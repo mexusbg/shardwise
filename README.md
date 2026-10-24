@@ -36,6 +36,69 @@ Made by [Fidweb](https://fidweb.net). Author: mexus.
 
 If Shardwise is useful to you, you can support its development on [Ko-fi](https://ko-fi.com/mexus).
 
+## Installation
+
+Download the installer for your system from the
+[latest release](https://github.com/mexusbg/shardwise/releases/latest):
+
+| System | File |
+|---|---|
+| Windows 10 / 11 (x64) | `Shardwise-<version>-win-x64.exe` |
+| macOS on Apple Silicon (M1 or newer) | `Shardwise-<version>-mac-arm64.dmg` |
+| Linux x64 | `Shardwise-<version>-linux-x86_64.AppImage` or `Shardwise-<version>-linux-amd64.deb` |
+
+The builds are not code-signed yet, so each system shows a one-time warning the first time you start Shardwise.
+Intel Macs are not supported.
+
+### Windows
+
+1. Run `Shardwise-<version>-win-x64.exe`.
+2. If a blue SmartScreen box says "Windows protected your PC", click **More info**, then **Run anyway**.
+3. Follow the installer. It lets you choose the folder and creates Start menu and desktop shortcuts.
+
+To uninstall: **Settings → Apps → Installed apps → Shardwise → Uninstall**.
+
+### macOS (Apple Silicon)
+
+1. Open the `.dmg` and drag **Shardwise** into **Applications**.
+2. Open Shardwise. macOS blocks it because the build is not notarized.
+3. Go to **System Settings → Privacy & Security**, scroll to the message about Shardwise, click **Open Anyway**
+   and confirm with your password.
+
+If there is no Open Anyway button, or macOS says the app "is damaged", run this once in Terminal and open it again:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Shardwise.app
+```
+
+### Linux
+
+**Debian / Ubuntu (.deb):**
+
+```bash
+sudo apt install ./Shardwise-<version>-linux-amd64.deb
+```
+
+**Any distribution (AppImage):** the AppImage is the program itself, no installation needed.
+
+```bash
+chmod +x Shardwise-<version>-linux-x86_64.AppImage
+./Shardwise-<version>-linux-x86_64.AppImage
+```
+
+- If it fails with `dlopen(): error loading libfuse.so.2`, install FUSE 2: `sudo apt install libfuse2` on
+  Ubuntu 22.04, `sudo apt install libfuse2t64` on Ubuntu 24.04 and later.
+- If it exits with a "SUID sandbox helper" error (Ubuntu 24.04 and later), start it with `--no-sandbox`, or use
+  the `.deb`.
+- For a menu entry and dock icon, use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) or
+  [Gear Lever](https://github.com/mijorus/gearlever).
+
+### Updates
+
+Shardwise checks GitHub for a newer release when it starts and shows a link in the status bar when one is
+available. Nothing is downloaded or installed without you; turn the check off in **Settings → About**. To update,
+install the new version over the old one: settings and saved connections are kept.
+
 ## Features (phase 1)
 
 - **Connections** — `mongodb+srv://`, standalone, replica sets, raw URI; import/export URIs; SCRAM, X.509,
@@ -124,36 +187,27 @@ wsl.exe -d Ubuntu-22.04 -- bash scripts/wsl-build.sh linux mac
 The macOS build made on Linux is a `.zip` of `Shardwise.app` (a dmg needs macOS), ad-hoc signed with
 [rcodesign](https://github.com/indygreg/apple-platform-rs) so Apple Silicon runs it.
 
-### Installing the test builds
-
-- **Windows**: run `Shardwise-<version>-win-x64.exe`. SmartScreen may warn about an unknown publisher:
-  *More info → Run anyway*.
-- **Linux**: `chmod +x Shardwise-<version>-linux-x86_64.AppImage` and run it, or
-  `sudo apt install ./Shardwise-<version>-linux-amd64.deb`. AppImages need FUSE 2 (`sudo apt install libfuse2`
-  on Ubuntu 22.04; `libfuse2t64` on 24.04). If the AppImage exits at once on Ubuntu 24.04 (AppArmor blocks
-  Chromium's sandbox for unconfined apps), start it with `--no-sandbox` or use the .deb.
-- **macOS (Apple Silicon)**: unzip, move `Shardwise.app` to Applications, then once in Terminal:
-  `xattr -dr com.apple.quarantine /Applications/Shardwise.app`. Without that, macOS says the app "is damaged" or
-  "cannot be verified" because it is not notarized. If it still refuses to start, re-sign it locally:
-  `codesign --force --deep --sign - /Applications/Shardwise.app`.
+Installing the builds: see [Installation](#installation). For the `.zip` made in WSL: unzip it, move
+`Shardwise.app` to Applications and follow the macOS steps; if it still refuses to start, re-sign it locally with
+`codesign --force --deep --sign - /Applications/Shardwise.app`.
 
 Supported targets: Windows 11 x64, Linux x64 (AppImage, .deb), macOS on Apple Silicon (arm64).
 Each `dist:*` script first downloads the official MongoDB Database Tools (Apache-2.0) for that target into
 `resources/tools/<os>-<arch>/`; `mongodump` / `mongorestore` ship inside the app, so nothing needs installing.
 `npm run tools:fetch` does the same for the current machine (used by `npm run dev`).
 
-Installers land in `release/<version>/`. The GitHub Actions workflow in `.github/workflows/build.yml` builds
-all three platforms on push. Builds are unsigned; add signing certificates via electron-builder environment
-variables when needed; until the macOS build is signed with a Developer ID and notarized, see the macOS install
-note above.
+Installers land in `release/<version>/`. The GitHub Actions workflow in `.github/workflows/build.yml` tests
+every push and pull request and builds all three platforms; pushing a version tag (`git tag v0.3.0 && git push
+origin v0.3.0`) also creates a GitHub release with the installers attached. Builds are unsigned; add signing
+certificates via electron-builder environment variables when needed.
 
 ### Update checks
 
 At launch (and with **Settings → About → Check now**) the app asks GitHub for the latest release of the
 repository named in `package.json` → `repository` ([mexusbg/shardwise](https://github.com/mexusbg/shardwise)) and
 shows a link to the release page when it is newer. Nothing is downloaded or installed automatically, and users can
-turn the check off. Publish releases with version tags such as `v0.3.0` and attach the installers; drafts and
-pre-releases are ignored.
+turn the check off. Releases come from version tags such as `v0.3.0` (see above); drafts and pre-releases are
+ignored.
 
 ## Layout
 
