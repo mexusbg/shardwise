@@ -1,0 +1,119 @@
+.ia-list {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ia-intro {
+  font-size: 12px;
+}
+.ia-card {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: 8px;
+  background: var(--bg-2);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ia-card.covered {
+  border-left-color: var(--border-strong);
+  opacity: 0.75;
+}
+.ia-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ia-keys {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.ia-key {
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+}
+.ia-key b {
+  font-weight: 700;
+}
+.ia-reason {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.ia-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.ia-stats b {
+  color: var(--text);
+}
+.ia-query {
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: text;
+}
+.ia-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ia-cmd {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+.ia-note {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.ia-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.ia-empty svg {
+  color: var(--ok);
+}
+.ia-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-soft);
+  border-radius: 8px;
+}
+.ia-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.xp-main > .ia-hint {
+  margin: 0 12px;
+}

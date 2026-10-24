@@ -1,0 +1,44 @@
+appId: net.fidweb.shardwise
+productName: Shardwise
+directories:
+  buildResources: build
+  output: release/${version}
+files:
+  - out/**
+  - package.json
+extraResources:
+  - from: resources/tools/${os}-${arch}
+    to: tools
+  - from: THIRD_PARTY_NOTICES.md
+    to: THIRD_PARTY_NOTICES.md
+  # Window / taskbar icon at run time (the executable's own icon is set from build/ by electron-builder).
+  - from: build/icon.png
+    to: icon.png
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: ${productName}-${version}-win-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+mac:
+  target:
+    - target: dmg
+      arch: [arm64]
+  category: public.app-category.developer-tools
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  category: Development
+  # Keeps the .desktop file name, StartupWMClass and the window app_id / WM_CLASS in step so docks show the app icon.
+  syncDesktopName: true
+  maintainer: mexus
+  artifactName: ${productName}-${version}-linux-${arch}.${ext}
+npmRebuild: false
+icon: build/icon.png

@@ -1,0 +1,33 @@
+node_modules/
+out/
+dist/
+release/
+*.log
+.e2e/
+coverage/
+resources/tools/
+resources/.tools-cache/
+
+# Connection exports hold credentials; never commit or copy them
+*.uri
+*connection*export*
+*Connection*Export*
+*-connections.json
+*-connections.txt
+
+# TypeScript build caches
+*.tsbuildinfo
+
+# Connection strings shared for debugging (contain passwords)
+failingstring*.txt
+
+
+# Not published: internal docs, design specs, AI assistant files. Only README and notices.
+docs/
+*.md
+!README.md
+!THIRD_PARTY_NOTICES.md
+CLAUDE.md
+AGENTS.md
+.claude/
+.cursor/

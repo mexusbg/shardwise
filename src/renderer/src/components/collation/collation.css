@@ -1,0 +1,115 @@
+/* Collation chip (query bar), picker popover and form (also used in Preferences and the connection editor) */
+
+.coll-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.coll-chip:hover,
+.coll-chip.open {
+  background: var(--bg-hover);
+  color: var(--text-2);
+}
+.coll-chip.on {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.coll-chip.invalid {
+  border-style: solid;
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.coll-pop {
+  position: fixed;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 16px);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  animation: coll-in 0.12s ease-out;
+}
+@keyframes coll-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.coll-pop-head,
+.coll-pop-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bg-2);
+}
+.coll-pop-head {
+  border-bottom: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+}
+.coll-pop-foot {
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+}
+.coll-pop-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.coll-form {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: center;
+  font-size: 12px;
+}
+.coll-form > label {
+  color: var(--text-2);
+}
+.coll-checks {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+.coll-checks .check {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.coll-raw {
+  display: flex;
+}
+.coll-err {
+  color: var(--danger);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+.coll-hint {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Preferences / connection editor: the form sits in a field row */
+.coll-inline {
+  max-width: 440px;
+}

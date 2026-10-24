@@ -1,0 +1,428 @@
+/* ---------- GridFS browser ---------- */
+
+.gfs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+  outline: none;
+}
+.gfs-small {
+  font-size: 11.5px;
+}
+
+.gfs-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 10px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.gfs-head-icon {
+  color: var(--accent);
+}
+.gfs-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+.gfs-db {
+  max-width: 220px;
+}
+.gfs-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 4px;
+}
+.gfs-bucket {
+  min-width: 150px;
+  max-width: 260px;
+}
+.gfs-spin {
+  animation: gfs-spin 0.9s linear infinite;
+}
+@keyframes gfs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gfs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 10px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+}
+.gfs-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  width: 300px;
+  max-width: 40%;
+  color: var(--text-3);
+}
+.gfs-search > svg {
+  position: absolute;
+  left: 8px;
+  pointer-events: none;
+}
+.gfs-search .input.small {
+  flex: 1;
+  padding-left: 26px;
+  padding-right: 24px;
+}
+.gfs-search .btn {
+  position: absolute;
+  right: 2px;
+  height: 20px;
+  width: 20px;
+}
+
+.gfs-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.gfs-list {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  position: relative;
+}
+.gfs-error {
+  margin: 10px;
+}
+
+.gfs-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: 12.5px;
+}
+.gfs-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 28px;
+  padding: 0 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+.gfs-table th.sortable {
+  cursor: pointer;
+}
+.gfs-table th.sortable:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.gfs-table th.sorted {
+  color: var(--accent);
+}
+.gfs-sort {
+  margin-left: 5px;
+  font-size: 9px;
+}
+.gfs-table td {
+  height: 32px;
+  padding: 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gfs-table tbody tr {
+  cursor: default;
+}
+.gfs-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
+}
+.gfs-table tbody tr.sel td {
+  background: var(--accent-soft);
+}
+.gfs-table tbody tr.focus td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.gfs-table .c-check {
+  width: 34px;
+  padding-right: 0;
+}
+.gfs-table .c-check input {
+  margin: 0;
+  accent-color: var(--accent);
+  vertical-align: middle;
+}
+.gfs-table .c-size {
+  width: 84px;
+  text-align: right;
+  font-size: 11.5px;
+}
+.gfs-table th.c-size {
+  text-align: right;
+}
+.gfs-table .c-date {
+  width: 160px;
+  color: var(--text-2);
+}
+.gfs-table .c-type {
+  width: 160px;
+}
+.gfs-table .c-id {
+  width: 200px;
+  font-size: 11px;
+}
+.gfs-body.with-detail .gfs-table .c-id {
+  display: none;
+}
+.gfs-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gfs-badge {
+  --k: var(--text-3);
+  flex: none;
+  min-width: 34px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  letter-spacing: 0.3px;
+  color: var(--k);
+  background: color-mix(in srgb, var(--k) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--k) 30%, transparent);
+}
+.gfs-badge.k-image {
+  --k: var(--t-oid);
+}
+.gfs-badge.k-text {
+  --k: var(--t-string);
+}
+.gfs-badge.k-archive {
+  --k: var(--t-date);
+}
+.gfs-badge.k-media {
+  --k: var(--t-bool);
+}
+.gfs-badge.k-doc {
+  --k: var(--t-number);
+}
+
+.gfs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 20px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.gfs-detail {
+  width: 360px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  border-left: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-2) 50%, var(--bg));
+}
+.gfs-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 6px 12px;
+  font-size: 13px;
+}
+.gfs-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.gfs-props {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 6px 10px;
+  margin: 0;
+  padding: 12px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.gfs-props dt {
+  color: var(--text-3);
+}
+.gfs-props dd {
+  margin: 0;
+  min-width: 0;
+}
+.gfs-break {
+  word-break: break-all;
+}
+.gfs-meta {
+  margin: 0;
+  padding: 6px 8px;
+  max-height: 180px;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.gfs-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
+  padding: 10px 12px 12px;
+  gap: 8px;
+}
+.gfs-preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+}
+.gfs-preview-msg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+.gfs-preview-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  /* Checkerboard behind transparent images, readable in both themes. */
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(45deg, var(--bg-3) 25%, transparent 25%), linear-gradient(-45deg, var(--bg-3) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--bg-3) 75%), linear-gradient(-45deg, transparent 75%, var(--bg-3) 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+}
+.gfs-preview-image img {
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+.gfs-preview-text-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 4px;
+}
+.gfs-preview-text {
+  flex: 1;
+  margin: 0;
+  min-height: 120px;
+  max-height: 480px;
+  overflow: auto;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.gfs-preview-more {
+  font-size: 11px;
+}
+
+.gfs-foot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  flex: none;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.gfs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gfs-form .field {
+  grid-template-columns: 110px 1fr;
+}
+.gfs-upload-files {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-2);
+  max-height: 150px;
+  overflow: auto;
+}
+.gfs-upload-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.gfs-upload-file svg {
+  flex: none;
+  color: var(--text-3);
+}
+.gfs-meta-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}

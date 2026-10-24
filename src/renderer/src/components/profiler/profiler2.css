@@ -1,0 +1,486 @@
+/* Query Profiler + Current Operations tab */
+
+.pf {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+.pf-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 40px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.pf-head-icon {
+  color: var(--accent);
+}
+.pf-title {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.pf-dbsel {
+  max-width: 220px;
+  font-weight: 600;
+}
+.pf-views {
+  margin-left: 10px;
+}
+.pf-conn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.pf-pane,
+.pf-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Settings / filter strips */
+.pf-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 6px 10px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+}
+.pf-strip > .notice {
+  flex: 1;
+  min-width: 260px;
+}
+.pf-notice-detail {
+  margin-top: 4px;
+  font-size: 11px;
+  user-select: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.pf-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 10px 0;
+  padding: 5px 10px;
+  font-size: 12px;
+  flex: none;
+}
+.pf-banner svg {
+  color: var(--warn);
+}
+.pf-lbl {
+  color: var(--text-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pf-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+}
+.pf-w50 {
+  width: 50px;
+}
+.pf-w60 {
+  width: 64px;
+}
+.pf-w140 {
+  width: 170px;
+}
+.pf-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.pf-search svg {
+  position: absolute;
+  left: 7px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.pf-search .input {
+  padding-left: 24px;
+  width: 210px;
+}
+.pf-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.pf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+  flex: none;
+}
+.pf-dot.l1 {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent);
+}
+.pf-dot.l2 {
+  background: var(--warn);
+  box-shadow: 0 0 0 3px var(--warn-soft);
+}
+.pf-chipbar {
+  padding: 6px 10px 0;
+  flex: none;
+}
+.pf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 0 2px 0 8px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  font-size: 12px;
+}
+.pf-chip .mono {
+  color: var(--text);
+}
+
+/* Table + details split */
+.pf-split {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+.pf-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+.pf-grid table {
+  width: 100%;
+  min-width: 1000px;
+}
+.pf-grid th {
+  cursor: pointer;
+  font-size: 12px;
+}
+.pf-grid th:last-child,
+.pf-grid td:last-child {
+  border-right: 0;
+}
+.pf-grid tbody tr {
+  cursor: pointer;
+}
+.pf-grid tbody tr:hover td {
+  background: var(--bg-hover);
+}
+.pf-grid tbody tr.sel td {
+  background: var(--accent-soft);
+}
+.pf-num,
+.pf-grid th.pf-num {
+  text-align: right;
+}
+.pf-op {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--bg-3);
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.pf-bad {
+  color: var(--danger);
+  font-weight: 600;
+}
+.pf-wicon {
+  color: var(--warn);
+  margin-right: 5px;
+  vertical-align: -2px;
+}
+.pf-wicon.danger {
+  color: var(--danger);
+}
+.pf-shape {
+  color: var(--text);
+}
+.pf-dur {
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pf-durbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  min-width: 2px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.pf-durbar.warn {
+  background: color-mix(in srgb, var(--warn) 38%, transparent);
+}
+.pf-durbar.danger {
+  background: color-mix(in srgb, var(--danger) 38%, transparent);
+}
+.pf-dur span {
+  position: relative;
+  padding-right: 2px;
+}
+.pf-none {
+  padding: 28px;
+  text-align: center;
+  font-family: var(--font);
+}
+.pf-foot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  height: 24px;
+  padding: 0 10px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.pf-foot-warn {
+  color: var(--warn);
+}
+.pf-spin {
+  animation: pf-spin 0.9s linear infinite;
+}
+@keyframes pf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Current operations */
+.pf-grid tr.pf-long-warn td:nth-child(3) {
+  color: var(--warn);
+  font-weight: 600;
+}
+.pf-grid tr.pf-long-warn td:first-child {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+.pf-grid tr.pf-long-danger td {
+  background: var(--danger-soft);
+}
+.pf-grid tr.pf-long-danger td:nth-child(3) {
+  color: var(--danger);
+  font-weight: 700;
+}
+.pf-grid tr.pf-long-danger td:first-child {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+.pf-killcell {
+  padding: 0 4px !important;
+  text-align: center;
+}
+.pf-kill {
+  color: var(--text-3);
+  height: 20px;
+  width: 20px !important;
+}
+.pf-grid tr:hover .pf-kill,
+.pf-grid tr.sel .pf-kill {
+  color: var(--danger);
+}
+.pf-kill:hover:not(:disabled) {
+  background: var(--danger-soft) !important;
+}
+.pf-lock {
+  color: var(--warn);
+  font-weight: 600;
+}
+.pf-gone {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Details panel */
+.pf-details {
+  width: 440px;
+  max-width: 50%;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-2);
+  overflow: auto;
+}
+.pf-d-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.pf-d-sub {
+  margin-top: -6px;
+  font-size: 12px;
+  user-select: text;
+}
+.pf-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 6px;
+}
+.pf-metric {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.pf-metric-label {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.pf-metric-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 2px;
+  user-select: text;
+}
+.pf-metric.warn {
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+  background: var(--warn-soft);
+}
+.pf-metric.warn .pf-metric-value {
+  color: var(--warn);
+}
+.pf-metric.danger {
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  background: var(--danger-soft);
+}
+.pf-metric.danger .pf-metric-value {
+  color: var(--danger);
+}
+.pf-d-plan {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 12px;
+}
+.pf-d-plan .mono {
+  word-break: break-word;
+}
+.pf-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pf-warning {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+}
+.pf-warning svg {
+  color: var(--warn);
+}
+.pf-warning.danger {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.pf-warning.danger svg {
+  color: var(--danger);
+}
+.pf-d-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pf-d-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+}
+.pf-d-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-2);
+}
+.pf-d-label .btn {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.pf-d-json {
+  flex: 1;
+  min-height: 240px;
+}
+.pf-json {
+  flex: 1;
+  min-height: 0;
+}
+.pf-json .cm-editor {
+  height: 100%;
+}
+
+/* Empty state */
+.pf-empty {
+  margin: auto;
+  max-width: 520px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.pf-empty > svg {
+  color: var(--accent);
+  opacity: 0.85;
+}
+.pf-empty h3 {
+  margin: 4px 0 0;
+  font-size: 16px;
+}
+.pf-empty p {
+  margin: 0 0 6px;
+  line-height: 1.5;
+}

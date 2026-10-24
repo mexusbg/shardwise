@@ -1,0 +1,339 @@
+.pg {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pg .crumbs .badge {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.pg-path {
+  margin-left: 6px;
+  font-size: 11px;
+  min-width: 0;
+}
+
+.pg-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.pg-toolbar .btn.danger {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: var(--danger-soft);
+  font-weight: 600;
+}
+.pg-toolbar .btn.primary,
+.pg-toolbar .btn.danger {
+  min-width: 72px;
+  justify-content: center;
+}
+.pg-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+}
+.pg-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-2);
+}
+.pg-field .select {
+  max-width: 180px;
+}
+
+.pg-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pg-status.ok {
+  color: var(--ok);
+}
+.pg-status.failed {
+  color: var(--danger);
+}
+.pg-status.stopped {
+  color: var(--warn);
+}
+.pg-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: pg-spin 0.8s linear infinite;
+}
+@keyframes pg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pg-split {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pg-split.dragging {
+  cursor: row-resize;
+  user-select: none;
+}
+.pg-editor-box {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+}
+.pg-editor-box .cm-wrap.pg-editor {
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.pg-editor-box .cm-wrap.pg-editor .cm-editor {
+  height: 100%;
+}
+.pg-editor-box .cm-wrap .cm-content {
+  font-size: var(--editor-fs, 13px);
+  line-height: 1.55;
+}
+.pg-editor-box .cm-wrap .cm-activeLine {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
+}
+.pg-editor-box .cm-wrap .cm-activeLineGutter {
+  background: var(--bg-3);
+  color: var(--text-2);
+}
+.pg-editor-box .cm-cursor {
+  border-left-color: var(--text);
+}
+.pg-editor-box .cm-matchingBracket {
+  background: var(--accent-soft);
+  outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.pg-editor-box .cm-foldGutter span {
+  color: var(--text-3);
+}
+
+.pg-resizer {
+  height: 5px;
+  flex: none;
+  cursor: row-resize;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  position: relative;
+}
+.pg-resizer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  width: 36px;
+  height: 2px;
+  margin-left: -18px;
+  border-radius: 1px;
+  background: var(--border-strong);
+}
+.pg-resizer:hover,
+.pg-split.dragging .pg-resizer {
+  background: var(--accent-soft);
+}
+
+.pg-results {
+  flex: 1;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+}
+.pg-results-bar {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 34px;
+  flex-wrap: nowrap;
+}
+.pg-tabs {
+  display: flex;
+  align-self: stretch;
+  gap: 2px;
+}
+.pg-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  padding: 0 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+}
+.pg-tabs button:hover {
+  color: var(--text);
+}
+.pg-tabs button.on {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.pg-count {
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: var(--bg-3);
+  color: var(--text-2);
+  font-weight: 500;
+  line-height: 17px;
+}
+.pg-count.bad {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pg-count.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.pg-docs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pg-views {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pg-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  line-height: 1.6;
+}
+
+.pg-value-text {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--t-string);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pg-error {
+  margin: 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.pg-error.stopped {
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+  background: var(--warn-soft);
+}
+.pg-error-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--danger);
+  font-weight: 600;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.pg-error.stopped .pg-error-head {
+  color: var(--warn);
+}
+.pg-error-head svg {
+  margin-top: 1px;
+}
+.pg-error-stack {
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+  background: var(--bg-input);
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: auto;
+  white-space: pre;
+}
+
+.pg-console {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 0;
+}
+.pg-log {
+  display: grid;
+  grid-template-columns: 64px 46px minmax(0, 1fr);
+  gap: 8px;
+  padding: 2px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  line-height: 1.5;
+}
+.pg-log pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: inherit;
+  color: var(--text);
+}
+.pg-log-time {
+  color: var(--text-3);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pg-log-level {
+  color: var(--text-3);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding-top: 2px;
+}
+.pg-log.info .pg-log-level {
+  color: var(--accent);
+}
+.pg-log.warn {
+  background: var(--warn-soft);
+}
+.pg-log.warn .pg-log-level,
+.pg-log.warn pre {
+  color: var(--warn);
+}
+.pg-log.error {
+  background: var(--danger-soft);
+}
+.pg-log.error .pg-log-level,
+.pg-log.error pre {
+  color: var(--danger);
+}

@@ -1,0 +1,289 @@
+/* ---------- Local MCP server ---------- */
+
+.mcp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mcp-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.mcp-title {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.mcp-sub {
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+.mcp-switch {
+  flex: none;
+  position: relative;
+  width: 36px;
+  height: 20px;
+  margin-top: 2px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-3);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mcp-switch span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transition: transform 0.15s, background 0.15s;
+}
+.mcp-switch.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.mcp-switch.on span {
+  transform: translateX(16px);
+  background: var(--accent-text);
+}
+.mcp-switch:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+.mcp-switch:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mcp-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.mcp-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.mcp-status.on {
+  border-color: color-mix(in srgb, var(--ok) 35%, var(--border));
+  background: color-mix(in srgb, var(--ok) 8%, var(--bg-2));
+}
+.mcp-status.on .mcp-dot {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent);
+}
+.mcp-status.error {
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.mcp-status.error .mcp-dot {
+  background: var(--danger);
+}
+
+.mcp-num {
+  width: 90px;
+}
+.mcp-col {
+  align-items: flex-start;
+  gap: 5px;
+}
+.mcp-danger {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--text);
+  line-height: 1.45;
+}
+.mcp-danger svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--danger);
+}
+
+.mcp-section-title {
+  margin: 14px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.mcp-snippet {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.mcp-snippet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 3px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
+}
+.mcp-snippet pre {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--bg-input);
+  color: var(--text);
+}
+
+.mcp-log {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 220px;
+  overflow: auto;
+  background: var(--bg-input);
+}
+.mcp-log-empty {
+  padding: 14px;
+  text-align: center;
+}
+.mcp-log-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    'time tool args pill meta'
+    '. client client client client';
+  column-gap: 8px;
+  align-items: baseline;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.mcp-log-row:last-child {
+  border-bottom: 0;
+}
+.mcp-log-row:hover {
+  background: var(--bg-hover);
+}
+.mcp-log-time {
+  grid-area: time;
+  color: var(--text-3);
+  font-size: 11px;
+}
+.mcp-log-tool {
+  grid-area: tool;
+  color: var(--accent);
+  font-weight: 600;
+}
+.mcp-log-args {
+  grid-area: args;
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+.mcp-log-row.err .mcp-log-tool,
+.mcp-log-row.err .mcp-log-args {
+  color: var(--danger);
+}
+.mcp-log-meta {
+  grid-area: meta;
+  color: var(--text-3);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.mcp-log-client {
+  grid-area: client;
+  color: var(--text-3);
+  font-size: 11px;
+}
+.mcp-pill {
+  grid-area: pill;
+  font-size: 10.5px;
+  padding: 0 6px;
+  border-radius: 8px;
+  line-height: 16px;
+}
+.mcp-pill.ok {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
+}
+.mcp-pill.bad {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* ---------- Approval dialog ---------- */
+
+.mcp-approval {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mcp-approval-lead {
+  line-height: 1.5;
+}
+.mcp-approval-grid {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  row-gap: 4px;
+  column-gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.mcp-approval-grid > span:nth-child(odd) {
+  color: var(--text-2);
+}
+.mcp-approval-op {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--border));
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.mcp-countdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.mcp-countdown-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  overflow: hidden;
+}
+.mcp-countdown-bar span {
+  display: block;
+  height: 100%;
+  background: var(--warn);
+  transition: width 0.25s linear;
+}

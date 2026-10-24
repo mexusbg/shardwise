@@ -1,0 +1,313 @@
+.sql {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sql .crumbs .sql-target {
+  margin-left: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.sql-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.sql-toolbar .btn.primary {
+  min-width: 72px;
+  justify-content: center;
+}
+.sql-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+}
+.sql-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-2);
+}
+.sql-field .select {
+  max-width: 180px;
+}
+
+.sql-kind {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  line-height: 17px;
+  background: color-mix(in srgb, var(--leaf) 14%, transparent);
+  color: color-mix(in srgb, var(--leaf) 80%, var(--text));
+  white-space: nowrap;
+}
+.sql-kind.aggregate {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sql-split {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sql-split.dragging {
+  cursor: row-resize;
+  user-select: none;
+}
+.sql-editor-box {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+}
+.sql-editor-box .cm-wrap.sql-editor {
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.sql-editor-box .cm-wrap .cm-editor {
+  height: 100%;
+}
+.sql-editor-box .cm-wrap .cm-content {
+  font-size: var(--editor-fs, 13px);
+  line-height: 1.6;
+}
+.sql-editor-box .cm-wrap .cm-activeLine {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
+}
+.sql-editor-box .cm-wrap .cm-activeLineGutter {
+  background: var(--bg-3);
+  color: var(--text-2);
+}
+.sql-editor-box .cm-cursor {
+  border-left-color: var(--text);
+}
+.sql-editor-box .cm-matchingBracket {
+  background: var(--accent-soft);
+  outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.sql-err-mark {
+  text-decoration: wavy underline var(--danger);
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
+  background: var(--danger-soft);
+  border-radius: 2px;
+}
+
+.sql-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 10px;
+  border-top: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border));
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12px;
+}
+.sql-error > svg {
+  flex: none;
+}
+.sql-error-pos {
+  flex: none;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: transparent;
+  color: var(--danger);
+  border-radius: 4px;
+  padding: 0 6px;
+  height: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.sql-error-pos:hover {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+.sql-error-msg {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  color: var(--text);
+  word-break: break-word;
+}
+.sql-error .btn {
+  color: var(--text-2);
+}
+
+.sql-resizer {
+  height: 5px;
+  flex: none;
+  cursor: row-resize;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  position: relative;
+}
+.sql-resizer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  width: 36px;
+  height: 2px;
+  margin-left: -18px;
+  border-radius: 1px;
+  background: var(--border-strong);
+}
+.sql-resizer:hover,
+.sql-split.dragging .sql-resizer {
+  background: var(--accent-soft);
+}
+
+.sql-bottom {
+  flex: 1;
+  min-height: 60px;
+  display: flex;
+}
+.sql-results {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sql-results-bar {
+  min-height: 34px;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.sql-count {
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+.sql-trunc {
+  color: var(--warn);
+}
+.sql-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  line-height: 1.6;
+}
+.sql-hint .faint {
+  max-width: 520px;
+}
+
+.sql-panel {
+  flex: 0 0 40%;
+  min-width: 300px;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+}
+.sql-panel-bar {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 6px 0 4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.sql-tabs {
+  display: flex;
+  align-self: stretch;
+  gap: 2px;
+}
+.sql-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  padding: 0 10px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+}
+.sql-tabs button:hover {
+  color: var(--text);
+}
+.sql-tabs button.on {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.sql-panel-empty {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 14px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--danger);
+}
+.sql-panel-empty > svg {
+  flex: none;
+  margin-top: 1px;
+}
+.sql-panel-empty .selectable {
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.sql-query {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sql-query-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.sql-query-head b {
+  font-family: var(--mono);
+}
+.sql-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sql-block-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.sql-block-label .faint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.sql-block-code .cm-content {
+  line-height: 1.5;
+}
+.sql-paging {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.sql-paging b {
+  font-family: var(--mono);
+}

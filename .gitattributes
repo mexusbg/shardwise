@@ -1,0 +1,12 @@
+# Normalise text to LF in the repository.
+* text=auto
+# Run under bash/sh (WSL, Linux, macOS): must keep LF even in a Windows checkout.
+*.sh text eol=lf
+*.py text eol=lf
+# Windows batch files need CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+# Binary assets.
+*.png binary
+*.ico binary
+*.icns binary

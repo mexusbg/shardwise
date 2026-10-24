@@ -1,0 +1,1154 @@
+/* Filter Builder. Base .vqb rules live in styles.css; everything here is scoped under .vqb to win over them. */
+
+.vqb {
+  --vqb-chip: color-mix(in srgb, var(--text) 7%, var(--bg));
+  --vqb-chip-hover: color-mix(in srgb, var(--text) 12%, var(--bg));
+  --vqb-hover: color-mix(in srgb, var(--text) 4%, transparent);
+  --vqb-line: color-mix(in srgb, var(--border) 70%, transparent);
+  --vqb-ring: 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-soft);
+  --vqb-t: 120ms ease;
+  background: var(--bg-2);
+  font-size: 12.5px;
+}
+.vqb button,
+.vqb select,
+.vqb input {
+  transition:
+    background-color var(--vqb-t),
+    color var(--vqb-t),
+    border-color var(--vqb-t),
+    box-shadow var(--vqb-t),
+    opacity var(--vqb-t);
+}
+.vqb :is(button, .vqb-gpill, .vqb-pick, .vqb-type-badge):focus-visible,
+.vqb :is(.vqb-gpill, .vqb-pick, .vqb-type-badge):has(select:focus-visible) {
+  outline: none;
+  box-shadow: var(--vqb-ring);
+}
+
+/* ---------- header ---------- */
+
+.vqb .vqb-top {
+  flex: none;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--vqb-line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vqb .vqb-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  font-weight: 650;
+  font-size: 13px;
+}
+.vqb .vqb-title .btn.small {
+  height: 24px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.vqb .vqb-title .btn.primary {
+  gap: 5px;
+  padding: 0 10px 0 8px;
+}
+.vqb .vqb-title .btn.primary svg {
+  color: var(--accent-text);
+}
+.vqb .vqb-title .btn.ghost {
+  color: var(--text-3);
+}
+.vqb .vqb-title .btn.ghost:hover {
+  color: var(--text);
+}
+.vqb .vqb-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--leaf);
+  background: color-mix(in srgb, var(--leaf) 15%, transparent);
+  margin-right: 2px;
+}
+.vqb .vqb-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 3px 0 10px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--vqb-line);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  min-width: 0;
+}
+.vqb .vqb-preview > .ellipsis {
+  flex: 1;
+  min-width: 0;
+  user-select: text;
+}
+.vqb .vqb-preview.empty {
+  color: var(--text-3);
+}
+.vqb .vqb-preview em {
+  font-family: var(--font);
+  font-style: normal;
+  margin-left: 6px;
+}
+.vqb .vqb-preview.error {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+  background: var(--danger-soft);
+  font-family: var(--font);
+}
+.vqb .vqb-copy {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.vqb .vqb-copy:hover {
+  opacity: 1;
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* ---------- body & cards ---------- */
+
+.vqb .vqb-scroll {
+  flex: 1;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  padding: 12px 2px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.vqb .vqb-notice {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.vqb .vqb-notice > svg {
+  margin-top: 1px;
+  color: var(--warn);
+}
+.vqb .vqb-card {
+  flex: none;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--vqb-line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.vqb .vqb-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px 0 4px;
+}
+.vqb .vqb-card-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  text-align: left;
+}
+.vqb .vqb-card-toggle:hover {
+  background: var(--vqb-hover);
+}
+.vqb .vqb-card-toggle > svg {
+  flex: none;
+  transition: transform var(--vqb-t);
+}
+.vqb .vqb-card.closed .vqb-card-toggle > svg {
+  transform: rotate(-90deg);
+}
+.vqb .vqb-card-title {
+  color: var(--text);
+  font-weight: 650;
+  font-size: 12.5px;
+}
+.vqb .vqb-count {
+  flex: none;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--vqb-chip);
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.vqb .vqb-card-hint {
+  font-size: 11.5px;
+  min-width: 0;
+}
+.vqb .vqb-card-hint::before {
+  content: '·';
+  margin-right: 6px;
+  color: var(--text-3);
+  opacity: 0.7;
+}
+.vqb .vqb-card.off .vqb-card-title {
+  color: var(--text-2);
+}
+.vqb .vqb-card.off .vqb-card-hint {
+  color: var(--warn);
+}
+.vqb .vqb-card-body {
+  padding: 0 10px 10px;
+}
+.vqb .vqb-card.off .vqb-card-body {
+  opacity: 0.5;
+}
+
+/* ---------- switch / segmented / toggles ---------- */
+
+.vqb .vqb-switch {
+  flex: none;
+  position: relative;
+  width: 28px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--border-strong);
+  cursor: pointer;
+}
+.vqb .vqb-switch > span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform var(--vqb-t);
+}
+.vqb .vqb-switch.on {
+  background: var(--accent);
+}
+.vqb .vqb-switch.on > span {
+  transform: translateX(12px);
+}
+
+.vqb .vqb-seg {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 7px;
+  background: var(--vqb-chip);
+}
+.vqb .vqb-seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.vqb .vqb-seg button:hover:not(.on) {
+  color: var(--text);
+}
+.vqb .vqb-seg button.on {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 650;
+  box-shadow:
+    0 0 0 1px var(--vqb-line),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.vqb .vqb-flag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.vqb .vqb-flag:hover {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+.vqb .vqb-flag.on {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---------- groups: a depth-coloured rail, no boxes ---------- */
+
+.vqb .vqb-grp {
+  --rail-text: color-mix(in srgb, var(--rail) 78%, var(--text));
+  position: relative;
+  min-width: 0;
+}
+.vqb .vqb-grp:not(.root) {
+  margin: 0 -4px 0 -6px;
+  padding: 2px 4px 0 10px;
+  border-radius: 8px;
+  transition: background-color var(--vqb-t);
+}
+.vqb:not(.dnd) .vqb-grp:not(.root):hover:not(:has(.vqb-grp:hover)) {
+  background: color-mix(in srgb, var(--rail) 3%, transparent);
+}
+.vqb .vqb-grp.disabled > .vqb-grp-body,
+.vqb .vqb-grp.disabled > .vqb-grp-head > :not(.vqb-actions):not(.vqb-grip) {
+  opacity: 0.45;
+}
+.vqb .vqb-grp-head {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-height: 24px;
+  min-width: 0;
+}
+.vqb .vqb-hint,
+.vqb .vqb-word {
+  color: var(--text-3);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.vqb .vqb-grp-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 4px 0 0 7px;
+  padding-left: 14px;
+}
+.vqb .vqb-grp-body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--rail) 42%, transparent);
+  transition: background-color var(--vqb-t);
+}
+.vqb:not(.dnd) .vqb-grp:hover:not(:has(.vqb-grp:hover)) > .vqb-grp-body::before {
+  background: color-mix(in srgb, var(--rail) 80%, transparent);
+}
+.vqb .vqb-grp.root.empty > .vqb-grp-body {
+  margin: 0;
+  padding: 0;
+}
+.vqb .vqb-grp.root.empty > .vqb-grp-body::before {
+  display: none;
+}
+
+/* operator pill at the top of the rail */
+.vqb .vqb-gpill {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 5px 0 8px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--rail-text);
+  background: color-mix(in srgb, var(--rail) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rail) 30%, transparent);
+  cursor: pointer;
+  transition:
+    background-color var(--vqb-t),
+    box-shadow var(--vqb-t);
+}
+.vqb .vqb-gpill:hover {
+  background: color-mix(in srgb, var(--rail) 22%, transparent);
+}
+.vqb .vqb-gpill > svg {
+  opacity: 0.75;
+}
+.vqb .vqb-gpill select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+.vqb .vqb-gpill select option {
+  color: var(--text);
+  background: var(--bg-2);
+  text-transform: none;
+}
+
+/* drop indicator between rows */
+.vqb .vqb-grp.drop-before::before,
+.vqb .vqb-rule.drop-before::before,
+.vqb .vqb-entry.drop-before::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+  z-index: 2;
+}
+
+/* ---------- condition rows ---------- */
+
+.vqb .vqb-rule {
+  position: relative;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  opacity: 1;
+  transition: background-color var(--vqb-t);
+}
+.vqb .vqb-rule:hover,
+.vqb .vqb-rule:focus-within {
+  background: var(--vqb-hover);
+}
+.vqb .vqb-rule.disabled > .vqb-line {
+  opacity: 0.45;
+}
+.vqb .vqb-rule.disabled .vqb-field-input,
+.vqb .vqb-entry.disabled .vqb-field-input {
+  text-decoration: line-through;
+}
+.vqb .vqb-rule.error {
+  background: var(--danger-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.vqb .vqb-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+  min-height: 24px;
+}
+.vqb .vqb-error {
+  margin: 2px 4px 2px;
+  font-size: 11.5px;
+  color: var(--danger);
+  user-select: text;
+  word-break: break-word;
+}
+
+/* field chip */
+.vqb .vqb-field {
+  position: relative;
+  flex: 0 1 auto;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--vqb-chip);
+  transition:
+    background-color var(--vqb-t),
+    box-shadow var(--vqb-t);
+}
+.vqb .vqb-field:hover {
+  background: var(--vqb-chip-hover);
+}
+.vqb .vqb-field:focus-within {
+  background: var(--bg-input);
+  box-shadow: var(--vqb-ring);
+}
+.vqb .vqb-field.static {
+  padding: 0 8px;
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-style: italic;
+  white-space: nowrap;
+}
+.vqb .vqb-field-input {
+  field-sizing: content;
+  min-width: 40px;
+  max-width: 170px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+.vqb .vqb-field-input::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.vqb .vqb-field-input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+/* on hover the chip grows into the gap (negative margin, no reflow) to make room for the caret */
+.vqb .vqb-field:hover:not(:focus-within):not(.static) {
+  z-index: 1;
+  margin-right: -10px;
+}
+.vqb .vqb-field:hover:not(:focus-within) .vqb-field-input {
+  padding-right: 18px;
+}
+.vqb .vqb-caret {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 24px;
+  padding: 0 4px 0 0;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background: none;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+.vqb .vqb-field:hover:not(:focus-within) .vqb-caret {
+  opacity: 1;
+  pointer-events: auto;
+}
+.vqb .vqb-caret:hover {
+  color: var(--text);
+}
+
+/* word chip (operator, array mode, $type alias) */
+.vqb .vqb-pick {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--accent);
+}
+.vqb .vqb-pick:hover {
+  background: var(--accent-soft);
+}
+.vqb .vqb-pick select {
+  appearance: none;
+  field-sizing: content;
+  min-width: 0;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 17px 0 6px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.vqb .vqb-pick select option,
+.vqb .vqb-pick select optgroup,
+.vqb .vqb-type-badge select option {
+  color: var(--text);
+  background: var(--bg-2);
+  font-weight: 400;
+}
+.vqb .vqb-pick select optgroup {
+  color: var(--text-3);
+  font-weight: 600;
+}
+.vqb .vqb-pick > svg {
+  position: absolute;
+  right: 4px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.vqb .vqb-arrop select {
+  font-size: 12px;
+}
+.vqb .vqb-alias {
+  color: var(--text);
+  background: var(--vqb-chip);
+  font-family: var(--mono);
+}
+.vqb .vqb-alias select {
+  font-size: 12px;
+  font-weight: 500;
+}
+.vqb .vqb-alias:hover {
+  background: var(--vqb-chip-hover);
+}
+
+/* type badge */
+.vqb .vqb-type-badge {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  color: var(--tc);
+  background: color-mix(in srgb, var(--tc) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 28%, transparent);
+  cursor: pointer;
+}
+.vqb .vqb-type-badge:hover {
+  background: color-mix(in srgb, var(--tc) 22%, transparent);
+}
+.vqb .vqb-type-badge select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* values: badge + input travel together and wrap as one unit */
+.vqb .vqb-val {
+  flex: 1 1 124px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vqb .vqb-val.wide {
+  flex-basis: 170px;
+}
+.vqb .vqb-val.range {
+  flex-basis: 176px;
+}
+.vqb .vqb-val.list {
+  flex-basis: 160px;
+}
+.vqb .vqb-in {
+  flex: 1 1 0;
+  min-width: 52px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.vqb .vqb-val:not(.range) > .vqb-in {
+  min-width: 90px;
+}
+.vqb .vqb-val .input.small,
+.vqb .vqb-val .select.small,
+.vqb .vqb-line .input.small {
+  height: 24px;
+  border-radius: 6px;
+  border-color: var(--vqb-line);
+  font-size: 12px;
+}
+.vqb .vqb-val .input.small:hover,
+.vqb .vqb-val .select.small:hover {
+  border-color: var(--border-strong);
+}
+.vqb .vqb-val .input.small:focus,
+.vqb .vqb-val .select.small:focus,
+.vqb .vqb-line .input.small:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.vqb .vqb-val .input.invalid {
+  border-color: var(--danger);
+}
+.vqb .vqb-val .btn.small {
+  flex: none;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 6px;
+  border-color: var(--vqb-line);
+  font-size: 11px;
+  color: var(--text-2);
+}
+.vqb .vqb-lang {
+  width: 90px;
+  flex: none;
+}
+
+/* list tokens */
+.vqb .vqb-tokens {
+  flex: 1 1 0;
+  min-width: 90px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  padding: 2px;
+  border: 1px solid var(--vqb-line);
+  border-radius: 6px;
+  background: var(--bg-input);
+  cursor: text;
+  transition:
+    border-color var(--vqb-t),
+    box-shadow var(--vqb-t);
+}
+.vqb .vqb-tokens:hover {
+  border-color: var(--border-strong);
+}
+.vqb .vqb-tokens:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.vqb .vqb-tokens.invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px var(--danger-soft);
+}
+.vqb .vqb-token {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 18px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tc) 13%, var(--bg));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 24%, transparent);
+}
+.vqb .vqb-token button {
+  border: 0;
+  background: none;
+  height: 18px;
+  cursor: pointer;
+}
+.vqb .vqb-token-text {
+  padding: 0 1px 0 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.vqb .vqb-token-x {
+  width: 16px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  border-radius: 0 4px 4px 0;
+}
+.vqb .vqb-token-x:hover {
+  color: var(--danger);
+}
+.vqb .vqb-token-input {
+  flex: 1 1 40px;
+  min-width: 40px;
+  height: 18px;
+  padding: 0 4px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.vqb .vqb-token-input::placeholder {
+  color: var(--text-3);
+  font-family: var(--font);
+}
+
+/* ---------- hover controls ---------- */
+
+.vqb .vqb-grip {
+  position: absolute;
+  left: -12px;
+  top: 5px;
+  width: 11px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--text-3);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity var(--vqb-t);
+}
+.vqb .vqb-grp-head > .vqb-grip {
+  left: -16px;
+  top: 3px;
+}
+.vqb .vqb-grip:hover {
+  color: var(--text);
+  background: var(--vqb-hover);
+}
+.vqb .vqb-grip:active {
+  cursor: grabbing;
+}
+.vqb .vqb-rule:hover > .vqb-grip,
+.vqb .vqb-entry:hover > .vqb-grip,
+.vqb .vqb-grp-head:hover > .vqb-grip {
+  opacity: 1;
+}
+
+.vqb .vqb-actions {
+  position: absolute;
+  top: -19px;
+  right: 4px;
+  z-index: 3;
+  display: inline-flex;
+  gap: 1px;
+  padding: 1px;
+  border-radius: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--vqb-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(2px);
+  transition:
+    opacity var(--vqb-t),
+    transform var(--vqb-t);
+}
+.vqb .vqb-grp-head > .vqb-actions {
+  top: 1px;
+  right: 0;
+}
+.vqb .vqb-rule:hover > .vqb-actions,
+.vqb .vqb-rule:focus-within > .vqb-actions,
+.vqb .vqb-entry:hover > .vqb-actions,
+.vqb .vqb-entry:focus-within > .vqb-actions,
+.vqb .vqb-grp-head:hover > .vqb-actions,
+.vqb .vqb-grp-head:focus-within > .vqb-actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.vqb.dnd .vqb-actions {
+  display: none;
+}
+.vqb .vqb-actions button {
+  width: 22px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.vqb .vqb-actions button:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.vqb .vqb-actions button.on {
+  color: var(--warn);
+}
+.vqb .vqb-actions button.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+/* ---------- drop targets: empty states & group / list footers ---------- */
+
+.vqb .vqb-drop {
+  margin: 0;
+  padding: 0;
+  border: 1px dashed transparent;
+  border-radius: 7px;
+  text-align: left;
+  cursor: default;
+  user-select: none;
+  transition:
+    border-color var(--vqb-t),
+    background-color var(--vqb-t),
+    box-shadow var(--vqb-t),
+    min-height var(--vqb-t),
+    max-height var(--vqb-t),
+    opacity var(--vqb-t);
+}
+.vqb .vqb-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 3px 3px 3px 10px;
+  border-color: var(--border-strong);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.vqb .vqb-empty > svg {
+  flex: none;
+  opacity: 0.85;
+}
+.vqb .vqb-empty:hover {
+  color: var(--text-2);
+}
+.vqb .vqb-foot {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 24px;
+  margin-left: -4px;
+}
+.vqb .vqb-foot-hint {
+  margin-left: auto;
+  padding-right: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.vqb .vqb-add {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.vqb .vqb-add:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* nested groups: add buttons only while that group is hovered or focused */
+.vqb .vqb-grp:not(.root) > .vqb-grp-body > .vqb-foot {
+  min-height: 6px;
+  max-height: 6px;
+  overflow: hidden;
+  opacity: 0;
+}
+.vqb .vqb-grp:not(.root):hover:not(:has(.vqb-grp:hover)) > .vqb-grp-body > .vqb-foot,
+.vqb .vqb-grp:not(.root):focus-within:not(:has(.vqb-grp:focus-within)) > .vqb-grp-body > .vqb-foot {
+  min-height: 24px;
+  max-height: 26px;
+  opacity: 1;
+}
+
+/* while dragging: every target shows, the hovered one glows */
+.vqb.dnd .vqb-drop {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-strong));
+}
+.vqb.dnd .vqb-grp:not(.root) > .vqb-grp-body > .vqb-foot {
+  min-height: 10px;
+  max-height: 26px;
+  opacity: 1;
+}
+.vqb.dnd .vqb-foot > .vqb-add {
+  display: none;
+}
+.vqb .vqb-drop.over,
+.vqb.dnd .vqb-grp:not(.root) > .vqb-grp-body > .vqb-foot.over {
+  min-height: 24px;
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  opacity: 1;
+  animation: vqb-glow 1.4s ease-in-out infinite;
+}
+.vqb .vqb-drop.over > svg {
+  color: var(--accent);
+}
+@keyframes vqb-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--accent-soft),
+      0 0 14px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+}
+.vqb.dnd .vqb-foot.over > .vqb-foot-hint {
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* drag source & ghost */
+.vqb .vqb-src {
+  opacity: 0.35;
+}
+.vqb .vqb-ghost.vqb-ghost {
+  position: fixed;
+  top: -2000px;
+  left: 0;
+  margin: 0;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.28);
+  opacity: 1;
+}
+.vqb .vqb-ghost .vqb-actions,
+.vqb .vqb-ghost .vqb-grip,
+.vqb .vqb-ghost .vqb-foot {
+  display: none;
+}
+
+/* ---------- fields & order rows ---------- */
+
+.vqb .vqb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+}
+.vqb .vqb-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: background-color var(--vqb-t);
+}
+.vqb .vqb-entry:hover,
+.vqb .vqb-entry:focus-within {
+  background: var(--vqb-hover);
+}
+.vqb .vqb-entry.disabled > :not(.vqb-actions):not(.vqb-grip) {
+  opacity: 0.45;
+}
+.vqb .vqb-entry > .vqb-actions {
+  position: static;
+  flex: none;
+  max-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+  transition:
+    opacity var(--vqb-t),
+    max-width var(--vqb-t);
+}
+.vqb .vqb-entry:hover > .vqb-actions,
+.vqb .vqb-entry:focus-within > .vqb-actions {
+  max-width: 72px;
+}
+.vqb .vqb-list > .vqb-empty {
+  margin-left: -12px;
+}
+.vqb .vqb-list > .vqb-foot {
+  margin-left: -4px;
+}
+.vqb .vqb-rank {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  background: var(--vqb-chip);
+}
+.vqb .vqb-slice {
+  field-sizing: content;
+  min-width: 26px;
+  max-width: 90px;
+  height: 20px;
+  margin-left: -1px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  outline: none;
+  background: var(--bg-input);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-align: center;
+}
+.vqb .vqb-slice:focus {
+  border-color: var(--accent);
+}
+.vqb .vqb-slice.invalid {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}

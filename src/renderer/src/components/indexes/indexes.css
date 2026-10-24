@@ -1,0 +1,586 @@
+/* ---------- Index manager ---------- */
+
+.ixm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+.ixm-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  height: 40px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.ixm-head-icon {
+  color: var(--accent);
+}
+.ixm-title {
+  font-weight: 600;
+  font-size: 14px;
+  max-width: 40%;
+}
+.ixm-stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ixm-stats b {
+  color: var(--text);
+  font-weight: 600;
+}
+.ixm-stat-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warn);
+}
+.ixm-stat-build {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+}
+.ixm-spin {
+  animation: ixm-rot 0.8s linear infinite;
+}
+@keyframes ixm-rot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ixm-error {
+  margin: 10px 10px 0;
+}
+.ixm-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.ixm-foot {
+  flex: none;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.ixm-empty {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 40px 20px;
+  color: var(--text-3);
+  text-align: center;
+}
+.ixm-empty h3 {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 15px;
+}
+.ixm-empty p {
+  margin: 4px 0 0;
+  max-width: 420px;
+}
+
+/* Table */
+
+.ixm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12.5px;
+}
+.ixm-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+  background: var(--bg);
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ixm-table th:last-child,
+.ixm-table td:last-child {
+  padding-right: var(--edge-gap);
+}
+.ixm-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  vertical-align: middle;
+}
+.ixm-table th.num,
+.ixm-table td.num {
+  text-align: right;
+}
+.ixm-table tbody tr {
+  transition: background 0.1s;
+}
+.ixm-table tbody tr:hover {
+  background: var(--bg-2);
+}
+.ixm-table tbody tr.sel {
+  background: var(--accent-soft);
+}
+.ixm-table tbody tr.is-unused td:first-child {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+.ixm-table tbody tr.is-building td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.ixm-table tbody tr.is-hidden .ixm-keys,
+.ixm-table tbody tr.is-hidden .ixm-name {
+  opacity: 0.55;
+}
+.ixm-table tbody tr.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.ixm-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.ixm-name .mono {
+  font-size: 12px;
+}
+
+.ixm-keys {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ixm-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  line-height: 18px;
+  max-width: 260px;
+}
+.ixm-key-f {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.ixm-key b {
+  font-weight: 700;
+}
+.ixm-key.special {
+  background: color-mix(in srgb, var(--t-bool) 14%, transparent);
+  color: var(--t-bool);
+}
+.ixm-key.special b {
+  font-weight: 600;
+  font-size: 10.5px;
+}
+
+.ixm-type {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 4px;
+  line-height: 17px;
+  white-space: nowrap;
+  --c: var(--text-2);
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+}
+.ixm-type.ty-compound {
+  --c: var(--accent);
+}
+.ixm-type.ty-text {
+  --c: var(--t-string);
+}
+.ixm-type.ty-2dsphere,
+.ixm-type.ty-2d {
+  --c: var(--t-number);
+}
+.ixm-type.ty-hashed {
+  --c: var(--t-bool);
+}
+.ixm-type.ty-wildcard {
+  --c: var(--t-oid);
+}
+.ixm-type.ty-ttl {
+  --c: var(--t-date);
+}
+
+.ixm-props {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ixm-prop {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 0 6px;
+  line-height: 18px;
+  border-radius: 9px;
+  background: var(--bg-3);
+  color: var(--text-2);
+  white-space: nowrap;
+  cursor: default;
+}
+.ixm-prop.accent {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.ixm-prop.ttl {
+  background: color-mix(in srgb, var(--t-date) 14%, transparent);
+  color: var(--t-date);
+}
+.ixm-prop.hidden {
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.ixm-size {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: 64px;
+}
+.ixm-size-bar {
+  width: 64px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-end;
+}
+.ixm-size-bar > span {
+  height: 100%;
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+  border-radius: 2px;
+}
+
+.ixm-usage {
+  white-space: nowrap;
+  color: var(--text-2);
+}
+.ixm-usage b {
+  color: var(--text);
+}
+.ixm-unused {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: help;
+}
+.ixm-build {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+}
+.ixm-build .progress {
+  flex: 1;
+  margin: 0;
+}
+.ixm-build .mono {
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.ixm-actions {
+  white-space: nowrap;
+  text-align: right;
+  width: 1%;
+}
+.ixm-actions .btn {
+  color: var(--text-2);
+}
+.ixm-actions .btn:hover:not(:disabled) {
+  color: var(--text);
+}
+.ixm-actions .btn.on {
+  color: var(--warn);
+}
+.ixm-actions .ixm-drop:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.ixm-table tbody tr .ixm-actions .btn {
+  opacity: 0.55;
+}
+.ixm-table tbody tr:hover .ixm-actions .btn,
+.ixm-table tbody tr.sel .ixm-actions .btn,
+.ixm-table tbody tr .ixm-actions .btn.on {
+  opacity: 1;
+}
+.ixm-table tbody tr .ixm-actions .btn:disabled {
+  opacity: 0.25;
+}
+
+/* ---------- Create index dialog ---------- */
+
+.ixf {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ixf.busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.ixf-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ixf-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--text-2);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.ixf-section-head .faint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  font-size: 11.5px;
+}
+.ixf-section .field {
+  margin-bottom: 0;
+  grid-template-columns: 130px 1fr;
+}
+.ixf-keys {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ixf-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ixf-key-n {
+  width: 16px;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ixf-kind {
+  width: 170px;
+  flex: none;
+}
+.ixf-key-actions {
+  display: inline-flex;
+  gap: 1px;
+}
+.ixf-remove:hover:not(:disabled) {
+  color: var(--danger);
+}
+.ixf-add {
+  align-self: flex-start;
+  margin-left: 22px;
+}
+.ixf-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+.ixf-field .input {
+  flex: 1;
+}
+.ixf-suggest {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 220px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 3px;
+}
+.ixf-opt {
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-2);
+}
+.ixf-opt b {
+  color: var(--text);
+  font-weight: 700;
+}
+.ixf-opt.on {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.ixf-opt.on b {
+  color: var(--accent-text);
+}
+.ixf-checks {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.ixf-ttl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ixf-ttl-input {
+  width: 110px;
+}
+.ixf-collation {
+  display: flex;
+  gap: 8px;
+}
+.ixf-collation .select:first-child {
+  width: 220px;
+  flex: none;
+}
+.ixf-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 6px 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+.ixf-preview code {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  color: var(--text);
+  padding-top: 2px;
+}
+.ixf-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ixf-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.ixf-msg svg {
+  margin-top: 2px;
+}
+.ixf-msg.error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.ixf-msg.error span {
+  color: var(--text);
+}
+.ixf-msg.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.ixf-msg.warn span {
+  color: var(--text);
+}
+.ixf-load {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.45;
+}
+.ixf-load svg {
+  margin-top: 1px;
+}
+.ixf-load.large {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  color: var(--text);
+}
+.ixf-load.large svg {
+  color: var(--warn);
+}
+.ixf-foot-note {
+  font-size: 12px;
+}
+.ixf-building {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+.ixf-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: ixm-rot 0.7s linear infinite;
+  flex: none;
+}
+.ixf-spinner.big {
+  width: 22px;
+  height: 22px;
+  border-width: 3px;
+}

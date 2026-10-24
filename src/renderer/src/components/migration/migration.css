@@ -1,0 +1,874 @@
+/* ---------- SQL ⇄ MongoDB migration ---------- */
+
+.mig {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+.mig-small {
+  font-size: 11.5px;
+}
+.mig-pad {
+  padding: 10px 12px;
+}
+.mig-m {
+  margin: 10px 12px;
+}
+.mig-accent {
+  color: var(--accent);
+  flex: none;
+}
+.mig-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.mig-spinner {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-top-color: var(--accent);
+  animation: mig-spin 0.8s linear infinite;
+}
+@keyframes mig-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Header */
+
+.mig-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  height: 40px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.mig-title {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.mig-dir {
+  margin-left: 6px;
+}
+.mig-dir button {
+  gap: 4px;
+}
+.mig-ns {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  max-width: 40%;
+}
+.mig-ns b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.mig-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* Sections shared by the three columns */
+
+.mig-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 8px 0 12px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Left: SQL connection + schema browser */
+
+.mig-left {
+  width: 260px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-2) 60%, var(--bg));
+}
+.mig-conn-pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.mig-left-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--text-3);
+}
+.mig-left-empty p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.mig-dialect {
+  --dc: var(--accent);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font: 700 9.5px/1 var(--mono);
+  letter-spacing: 0.2px;
+  color: var(--dc);
+  background: color-mix(in srgb, var(--dc) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dc) 38%, transparent);
+}
+.mig-dialect.d-postgres {
+  --dc: #4f8fd6;
+}
+.mig-dialect.d-mysql {
+  --dc: #e08a00;
+}
+.mig-dialect.d-mssql {
+  --dc: #d9534a;
+}
+.mig-dialect.d-sqlite {
+  --dc: #2fa59c;
+}
+
+.mig-tree {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.mig-tree-head {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 6px 0 12px;
+  flex: none;
+}
+.mig-tree-body {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 8px;
+}
+.mig-tree-error {
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.mig-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 6px 0 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  min-width: 0;
+}
+.mig-tree-row.clickable {
+  cursor: pointer;
+}
+.mig-tree-row.clickable:hover {
+  background: var(--bg-hover);
+}
+.mig-tree-row.depth-2 {
+  padding-left: 24px;
+}
+.mig-tree-row.depth-3 {
+  padding-left: 44px;
+  font-size: 12px;
+  height: 22px;
+}
+.mig-twisty {
+  color: var(--text-3);
+  flex: none;
+}
+.mig-tree-ico {
+  color: var(--text-2);
+  flex: none;
+}
+.mig-tree-type {
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 10.5px;
+  max-width: 50%;
+}
+.mig-col-ico {
+  display: inline-flex;
+  color: var(--text-3);
+  flex: none;
+}
+.mig-col-ico.pk {
+  color: var(--warn);
+}
+.mig-col-ico.fk {
+  color: var(--accent);
+}
+.mig-add {
+  opacity: 0;
+  flex: none;
+}
+.mig-tree-row:hover .mig-add,
+.mig-add.on {
+  opacity: 1;
+}
+.mig-add.on {
+  color: var(--ok);
+}
+
+/* Main panels */
+
+.mig-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.mig-main[hidden] {
+  display: none;
+}
+.mig-cols {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.mig-mid {
+  width: 250px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.mig-list {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 0;
+}
+.mig-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 3px 8px 3px 12px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.mig-item:hover {
+  background: var(--bg-hover);
+}
+.mig-item.sel {
+  background: var(--accent-soft);
+  border-left-color: var(--accent);
+}
+.mig-item.off .mig-item-text,
+.mig-item.off > .ellipsis {
+  color: var(--text-3);
+}
+.mig-item input {
+  margin: 0;
+  accent-color: var(--accent);
+  flex: none;
+}
+.mig-item-ico {
+  color: var(--text-2);
+  flex: none;
+}
+.mig-item-text {
+  line-height: 1.3;
+}
+.mig-item-del {
+  opacity: 0;
+  flex: none;
+}
+.mig-item:hover .mig-item-del {
+  opacity: 1;
+}
+.mig-hint {
+  padding: 14px 14px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.mig-mid-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  flex: none;
+}
+
+.mig-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.mig-intro,
+.mig-empty {
+  margin: auto;
+  max-width: 520px;
+  padding: 24px;
+  text-align: center;
+  color: var(--text-3);
+}
+.mig-intro h3,
+.mig-empty h3 {
+  color: var(--text);
+  margin: 10px 0 6px;
+}
+.mig-intro p {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.mig-map-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 6px 12px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-2) 45%, var(--bg));
+}
+.mig-table-name {
+  width: 180px;
+  font-weight: 600;
+}
+.mig-filter {
+  width: 260px;
+  flex: none;
+}
+.mig-filter .cm-wrap {
+  min-height: 26px;
+}
+.mig-src-name {
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 260px;
+}
+
+/* Mongo → SQL field grid */
+
+.mig-fields {
+  flex: 3 1 0;
+  overflow: auto;
+  min-height: 140px;
+}
+.mig-frow {
+  display: grid;
+  grid-template-columns: 22px minmax(150px, 1.3fr) 96px 104px minmax(110px, 1fr) minmax(120px, 1fr);
+  align-items: center;
+  gap: 8px;
+  height: 31px;
+  padding: 0 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  min-width: 680px;
+}
+.mig-frow > span {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.mig-frow input[type='checkbox'] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+.mig-frow.head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 28px;
+  background: var(--bg-2);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-bottom-color: var(--border);
+}
+.mig-frow:not(.head):hover {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
+}
+.mig-frow.is-table {
+  background: color-mix(in srgb, var(--accent-soft) 55%, transparent);
+}
+.mig-frow.off .mig-fname,
+.mig-frow.off .mig-ftype {
+  opacity: 0.45;
+}
+.mig-fname {
+  gap: 4px;
+}
+.mig-fname-ico {
+  color: var(--accent);
+  flex: none;
+}
+.mig-twisty-btn {
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  padding: 0;
+  width: 14px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.mig-twisty-pad {
+  width: 14px;
+  flex: none;
+}
+.mig-pk {
+  color: var(--warn);
+  flex: none;
+}
+.mig-ftype {
+  gap: 4px;
+  font-size: 11.5px;
+}
+.mig-warn {
+  color: var(--warn);
+  flex: none;
+}
+.mig-mode {
+  width: 100%;
+}
+.mig-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+.mig-name,
+.mig-type {
+  width: 100%;
+}
+.mig-suffix {
+  font-size: 11px;
+  flex: none;
+}
+
+/* Previews */
+
+.mig-preview {
+  flex: 2 1 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+  border-top: 1px solid var(--border);
+}
+.mig-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 34px;
+  padding: 0 10px 0 8px;
+  flex: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.mig-tabs > button {
+  border: 0;
+  background: none;
+  height: 33px;
+  padding: 0 10px;
+  cursor: pointer;
+  color: var(--text-2);
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.mig-tabs > button.on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.mig-tabs .select {
+  max-width: 220px;
+  margin-left: 6px;
+}
+.badge.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.mig-preview-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.mig-ddl,
+.mig-docs,
+.mig-log {
+  margin: 0;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+}
+.mig-log {
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: var(--bg-2);
+  border-radius: var(--radius);
+}
+.mig-warnings {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mig-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.mig-warning svg {
+  color: var(--warn);
+  margin-top: 2px;
+  flex: none;
+}
+
+.mig-grid-wrap {
+  overflow: auto;
+  height: 100%;
+}
+.mig-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  min-width: 100%;
+}
+.mig-grid th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-2);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.mig-grid td {
+  padding: 4px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  font-family: var(--mono);
+  white-space: nowrap;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: text;
+}
+.mig-grid td.null {
+  color: var(--text-3);
+  font-style: italic;
+}
+.mig-grid .rownum {
+  color: var(--text-3);
+  text-align: right;
+  width: 1%;
+  background: var(--bg-2);
+}
+
+/* SQL → Mongo source editor */
+
+.mig-src {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.mig-query {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.mig-query textarea {
+  flex: 1;
+  font-size: 12.5px;
+  min-height: 70px;
+}
+.mig-src-scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  padding-bottom: 16px;
+}
+.mig-sec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-2);
+}
+.mig-sec .faint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.mig-ccols {
+  margin: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mig-ccols.off {
+  opacity: 0.55;
+}
+.mig-crow {
+  display: grid;
+  grid-template-columns: 26px minmax(120px, 1fr) minmax(90px, 0.8fr) 14px minmax(140px, 1.2fr) 150px;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+.mig-crow:last-child {
+  border-bottom: 0;
+}
+.mig-crow > span {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.mig-crow input[type='checkbox'] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+.mig-crow .input,
+.mig-crow .select {
+  width: 100%;
+}
+.mig-crow.head {
+  height: 26px;
+  background: var(--bg-2);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-bottom-color: var(--border);
+}
+.mig-crow.off:not(.head) > span:nth-child(2) {
+  color: var(--text-3);
+}
+.mig-idfield {
+  color: var(--warn);
+  font-weight: 600;
+}
+.mig-ccols .mig-ccols {
+  margin: 0;
+}
+
+.mig-embed {
+  margin: 0 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.mig-embed.on {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.mig-embed-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+}
+.mig-embed.on .mig-embed-head {
+  background: color-mix(in srgb, var(--accent-soft) 60%, transparent);
+}
+.mig-embed-head input[type='checkbox'] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+.mig-embed-title {
+  line-height: 1.35;
+}
+.mig-embed .mig-ccols {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+.mig-docs {
+  margin: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-2);
+  min-height: 60px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+/* Footer */
+
+.mig-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  min-height: 48px;
+  flex: none;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.mig-opt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.mig-job {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 460px;
+}
+.mig-job-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 360px;
+}
+.mig-job-text .progress {
+  margin: 4px 0 0;
+}
+.mig-job.done {
+  padding: 3px 4px 3px 8px;
+  border-radius: var(--radius);
+}
+.mig-job.s-done {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+.mig-job.s-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.mig-job.s-cancelled {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+.mig-job.done .ellipsis {
+  color: var(--text);
+}
+
+/* Connections dialog */
+
+.mig-conns {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+.mig-conns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.mig-conns-list .list {
+  flex: 1;
+}
+.mig-conns-new {
+  align-self: flex-start;
+}
+.mig-conns-edit {
+  overflow: auto;
+  min-height: 0;
+  padding-right: 4px;
+}
+.mig-conn-form .field {
+  grid-template-columns: 130px 1fr;
+}
+.mig-conn-form .segmented button {
+  font-size: 12px;
+}
+.mig-conn-section {
+  margin: 14px 0 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.mig-test {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 360px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.mig-test .faint {
+  flex: none;
+}
+.mig-test.ok {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 9%, transparent);
+  border-color: color-mix(in srgb, var(--ok) 35%, transparent);
+}
+.mig-test.bad {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.mig-test svg {
+  flex: none;
+}

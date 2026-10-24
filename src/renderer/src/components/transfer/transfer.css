@@ -1,0 +1,270 @@
+/* Import / export dialogs and jobs panel */
+
+.tr-section {
+  margin-bottom: 20px;
+}
+.tr-section:last-child {
+  margin-bottom: 0;
+}
+.tr-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.tr-step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.tr-title-sub {
+  font-weight: 400;
+  margin-left: 6px;
+}
+.tr-small {
+  font-size: 12px;
+}
+.tr-gap {
+  margin-top: 10px;
+}
+.tr-indent {
+  margin-left: 158px;
+  margin-top: -2px;
+}
+.tr-ok {
+  color: var(--ok);
+}
+
+.tr-formats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.tr-format {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-2);
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+.tr-format:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+.tr-format svg {
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.tr-format b {
+  font-size: 13px;
+}
+.tr-format small {
+  color: var(--text-3);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.tr-format.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.tr-format.on svg,
+.tr-format.on b {
+  color: var(--accent);
+}
+
+.tr-filter {
+  width: 100%;
+  margin-bottom: 6px;
+}
+.tr-checklist {
+  max-height: 188px;
+  background: var(--bg-input);
+}
+.tr-checklist .list-row {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  max-height: 168px;
+}
+.tr-grid .list-row {
+  border-bottom: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.tr-query {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 120px;
+  overflow: auto;
+}
+.tr-delim {
+  width: 64px;
+}
+
+.tr-spin {
+  animation: tr-spin 0.9s linear infinite;
+  color: var(--accent);
+}
+@keyframes tr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tr-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: auto;
+  max-height: 280px;
+  background: var(--bg-input);
+}
+.tr-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  font-size: 12px;
+}
+.tr-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-2);
+  text-align: left;
+  font-weight: 600;
+  vertical-align: top;
+  padding: 6px 8px;
+  min-width: 120px;
+  max-width: 220px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.tr-table th .select {
+  width: 100%;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.tr-table td {
+  padding: 4px 8px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  user-select: text;
+}
+.tr-table tr:last-child td {
+  border-bottom: 0;
+}
+.tr-table th:last-child,
+.tr-table td:last-child {
+  border-right: 0;
+}
+.tr-table th.skip > div,
+.tr-table td.skip {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.tr-danger {
+  color: var(--danger);
+}
+.tr-danger input {
+  accent-color: var(--danger);
+}
+.tr-new {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tr-foot-msg {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Jobs panel */
+
+.tr-jobs {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 4px;
+  margin: -4px;
+}
+.tr-jobs-head {
+  display: flex;
+  justify-content: flex-end;
+}
+.tr-job {
+  flex: none;
+  animation: fade 0.15s ease-out;
+}
+.tr-job.tr-job-error {
+  border-left: 3px solid var(--danger);
+}
+.tr-job-done {
+  border-left: 3px solid var(--ok);
+}
+.tr-nums {
+  font-size: 11px;
+  flex: none;
+}
+.tr-job-errmsg {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  max-height: 80px;
+  overflow: auto;
+}
+.tr-job-actions {
+  margin-top: 6px;
+}
+.tr-job-actions .btn.ghost {
+  margin-left: -7px;
+}
+.progress.tr-done > div {
+  background: var(--ok);
+}
+.progress.tr-error > div {
+  background: var(--danger);
+}
+.progress.tr-cancelled > div {
+  background: var(--text-3);
+}
+.tr-state-done {
+  color: var(--ok);
+}
+.tr-state-error {
+  color: var(--danger);
+}
+.tr-state-cancelled {
+  color: var(--text-3);
+}

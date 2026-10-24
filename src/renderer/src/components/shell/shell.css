@@ -1,0 +1,544 @@
+.sh {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.sh .sh-db {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.sh-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.sh-toolbar .btn.danger:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: var(--danger-soft);
+  font-weight: 600;
+}
+.sh-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+}
+.sh-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-2);
+}
+.sh-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.sh-status.ok {
+  color: var(--ok);
+}
+.sh-status.lost {
+  color: var(--danger);
+}
+.sh-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sh-spinner {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  animation: sh-spin 0.8s linear infinite;
+  flex: none;
+}
+@keyframes sh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scrollback */
+.sh-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.sh-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 0 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  background: color-mix(in srgb, var(--bg-input) 70%, var(--bg));
+}
+.sh-scroll pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sh-entry {
+  padding: 6px 14px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+}
+.sh-entry:hover .sh-result-tools {
+  opacity: 1;
+}
+.sh-input-echo {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.sh-prompt {
+  color: var(--leaf);
+  font-family: var(--mono);
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  flex: none;
+}
+.sh-cmd {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+  cursor: text;
+}
+
+.sh-logs {
+  margin: 4px 0 2px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+.sh-log {
+  color: var(--text);
+}
+.sh-log.info {
+  color: var(--accent-2);
+}
+.sh-log.warn {
+  color: var(--warn);
+}
+.sh-log.error {
+  color: var(--danger);
+}
+
+.sh-text {
+  margin-top: 4px !important;
+  color: var(--text);
+}
+.sh-dim {
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+.sh-result {
+  position: relative;
+  margin-top: 4px;
+}
+.sh-result-tools {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 2;
+  font-family: var(--font);
+  background: color-mix(in srgb, var(--bg-input) 70%, var(--bg));
+  padding-left: 6px;
+}
+.sh-result-tools:focus-within {
+  opacity: 1;
+}
+.sh-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-family: var(--font);
+  background: var(--bg);
+}
+.sh-result.table .sh-result-tools {
+  position: static;
+  opacity: 1;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  background: none;
+}
+.sh-table .grid {
+  flex: 1;
+  min-height: 0;
+}
+
+/* JSON tree */
+.sh-json {
+  color: var(--text);
+}
+.sh-json > .sh-node + .sh-node,
+.sh-json > .sh-line + .sh-node,
+.sh-json > .sh-node + .sh-line {
+  margin-top: 2px;
+}
+.sh-line {
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding-left: 14px;
+}
+.sh-children {
+  margin-left: 6px;
+  padding-left: 14px;
+  border-left: 1px dotted color-mix(in srgb, var(--border-strong) 70%, transparent);
+}
+.sh-fold {
+  position: absolute;
+  left: -1px;
+  top: 3px;
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.sh-fold:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.sh-fold.open svg {
+  transform: rotate(90deg);
+}
+.sh-collapsed,
+.sh-more-items {
+  font: inherit;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-2);
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 0 4px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 16px;
+}
+.sh-more-items {
+  margin: 2px 0 2px 14px;
+}
+.sh-collapsed:hover,
+.sh-more-items:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.sh-key {
+  color: var(--text);
+}
+.sh-punct {
+  color: var(--text-3);
+}
+.sh-string,
+.sh-symbol {
+  color: var(--t-string);
+}
+.sh-int,
+.sh-long,
+.sh-double,
+.sh-decimal {
+  color: var(--t-number);
+}
+.sh-bool,
+.sh-minKey,
+.sh-maxKey {
+  color: var(--t-bool);
+}
+.sh-date,
+.sh-timestamp {
+  color: var(--t-date);
+}
+.sh-objectId,
+.sh-uuid,
+.sh-dbref {
+  color: var(--t-oid);
+}
+.sh-null,
+.sh-undefined {
+  color: var(--t-null);
+  font-style: italic;
+}
+.sh-regex {
+  color: var(--t-regex);
+}
+.sh-binary,
+.sh-code {
+  color: var(--t-binary);
+}
+
+.sh-more {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12px;
+}
+.sh-more .kbd {
+  font-family: var(--mono);
+}
+
+.sh-error {
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--danger);
+}
+.sh-error.stopped {
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+  color: var(--warn);
+}
+.sh-error-head {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-weight: 600;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.sh-error-head svg {
+  flex: none;
+  margin-top: 2px;
+}
+.sh-error-stack {
+  margin-top: 6px !important;
+  color: var(--text);
+  opacity: 0.85;
+  font-size: 11.5px;
+}
+
+.sh-meta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  min-height: 16px;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.sh-meta .ok {
+  color: var(--ok);
+}
+.sh-meta .failed {
+  color: var(--danger);
+}
+.sh-meta .stopped {
+  color: var(--warn);
+}
+
+.sh-sys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 14px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.sh-sys svg {
+  flex: none;
+}
+.sh-sys.info svg {
+  color: var(--leaf);
+}
+.sh-sys.warn {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+}
+.sh-sys.error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.sh-sys .btn {
+  margin-left: auto;
+}
+
+/* Input */
+.sh-inputbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  transition: box-shadow 0.12s;
+}
+.sh-inputbar.focused {
+  box-shadow: inset 0 2px 0 -1px var(--accent);
+}
+.sh-inputbar.disabled {
+  opacity: 0.6;
+}
+.sh-inputbar .sh-prompt {
+  padding-top: 1px;
+}
+.sh-editor {
+  flex: 1;
+  min-width: 0;
+}
+.sh-editor .cm-editor {
+  max-height: 40vh;
+  background: transparent;
+}
+.sh-editor .cm-editor.cm-focused {
+  outline: none;
+}
+.sh-editor .cm-scroller {
+  font-family: var(--editor-font, var(--mono));
+  line-height: 1.55;
+  overflow: auto;
+}
+.editor-fs-custom .sh-editor .cm-content {
+  font-size: var(--editor-fs);
+}
+.sh-editor .cm-content {
+  padding: 1px 0;
+  caret-color: var(--text);
+  color: var(--text);
+}
+.sh-editor .cm-line {
+  padding: 0;
+}
+.sh-editor .cm-cursor {
+  border-left-color: var(--text);
+}
+.sh-editor .cm-placeholder {
+  color: var(--text-3);
+}
+.sh-editor .cm-matchingBracket {
+  background: var(--accent-soft);
+  outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.sh-editor .cm-selectionBackground,
+.sh-editor .cm-focused .cm-selectionBackground {
+  background: var(--bg-active) !important;
+}
+
+/* Syntax colours (lezer classHighlighter) for the input and the echoed commands */
+.sh .tok-keyword,
+.sh .tok-operatorKeyword {
+  color: var(--t-date);
+}
+.sh .tok-string,
+.sh .tok-string2 {
+  color: var(--t-string);
+}
+.sh .tok-number {
+  color: var(--t-number);
+}
+.sh .tok-bool,
+.sh .tok-atom {
+  color: var(--t-bool);
+}
+.sh .tok-null {
+  color: var(--t-null);
+}
+.sh .tok-comment {
+  color: var(--text-3);
+  font-style: italic;
+}
+.sh .tok-propertyName {
+  color: var(--t-oid);
+}
+.sh .tok-variableName.tok-definition,
+.sh .tok-propertyName.tok-definition {
+  color: var(--text);
+}
+.sh .tok-className,
+.sh .tok-typeName,
+.sh .tok-namespace {
+  color: var(--t-binary);
+}
+.sh .tok-operator,
+.sh .tok-punctuation {
+  color: var(--text-2);
+}
+.sh .tok-variableName2 {
+  color: var(--t-regex);
+}
+
+/* Output cut at the limits of Preferences → Shell */
+.sh-clipped {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12px;
+}
+.sh-clipped .btn {
+  height: 22px;
+}
+
+/* Startup scripts */
+.sh-startup .sh-sys {
+  margin: 0;
+}
+.sh-startup .sh-logs {
+  margin-top: 4px;
+}
+
+/* Approval of a destructive / write command */
+.sh-confirm-op {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-2, rgba(127, 127, 127, 0.08));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
