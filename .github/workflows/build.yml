@@ -47,6 +47,9 @@ jobs:
         env:
           # Unsigned builds; add CSC_LINK / APPLE_ID secrets to sign and notarize.
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Check the macOS signature (Apple Silicon only runs signed code)
+        if: runner.os == 'macOS'
+        run: codesign --verify --deep --strict --verbose=2 release/*/mac-arm64/Shardwise.app
       - uses: actions/upload-artifact@v7
         with:
           name: shardwise-${{ matrix.os }}

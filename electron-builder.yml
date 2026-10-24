@@ -40,5 +40,7 @@ linux:
   syncDesktopName: true
   maintainer: mexus
   artifactName: ${productName}-${version}-linux-${arch}.${ext}
+# macOS without a Developer ID certificate: ad-hoc signature, so Apple Silicon runs the app.
+afterPack: scripts/mac-adhoc-sign.cjs
 npmRebuild: false
 icon: build/icon.png
