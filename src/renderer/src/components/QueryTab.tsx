@@ -216,54 +216,64 @@ function ResultToolbar({ tab }: { tab: Tab }): ReactElement {
       <span className="muted" style={{ marginLeft: 4 }}>
         {tab.docs ? (docs.length ? `Documents ${start.toLocaleString()} to ${end.toLocaleString()}` : 'No documents') : ''}
         {tab.count != null && ` of ${tab.count.toLocaleString()}`}
+        {tab.docs && tab.ms !== undefined && (
+          <span className="faint" title="Time the server took to return this page">
+            {' '}
+            · {tab.ms} ms
+          </span>
+        )}
       </span>
       <button className="btn ghost small" onClick={() => countDocuments(tab.id)} disabled={tab.counting || !tab.applied} title={withShortcut('Count documents matching the query', 'query.count')}>
         <Icon name="count" size={13} /> {tab.counting ? 'Counting…' : 'Count'}
       </button>
       <span className="spacer" />
-      {tab.ms !== undefined && <span className="faint">{tab.ms} ms</span>}
-      <button className="btn ghost icon small" title={withShortcut('New document', 'query.insertDocument')} disabled={readOnly} onClick={() => insertDocumentDialog(tab)}>
-        <Icon name="plus" size={14} />
-      </button>
-      <button className="btn ghost icon small" title={withShortcut('Edit the selected document as JSON', 'query.editJson')} disabled={readOnly || !docs.length} onClick={() => void editDocumentDialog(tab, tab.selection[0] ?? 0)}>
-        <Icon name="edit" size={14} />
-      </button>
-      <button className="btn ghost icon small" title={withShortcut('Show the selected document as JSON', 'query.showJson')} disabled={!docs.length} onClick={() => void viewDocumentDialog(tab, tab.selection[0] ?? 0)}>
-        <Icon name="json" size={14} />
-      </button>
-      <button className="btn ghost icon small" title={withShortcut('Update documents (edit the query and the update)…', 'query.updateDocuments')} disabled={readOnly} onClick={() => updateDocumentsDialog(tab)}>
-        <Icon name="update" size={14} />
-      </button>
-      <button className="btn ghost icon small" title="Delete documents (edit the query: selection, the tab's query or all)…" disabled={readOnly} onClick={() => deleteDocumentsDialog(tab)}>
-        <Icon name="trash" size={14} />
-      </button>
-      <button
-        className="btn ghost icon small"
-        title="More"
-        onClick={(e) =>
-          showMenu(e, [
-            { label: 'New Document…', icon: 'plus', disabled: readOnly, shortcut: shortcutLabel('query.insertDocument'), onClick: () => insertDocumentDialog(tab) },
-            { label: 'Paste as New Document(s)…', disabled: readOnly, onClick: () => pasteDocuments(tab) },
-            { label: 'Update Documents…', icon: 'update', disabled: readOnly, shortcut: shortcutLabel('query.updateDocuments'), onClick: () => updateDocumentsDialog(tab) },
-            { separator: true },
-            { label: 'Open in Pipeline Editor', icon: 'aggregate', shortcut: shortcutLabel('query.openPipeline'), onClick: () => openInPipeline(tab) },
-            { label: 'Explain with AI…', icon: 'sparkle', onClick: () => void explainQueryWithAi(tab) },
-            { label: 'Export Query Results…', icon: 'export', shortcut: shortcutLabel('query.export'), onClick: () => exportResults(tab) },
-            { separator: true },
-            { label: 'Delete All Matching…', icon: 'trash', danger: true, disabled: readOnly, onClick: () => deleteMatching(tab) }
-          ])
-        }
-      >
-        <Icon name="more" size={14} />
-      </button>
-      <button
-        className={`btn ghost icon small ${tab.readOnly ? 'active' : ''}`}
-        title={tab.isView ? 'Views are read-only' : connLocked ? 'Read-only connection (change it in the connection settings)' : withShortcut(tab.readOnly ? 'Read-only mode on' : 'Read-only mode', 'query.toggleReadOnly')}
-        disabled={tab.isView || connLocked}
-        onClick={() => patchTab(tab.id, { readOnly: !tab.readOnly })}
-      >
-        <Icon name={tab.readOnly || tab.isView ? 'lock' : 'unlock'} size={14} />
-      </button>
+      {/* One group, so it wraps to the next line as a whole and keeps its order. */}
+      <div className="rt-actions">
+        <button className="btn ghost small" title={withShortcut('New document', 'query.insertDocument')} disabled={readOnly} onClick={() => insertDocumentDialog(tab)}>
+          <Icon name="plus" size={14} /> Insert
+        </button>
+        <button className="btn ghost icon small" title={withShortcut('Edit the selected document as JSON', 'query.editJson')} disabled={readOnly || !docs.length} onClick={() => void editDocumentDialog(tab, tab.selection[0] ?? 0)}>
+          <Icon name="edit" size={14} />
+        </button>
+        <button className="btn ghost icon small" title={withShortcut('Show the selected document as JSON', 'query.showJson')} disabled={!docs.length} onClick={() => void viewDocumentDialog(tab, tab.selection[0] ?? 0)}>
+          <Icon name="json" size={14} />
+        </button>
+        <span className="rt-sep" />
+        <button className="btn ghost small" title={withShortcut('Update documents (edit the query and the update)…', 'query.updateDocuments')} disabled={readOnly} onClick={() => updateDocumentsDialog(tab)}>
+          <Icon name="update" size={14} /> Update
+        </button>
+        <button className="btn ghost small" title="Delete documents (edit the query: selection, the tab's query or all)…" disabled={readOnly} onClick={() => deleteDocumentsDialog(tab)}>
+          <Icon name="trash" size={14} /> Delete
+        </button>
+        <span className="rt-sep" />
+        <button
+          className="btn ghost icon small"
+          title="More"
+          onClick={(e) =>
+            showMenu(e, [
+              { label: 'New Document…', icon: 'plus', disabled: readOnly, shortcut: shortcutLabel('query.insertDocument'), onClick: () => insertDocumentDialog(tab) },
+              { label: 'Paste as New Document(s)…', disabled: readOnly, onClick: () => pasteDocuments(tab) },
+              { label: 'Update Documents…', icon: 'update', disabled: readOnly, shortcut: shortcutLabel('query.updateDocuments'), onClick: () => updateDocumentsDialog(tab) },
+              { separator: true },
+              { label: 'Open in Pipeline Editor', icon: 'aggregate', shortcut: shortcutLabel('query.openPipeline'), onClick: () => openInPipeline(tab) },
+              { label: 'Explain with AI…', icon: 'sparkle', onClick: () => void explainQueryWithAi(tab) },
+              { label: 'Export Query Results…', icon: 'export', shortcut: shortcutLabel('query.export'), onClick: () => exportResults(tab) },
+              { separator: true },
+              { label: 'Delete All Matching…', icon: 'trash', danger: true, disabled: readOnly, onClick: () => deleteMatching(tab) }
+            ])
+          }
+        >
+          <Icon name="more" size={14} />
+        </button>
+        <button
+          className={`btn ghost icon small ${tab.readOnly ? 'active' : ''}`}
+          title={tab.isView ? 'Views are read-only' : connLocked ? 'Read-only connection (change it in the connection settings)' : withShortcut(tab.readOnly ? 'Read-only mode on' : 'Read-only mode', 'query.toggleReadOnly')}
+          disabled={tab.isView || connLocked}
+          onClick={() => patchTab(tab.id, { readOnly: !tab.readOnly })}
+        >
+          <Icon name={tab.readOnly || tab.isView ? 'lock' : 'unlock'} size={14} />
+        </button>
+      </div>
     </div>
   )
 }

@@ -399,9 +399,10 @@ function StatusBar(): ReactElement {
   const live = useStore((s) => s.live)
   const tab = tabs.find((t) => t.id === activeId)
   const conn = tab ? live[tab.connId] : undefined
+  const open = Object.keys(live).length
   return (
     <div className="statusbar">
-      <span>{Object.keys(live).length} connection(s)</span>
+      <span>{open === 0 ? 'Not connected' : open === 1 ? '1 connection' : `${open} connections`}</span>
       {conn && (
         <>
           <span>

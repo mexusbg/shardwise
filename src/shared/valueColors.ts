@@ -29,7 +29,7 @@ export const DEFAULT_VALUE_COLORS: Record<ThemeName, Record<ValueColorKey, strin
     bool: '#8a3ffc',
     date: '#a3510a',
     oid: '#b3266b',
-    null: '#8a92a0',
+    null: '#646b78',
     object: '#5a6270',
     regex: '#9a6700',
     binary: '#6b5b95'
@@ -40,7 +40,7 @@ export const DEFAULT_VALUE_COLORS: Record<ThemeName, Record<ValueColorKey, strin
     bool: '#c4a7ff',
     date: '#ffb86b',
     oid: '#ff8fc8',
-    null: '#7a818d',
+    null: '#959ca8',
     object: '#a7aeb9',
     regex: '#e3b341',
     binary: '#b9a7e8'

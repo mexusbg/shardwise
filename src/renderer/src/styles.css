@@ -16,13 +16,15 @@
   --border-strong: #c3c9d3;
   --text: #1d2129;
   --text-2: #5a6270;
-  --text-3: #8a92a0;
+  --text-3: #646b78;
   --accent: #1f6feb;
   --accent-2: #155bd0;
   --accent-text: #ffffff;
   --accent-soft: rgba(31, 111, 235, 0.12);
   --danger: #d1242f;
   --danger-soft: rgba(209, 36, 47, 0.1);
+  --danger-text: #ffffff;
+  --border-input: #868f9c;
   --ok: #1a7f37;
   --warn: #9a6700;
   --warn-soft: rgba(212, 167, 44, 0.16);
@@ -34,7 +36,7 @@
   --t-bool: #8a3ffc;
   --t-date: #a3510a;
   --t-oid: #b3266b;
-  --t-null: #8a92a0;
+  --t-null: #646b78;
   --t-object: #5a6270;
   --t-regex: #9a6700;
   --t-binary: #6b5b95;
@@ -53,13 +55,15 @@
     --border-strong: #4a4f58;
     --text: #e3e6eb;
     --text-2: #a7aeb9;
-    --text-3: #7a818d;
+    --text-3: #959ca8;
     --accent: #4c8dff;
     --accent-2: #6aa0ff;
     --accent-text: #0b1220;
     --accent-soft: rgba(76, 141, 255, 0.16);
     --danger: #ff6b6b;
     --danger-soft: rgba(255, 107, 107, 0.12);
+    --danger-text: #1a0b0b;
+    --border-input: #6e7581;
     --ok: #4cc38a;
     --warn: #e3b341;
     --warn-soft: rgba(227, 179, 65, 0.14);
@@ -71,7 +75,7 @@
     --t-bool: #c4a7ff;
     --t-date: #ffb86b;
     --t-oid: #ff8fc8;
-    --t-null: #7a818d;
+    --t-null: #959ca8;
     --t-object: #a7aeb9;
     --t-regex: #e3b341;
     --t-binary: #b9a7e8;
@@ -90,13 +94,15 @@
   --border-strong: #4a4f58;
   --text: #e3e6eb;
   --text-2: #a7aeb9;
-  --text-3: #7a818d;
+  --text-3: #959ca8;
   --accent: #4c8dff;
   --accent-2: #6aa0ff;
   --accent-text: #0b1220;
   --accent-soft: rgba(76, 141, 255, 0.16);
   --danger: #ff6b6b;
   --danger-soft: rgba(255, 107, 107, 0.12);
+  --danger-text: #1a0b0b;
+  --border-input: #6e7581;
   --ok: #4cc38a;
   --warn: #e3b341;
   --warn-soft: rgba(227, 179, 65, 0.14);
@@ -108,7 +114,7 @@
   --t-bool: #c4a7ff;
   --t-date: #ffb86b;
   --t-oid: #ff8fc8;
-  --t-null: #7a818d;
+  --t-null: #959ca8;
   --t-object: #a7aeb9;
   --t-regex: #e3b341;
   --t-binary: #b9a7e8;
@@ -230,7 +236,7 @@ button {
 .btn.danger.solid {
   background: var(--danger);
   border-color: var(--danger);
-  color: #fff;
+  color: var(--danger-text);
 }
 .btn.ghost {
   background: transparent;
@@ -263,7 +269,7 @@ button {
 textarea.input {
   height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-input);
   background: var(--bg-input);
   border-radius: var(--radius);
   outline: none;
@@ -761,6 +767,18 @@ textarea.input:focus {
   background: var(--bg-2);
   flex-wrap: wrap;
 }
+.result-toolbar .rt-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+.result-toolbar .rt-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: var(--border);
+}
 .result-toolbar .pager {
   display: flex;
   align-items: center;
@@ -906,7 +924,10 @@ textarea.input:focus {
 .grid td.missing {
   color: var(--text-3);
 }
-.grid .col-resize {
+/* _id stays in every table but in a quieter colour, so the data columns lead. */
+.grid td.id-col > span {
+  color: var(--text-2);
+}.grid .col-resize {
   position: absolute;
   right: -3px;
   top: 0;
@@ -1391,7 +1412,7 @@ textarea.input:focus {
 /* ---------- CodeMirror ---------- */
 
 .cm-wrap {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-input);
   border-radius: var(--radius);
   background: var(--bg-input);
   overflow: hidden;
@@ -2044,4 +2065,16 @@ body
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* System setting "reduce motion": no animations or transitions anywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -375,7 +375,7 @@ export const TableView = memo(function TableView({ tab }: { tab: QueryTab }): Re
                   return (
                     <td
                       key={c}
-                      className={`${focused ? 'cell-focus' : ''} ${missing ? 'missing' : ''}`}
+                      className={`${focused ? 'cell-focus' : ''} ${missing ? 'missing' : ''} ${fullPath(c) === '_id' ? 'id-col' : ''}`}
                       onMouseDown={(e) => {
                         if (e.button !== 0) return
                         setFocus({ row, col: ci })
