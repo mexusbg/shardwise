@@ -55,6 +55,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
         placeholder="{ field: 'value' }   — empty matches all documents"
         fields={fields}
         maxHeight={160}
+        collapse
         invalid={err?.part === 'query'}
       />
       <div className="row">
@@ -89,6 +90,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
           placeholder="{ field: 1 }"
           fields={fields}
           maxHeight={90}
+        collapse
           invalid={err?.part === 'projection'}
         />
         <div className="qlabel">Sort</div>
@@ -101,6 +103,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
           placeholder="{ field: -1 }"
           fields={fields}
           maxHeight={90}
+        collapse
           invalid={err?.part === 'sort'}
         />
         <div className="qlabel">Skip</div>

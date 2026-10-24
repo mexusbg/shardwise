@@ -71,6 +71,8 @@ interface Props {
   autoFocus?: boolean
   /** Autocomplete preference that applies (default: query editors). */
   area?: EditorArea
+  /** Show only the first line, cut with an ellipsis, until the editor gets focus (query bar). */
+  collapse?: boolean
 }
 
 export function CodeEditor(p: Props): ReactElement {
@@ -141,10 +143,11 @@ export function CodeEditor(p: Props): ReactElement {
     })
   }, [p.readOnly])
 
+  const collapsed = p.collapse && !focused ? (p.value.trim().includes('\n') ? 'collapsed more' : 'collapsed') : ''
   return (
     <div
       ref={host}
-      className={`cm-wrap ${focused ? 'focused' : ''} ${p.invalid ? 'invalid' : ''} ${p.full ? 'full' : ''} ${p.className ?? ''}`}
+      className={`cm-wrap ${focused ? 'focused' : ''} ${p.invalid ? 'invalid' : ''} ${p.full ? 'full' : ''} ${collapsed} ${p.className ?? ''}`}
     />
   )
 }
