@@ -75,5 +75,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          ls -la dist
-          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "Shardwise ${TAG#v}" --generate-notes
+          # The artifacts keep their release/<version>/ folder: upload every file found below dist.
+          mapfile -t files < <(find dist -type f | sort)
+          printf '%s\n' "${files[@]}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" "${files[@]}" --repo "$GITHUB_REPOSITORY" --title "Shardwise ${TAG#v}" --generate-notes
+          fi
