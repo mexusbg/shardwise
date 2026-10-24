@@ -42,7 +42,7 @@ for t in $TARGETS; do
         # The .deb control file requires a homepage; build only the AppImage until package.json has one.
         echo "No homepage in package.json: skipping the .deb"
         node scripts/fetch-tools.mts linux-x64 && node scripts/notices.mjs && npx electron-vite build
-        npx electron-builder --linux AppImage --x64
+        npx electron-builder --publish never --linux AppImage --x64
       fi
       cp -f release/"$VERSION"/*.AppImage "$OUT/"
       ;;

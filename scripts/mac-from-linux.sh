@@ -40,7 +40,7 @@ test -f node_modules/kerberos/build/Release/kerberos.node
 node scripts/fetch-tools.mts mac-arm64
 node scripts/notices.mjs
 npx electron-vite build
-npx electron-builder --mac dir --arm64 -c.afterPack=scripts/mac-adhoc-sign.cjs
+npx electron-builder --publish never --mac dir --arm64 -c.afterPack=scripts/mac-adhoc-sign.cjs
 # Zipped here, not by electron-builder, which would follow the framework symlinks.
 VERSION="$(node -p "require('./package.json').version")"
 rm -f release/"$VERSION"/*-mac-arm64.zip*
