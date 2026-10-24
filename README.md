@@ -1,11 +1,17 @@
 # Shardwise
 
-Cross-platform MongoDB GUI (Windows, macOS, Linux) with a visual Filter Builder,
-Table / Tree / JSON result views, in-place editing and import/export.
+A free, open-source MongoDB GUI for Windows, macOS and Linux. Query with a visual Filter Builder or in shell
+syntax, browse results as a table, tree or JSON, edit documents in place, build aggregation pipelines stage by
+stage, read explain plans, analyse schemas, and move data between MongoDB, files and SQL databases.
 
 > **Please read [Before you use it](#before-you-use-it) first.** Shardwise was built mainly with an AI model,
 > some features have so far been verified only by automated tests, and it comes with no warranty.
 > Try it on a non-production database and keep a proper backup.
+
+**[Download the latest release](https://github.com/mexusbg/shardwise/releases/latest)** ·
+[Installation](#installation) · [Features](#features)
+
+![Shardwise: a query in the table view with the Filter Builder](screenshots/query.png)
 
 ## Before you use it
 
@@ -29,6 +35,127 @@ server setups. Bug reports are welcome.
 Fidweb are not liable for any loss of data, damage or other liability, whether in contract, tort or otherwise,
 arising from the use of the software or the inability to use it. You use it at your own risk. See also the
 [license](LICENSE).
+
+## Features
+
+### Connect to any deployment
+
+- `mongodb+srv://`, standalone servers and replica sets, or paste a connection string.
+- Authentication with SCRAM, X.509, LDAP, Kerberos and AWS IAM; TLS with your own CA and client certificates.
+- SSH tunnels (password or key) that also work with SRV and replica sets; HTTP and SOCKS proxies.
+- Passwords encrypted with the operating system's keychain, or asked for each time you connect.
+- Folders and colours for connections, and read-only connections that refuse every write.
+- Import connections from Studio 3T®, MongoDB Compass and Robo 3T exports; export them as URIs or as
+  passphrase-encrypted JSON.
+
+![Connection Manager](screenshots/connections.png)
+
+### Browse and query
+
+- Query, projection, sort, skip and limit in shell syntax (`ObjectId("…")`, `ISODate("…")`, regex literals), with
+  autocomplete of field names.
+- **Filter Builder:** drag a cell or a column header into it to add a condition, a field or a sort order.
+  `$and` / `$or` / `$nor` / `$elemMatch` groups, about 25 operators and typed values. It stays in sync with the
+  query text in both directions.
+- **Table**, **Tree** and **JSON** views. Step into nested fields, hide and resize columns, and sort by clicking a
+  column header.
+- Collation picker, paging, document counts, and default queries per connection, database or collection.
+- **Ctrl+P** jumps to any collection by name. Typing in the connection tree jumps to the next matching name.
+- **Find in Database** searches for a value across all collections of a database.
+- Every query is kept in the query history. Save the ones you need in the Query Library, organised in folders.
+
+| Tree view | Edit a document as JSON |
+|---|---|
+| ![Tree view of a document](screenshots/tree.png) | ![Document editor](screenshots/edit-document.png) |
+
+### Edit data
+
+- Edit values in place, change a value's type with conversion, or edit the whole document as JSON (Ctrl+F finds
+  text in it).
+- Insert, paste and duplicate documents; set, rename, add and remove fields in one document, the matching
+  documents or the whole collection.
+- **Update** and **Delete** dialogs with an editable query and a live count of the documents that will change.
+- **Change History** keeps the previous version of every document changed through Shardwise, in a local file,
+  and restores it with one click.
+- Lock a tab as read-only to prevent accidental edits. Edit validation rules and view definitions.
+
+### Aggregation pipelines
+
+Build a pipeline stage by stage from templates, with a preview of the input and output of every stage. Edit the
+whole pipeline as text, run explain on it, save it, or create a view from it. A find query opens as a pipeline
+in one click.
+
+![Aggregation pipeline editor](screenshots/aggregation.png)
+
+### Performance
+
+- **Explain plans** as a visual stage tree with the key numbers up front. Warnings point out collection scans and
+  in-memory sorts, and suggest an index.
+- **Query Profiler** on `system.profile`: profiling levels, slow-operation threshold, operations grouped by query
+  shape, and index suggestions. Current operations, with kill.
+- **Index manager:** sizes, usage statistics, unused indexes, build progress, hide / unhide, and a full create
+  dialog (compound, text, 2dsphere, hashed, wildcard, TTL, partial, collation).
+
+| Explain plan | Index manager |
+|---|---|
+| ![Explain plan](screenshots/explain.png) | ![Index manager](screenshots/indexes.png) |
+
+### Schema analysis
+
+Field types, how often each field is present, statistics and top values from a sample. Mixed types are flagged.
+Click a value to query it, and export the result as JSON Schema or as a validator.
+
+![Schema analysis](screenshots/schema.png)
+
+### Code
+
+- **Playground:** JavaScript or TypeScript with the Node.js driver, mongosh-style `db.coll.find()`, and Mongoose
+  (`Order.aggregate(...)` works without defining a schema). Scripts run in a background worker you can stop.
+- **Shell:** a mongosh-style console with persistent variables, `use`, `show …`, `it` and history. It asks before
+  running commands that drop or delete data.
+- **Query Code:** the current query as mongosh, Node.js, Mongoose, Python, Java, C#, Go, PHP, Ruby or SQL.
+- **SQL Query:** write SQL (WHERE, GROUP BY / HAVING, JOIN, functions) and run it as a find or an aggregation.
+
+| Playground | Shell |
+|---|---|
+| ![Playground with a Mongoose aggregation](screenshots/playground.png) | ![Shell](screenshots/shell.png) |
+
+![The current query as Python code](screenshots/code.png)
+
+### Move and compare data
+
+- **Import / export:** JSON (mongo shell, canonical and relaxed Extended JSON, plain JSON), CSV, Excel, and BSON
+  through the bundled `mongodump` / `mongorestore` (folder or archive, gzip).
+- **Copy and paste** collections and whole databases, also between connections, with their indexes and views.
+- **Compare & sync:** compare two collections by a key field, field by field, and sync them with a dry run first.
+- **MongoDB → SQL** and **SQL → MongoDB** for PostgreSQL, MySQL / MariaDB, SQL Server and SQLite. The relational
+  mapping is inferred from a sample (flattened objects, child tables for arrays) and you can edit it, then migrate
+  live or generate a `.sql` script.
+- **Data masking** for safe copies and exports, and **Restructure Fields** to rename, move or retype fields
+  across a collection, with a preview and a dry run.
+- **GridFS** file browser, and **Tasks** that run saved imports, exports, syncs, migrations and masking jobs on
+  demand or on a schedule.
+
+| Compare & sync | MongoDB → SQL |
+|---|---|
+| ![Compare two collections](screenshots/compare.png) | ![SQL migration](screenshots/migrate.png) |
+
+### AI helper (optional)
+
+Describe a query or a pipeline in plain language and the AI writes it; ask it to explain an explain plan or a
+stage; chat with an assistant that can run read-only queries. It works with Claude (Anthropic) or any
+OpenAI-compatible service: OpenAI, Gemini, Mistral, Groq, OpenRouter, DeepSeek, or a local model with Ollama or
+LM Studio. You bring your own API key, which is stored encrypted. Only field names and types are sent unless you
+allow sample documents. A local MCP server lets external AI agents (Claude Code, Cursor, VS Code…) query the
+connections you choose.
+
+### Administration and settings
+
+- Server Status dashboard with live charts, and Users & Roles (built-in and custom roles, privileges).
+- Dark and light themes, colours for each value type, rebindable keyboard shortcuts, date formats and time zones,
+  and a search box in Settings.
+
+![Light theme](screenshots/light.png)
 
 ## Author and support
 
@@ -99,62 +226,6 @@ Shardwise checks GitHub for a newer release when it starts and shows a link in t
 available. Nothing is downloaded or installed without you; turn the check off in **Settings → About**. To update,
 install the new version over the old one: settings and saved connections are kept.
 
-## Features (phase 1)
-
-- **Connections** — `mongodb+srv://`, standalone, replica sets, raw URI; import/export URIs; SCRAM, X.509,
-  LDAP, Kerberos, AWS IAM; TLS with CA / client certificates; SSH tunnels (password or key) that work with
-  SRV and replica sets; passwords encrypted with the OS keychain.
-- **Server tree** — databases, collections and views with document counts; create, rename, drop.
-- **Query tab** — Query / Projection / Sort / Skip / Limit in shell syntax (`ObjectId("…")`, `ISODate("…")`,
-  regex literals), autocomplete, paging, count, read-only lock.
-- **Filter Builder** — drag fields from the results, `$and` / `$or` / `$nor` / `$elemMatch` groups,
-  ~25 operators, typed values, projection and sort sections; two-way sync with the query text.
-- **Result views** — Table (step into nested fields, hide/resize columns), Tree, JSON.
-- **Editing** — edit in place, Edit Value / Type with conversion, edit document as JSON, insert / paste /
-  duplicate documents, set / rename / add / remove fields for one document, the query or the collection,
-  delete documents.
-- **Query profiling** — Explain Plan view (visual stage tree, COLLSCAN / in-memory sort warnings), Query Profiler
-  on `system.profile` (levels, slow-op threshold, operations and query shapes, open in tab), current operations
-  with kill.
-- **Playground** — JavaScript / TypeScript with the driver, mongosh-style `db.coll.find()`, and Mongoose
-  (`User.find(...)` works without a schema); runs in a killable worker.
-- **Defaults & helpers** — header-click sorting, default query per connection / database / collection,
-  auto-cast of `'650a…'` / ISO strings to ObjectId / Date for fields that hold those types, type preselection in
-  the builder.
-- **Connection import / export** — Shardwise JSON (passwords optional, passphrase-encrypted), URI lists; import
-  from Studio 3T®, MongoDB Compass and Robo 3T connection exports (for compatibility only).
-- **Import / export** — JSON (mongo shell syntax, mongoexport canonical & relaxed, legacy shell,
-  pure JSON), CSV, Excel, BSON via the bundled `mongodump` / `mongorestore` (folder or archive, gzip).
-
-## Features (phase 2 — power tools)
-
-- **Aggregation editor** — stage list with templates, per-stage input / output previews, pipeline as text,
-  explain, create view, open a find query as a pipeline.
-- **Index manager** — sizes, usage statistics, build progress, hide / unhide, drop, full create dialog
-  (compound, text, 2dsphere, hashed, wildcard, TTL, partial, collation).
-- **Shell** — mongosh-style REPL with persistent variables, `use`, `show …`, `it`, history, interrupt.
-- **Query history & Query Library** — every run recorded; saved queries in folders.
-
-## Features (phase 3 — extras)
-
-- **Query Code** — the current query as mongosh, Node.js, Mongoose, Python, Java, C#, Go, PHP, Ruby or SQL.
-- **Schema explorer** — field types, presence, statistics, top values; export JSON Schema / validator.
-- **SQL query** — write SQL (WHERE, GROUP BY / HAVING, JOIN, functions) and run it as find / aggregate.
-- **Users & roles** — users, built-in and custom roles, privileges.
-- **Compare & sync** — compare two collections by key (field-level diff) and sync them with a dry run.
-- **AI helper and assistant** — describe a query in plain language and the AI writes it; a chat assistant can run
-  read-only queries. Works with Claude (Anthropic) or any OpenAI-compatible service: OpenAI (ChatGPT models),
-  Gemini, Mistral, Groq, OpenRouter, DeepSeek, or a local model with Ollama or LM Studio. Your own API key is stored
-  encrypted; only field names / types are sent unless you opt in to sample documents. A local MCP server lets
-  external AI agents (Claude Code, Cursor, VS Code…) query the connections you choose.
-- **Data masking & reschema** — masked copies / exports, and field renames / type changes via update pipelines.
-
-## Features (phase 4 — SQL migration)
-
-- **MongoDB → SQL** and **SQL → MongoDB** for PostgreSQL, MySQL / MariaDB, SQL Server and SQLite: inferred
-  relational mapping (flattened objects, child tables for arrays), mapping editor, embedding via foreign
-  keys, live migration or a generated `.sql` file.
-
 ## Development
 
 Requires Node.js 24 (see `.nvmrc`).
@@ -165,6 +236,7 @@ npm run dev          # start the app with hot reload
 npm test             # unit + integration tests (downloads a MongoDB binary on first run)
 npm run typecheck
 npm run build && npm run e2e   # launch the built app against a seeded in-memory MongoDB, save screenshots to .e2e/screens
+node scripts/readme-screens.mjs # after a build: regenerate the README screenshots in screenshots/ (sample data only)
 ```
 
 If you run commands from a terminal inside VS Code, unset `ELECTRON_RUN_AS_NODE` first, otherwise Electron
