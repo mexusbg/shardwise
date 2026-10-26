@@ -33,7 +33,7 @@ import { openAskAi } from './ai/AskAi'
 import { explainQueryWithAi, fixQueryWithAi } from './ai/AiActions'
 import { QueryHistoryButton } from './history/QueryHistoryButton'
 import { VqbPanel } from './vqb/VqbPanel'
-import { openExportDialog } from './transfer/TransferDialogs'
+import { openTabExport } from './transfer/TransferDialogs'
 import { CollationButton } from './collation/CollationPicker'
 
 const PAGE_SIZES = [10, 20, 50, 100, 200, 500, 1000]
@@ -260,7 +260,7 @@ function ResultToolbar({ tab }: { tab: Tab }): ReactElement {
               { separator: true },
               { label: 'Open in Pipeline Editor', icon: 'aggregate', shortcut: shortcutLabel('query.openPipeline'), onClick: () => openInPipeline(tab) },
               { label: 'Explain with AI…', icon: 'sparkle', onClick: () => void explainQueryWithAi(tab) },
-              { label: 'Export Query Results…', icon: 'export', shortcut: shortcutLabel('query.export'), onClick: () => exportResults(tab) },
+              { label: 'Export…', icon: 'export', shortcut: shortcutLabel('query.export'), onClick: () => void openTabExport(tab) },
               { separator: true },
               { label: 'Delete All Matching…', icon: 'trash', danger: true, disabled: readOnly, onClick: () => deleteMatching(tab) }
             ])
@@ -299,16 +299,6 @@ function openInPipeline(tab: Tab): void {
   openAggregationTab(tab.connId, tab.db, tab.coll, {
     query: { query: tab.queryText, projection: tab.projectionText, sort: tab.sortText, skip: tab.skipText, limit: tab.limitText },
     collation: tab.collationText.trim() || undefined
-  })
-}
-
-function exportResults(tab: Tab): void {
-  const a = tab.applied
-  void openExportDialog({
-    connId: tab.connId,
-    db: tab.db,
-    collections: [tab.coll],
-    query: a ? { filter: a.filter, projection: a.projection, sort: a.sort, skip: a.skip, limit: a.limit, collation: a.collation } : undefined
   })
 }
 
@@ -360,7 +350,7 @@ function useQueryTabCommands(tab: Tab, root: React.RefObject<HTMLDivElement | nu
       if (tab.readOnly || tab.isView || connLocked) return false
       insertDocumentDialog(tab)
     },
-    'query.export': () => exportResults(tab),
+    'query.export': () => void openTabExport(tab),
     'query.toggleReadOnly': () => {
       if (tab.isView || connLocked) return false
       patchTab(tab.id, { readOnly: !tab.readOnly })

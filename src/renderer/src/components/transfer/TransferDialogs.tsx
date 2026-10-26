@@ -3,8 +3,11 @@ import type { ReactElement, ReactNode } from 'react'
 import { JSON_FLAVOR_LABELS, TEXT_ENCODING_LABELS } from '@shared/api'
 import type { CollectionInfo, CsvColumnType, ExportRequest, FileDialogOptions, FilePreview, ImportRequest, JsonFlavor, TextEncoding, ToolsStatus, TransferFormat } from '@shared/api'
 import { cellText, shellText } from '@shared/bsonValue'
+import { exportScopes } from '@shared/exportScopes'
+import type { ExportScope, ExportScopeId } from '@shared/exportScopes'
 import { api } from '../../lib/api'
 import { connName, errorText, toast } from '../../state/store'
+import type { QueryTab } from '../../state/store'
 import { CodeEditor } from '../CodeEditor'
 import { Icon } from '../Icon'
 import { Modal, openModal } from '../Modal'
@@ -275,7 +278,10 @@ interface ExportOpts {
   connId: string
   db: string
   collections?: string[]
-  query?: ExportRequest['query']
+  /** From a collection tab: which documents of collections[0] can be exported (query result, page, selection, all). */
+  scopes?: ExportScope[]
+  /** Preselected scope. */
+  scope?: ExportScopeId
 }
 
 function hasKeys(d: unknown): boolean {
@@ -305,7 +311,8 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
   const [colls, setColls] = useState<CollectionInfo[] | null>(null)
   const [sel, setSel] = useState<string[]>(o.collections ?? [])
   const [filter, setFilter] = useState('')
-  const [useQuery, setUseQuery] = useState(true)
+  const [scopeId, setScopeId] = useState<ExportScopeId | undefined>(o.scope ?? o.scopes?.find((x) => !x.disabled)?.id)
+  const [queryCount, setQueryCount] = useState<number | null>(o.scopes?.find((x) => x.id === 'query')?.count ?? null)
   const [flavor, setFlavor] = useState<JsonFlavor>('shell')
   const [layout, setLayout] = useState<'lines' | 'array'>('array')
   const [pretty, setPretty] = useState(true)
@@ -341,13 +348,35 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
     )
   }, [o.connId, o.db])
 
+  // The tab may not have counted its query: count it here, within the query's skip and limit.
+  useEffect(() => {
+    const qs = o.scopes?.find((x) => x.id === 'query')
+    if (!qs?.query || qs.count !== null || !o.collections?.[0]) return
+    let alive = true
+    const { filter, collation, skip = 0, limit = 0 } = qs.query
+    api.count(o.connId, o.db, o.collections[0], filter, collation ?? null).then(
+      (n) => alive && setQueryCount(limit ? Math.min(limit, Math.max(0, n - skip)) : Math.max(0, n - skip)),
+      () => {}
+    )
+    return () => {
+      alive = false
+    }
+  }, [o])
+
   const all = colls ?? (o.collections ?? []).map((name) => ({ name, type: 'collection' as const }))
   const names = all.map((c) => c.name)
   const visible = filter ? names.filter((n) => n.toLowerCase().includes(filter.toLowerCase())) : names
   const chosen = names.filter((n) => sel.includes(n))
   const typeOf = (n: string): CollectionInfo['type'] | undefined => all.find((c) => c.name === n)?.type
 
-  const queryApplies = !!o.query && chosen.length === 1 && (!o.collections?.length || o.collections[0] === chosen[0])
+  // The tab's scopes apply while only the tab's own collection is chosen.
+  const scopesApply = !!o.scopes && chosen.length === 1 && (!o.collections?.length || o.collections[0] === chosen[0])
+  const scope = scopesApply ? o.scopes!.find((x) => x.id === scopeId) : undefined
+  const countOf = (x: ExportScope): number | null => (x.id === 'query' ? queryCount : x.count)
+  const q = scope?.query
+  // mongodump takes only a filter: the page and the selection are exported by _id, but a query result's
+  // projection, sort, skip and limit are dropped.
+  const bsonDrops = isBson(format) && !!q && (hasKeys(q.projection) || hasKeys(q.sort) || !!q.skip || !!q.limit)
   const tabular = format === 'csv' || format === 'xlsx'
   const ext = format === 'bson-archive' ? (gzip ? '.archive.gz' : '.archive') : format === 'json' ? '.json' : format === 'csv' ? '.csv' : '.xlsx'
   const toFile = format === 'bson-archive' || (!isBson(format) && chosen.length === 1)
@@ -390,7 +419,7 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
   const build = (): ExportRequest => {
     const pickedFields = fields ? fields.filter((f) => fieldSel.includes(f)) : []
     const req: ExportRequest = { connId: o.connId, db: o.db, collections: chosen, format, target: target.trim() }
-    if (queryApplies && useQuery) req.query = o.query
+    if (q) req.query = q
     if (format === 'json') req.json = { flavor, layout, pretty }
     if (format === 'csv') req.csv = { fields: pickedFields, delimiter, header, bom }
     if (format === 'xlsx') req.xlsx = { fields: pickedFields }
@@ -457,13 +486,20 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
             )}
           />
         )}
-        {queryApplies && o.query && (
+        {scopesApply && (
           <div className="col tr-gap">
-            <label className="check">
-              <input type="checkbox" checked={useQuery} onChange={(e) => setUseQuery(e.target.checked)} />
-              Export only documents matching the current query
-            </label>
-            {useQuery && <QueryBox q={o.query} />}
+            <Field label="Documents">
+              <div className="segmented tr-scopes">
+                {o.scopes!.map((x) => (
+                  <button key={x.id} className={x.id === scopeId ? 'on' : ''} disabled={!!x.disabled} title={x.disabled} onClick={() => setScopeId(x.id)}>
+                    {x.label}
+                    {countOf(x) !== null && !x.disabled && <span className="faint"> ({countOf(x)!.toLocaleString()})</span>}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            {q && scope?.id === 'query' && <QueryBox q={q} />}
+            {bsonDrops && <div className="faint tr-small">BSON export (mongodump) uses only the filter: projection, sort, skip and limit are not applied.</div>}
           </div>
         )}
       </Section>
@@ -579,6 +615,13 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
 
 export function openExportDialog(o: ExportOpts): Promise<void> {
   return openModal<void>((close) => <ExportDialog o={o} close={() => close()} />)
+}
+
+/** Export from a collection tab: the query result by default, the selection when several rows are selected. */
+export function openTabExport(tab: QueryTab): Promise<void> {
+  const scopes = exportScopes({ applied: tab.applied, docs: tab.docs ?? [], selection: tab.selection, page: tab.page, pageSize: tab.pageSize, count: tab.count ?? null })
+  const scope = tab.selection.length > 1 && scopes.some((x) => x.id === 'selected' && !x.disabled) ? 'selected' : scopes[0].id
+  return openExportDialog({ connId: tab.connId, db: tab.db, collections: [tab.coll], scopes, scope })
 }
 
 // ---------------------------------------------------------------------------

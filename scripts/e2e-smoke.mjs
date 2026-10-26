@@ -465,6 +465,38 @@ try {
   if (!imported) throw new Error('Import did not create orders_copy')
   await shot('17-after-import')
 
+  // Export from a document's context menu: the query result, this page, the selection or the whole collection.
+  {
+    await win.locator('.tree-row', { hasText: 'orders' }).first().dblclick()
+    await win.waitForSelector('.qtab:visible .grid tbody tr td')
+    const q = win.locator('.qtab:visible .querybar .cm-content')
+    await q.nth(0).click()
+    await win.keyboard.press('Control+A')
+    await win.keyboard.insertText("{ status: 'paid' }")
+    await win.keyboard.press('Control+Enter')
+    await win.waitForTimeout(800)
+    await win.locator('.qtab:visible .grid tbody tr').first().locator('td.rownum').click({ button: 'right' })
+    await win.locator('.ctx-item', { hasText: 'Export…' }).click()
+    await win.waitForSelector('.modal .tr-scopes')
+    await win.waitForSelector('.modal .tr-scopes button:has-text("Query result (30)")', { timeout: 5000 }).catch(() => {})
+    const scopes = await win.locator('.modal .tr-scopes button').allTextContents()
+    const preselected = ((await win.locator('.modal .tr-scopes button.on').textContent()) ?? '').trim()
+    await win.locator('.modal .tr-format', { hasText: 'CSV' }).click()
+    await win.locator('.modal .tr-scopes button', { hasText: 'This page' }).click()
+    const pageFile = join(exportDir, 'paid-page.csv')
+    await win.locator('.modal input.mono').last().fill(pageFile)
+    await shot('17b-export-from-document')
+    await win.getByRole('button', { name: 'Start export' }).click()
+    await waitFile(pageFile)
+    await win.waitForTimeout(500)
+    const rows = readFileSync(pageFile, 'utf8').trim().split(/\r?\n/)
+    const paidOnly = rows.slice(1).every((r) => r.includes('paid'))
+    const ok = scopes.length === 4 && preselected.startsWith('Query result') && rows.length === 31 && paidOnly
+    console.log('export from document menu:', ok, `(scopes: ${scopes.join(' | ')}; preselected: ${preselected}; ${rows.length - 1} rows)`)
+    if (!ok) throw new Error('Export from the document menu did not write this page of the query result')
+    await win.locator('.tab.active .close').click()
+  }
+
   // Explain plan of the current query
   await win.locator('.tree-row', { hasText: 'customers' }).first().dblclick()
   await win.waitForSelector('.grid tbody tr td')

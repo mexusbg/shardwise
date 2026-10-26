@@ -115,6 +115,9 @@
   font-family: var(--mono);
   font-size: 12px;
 }
+.tr-scopes {
+  flex-wrap: wrap;
+}
 .tr-query {
   padding: 8px 10px;
   border: 1px solid var(--border);

@@ -33,7 +33,7 @@ import { QueryTab } from './components/QueryTab'
 import { Sidebar } from './components/Sidebar'
 import { openConnectionManager } from './components/connections/ConnectionManager'
 import { openSettings } from './components/SettingsDialog'
-import { openExportDialog, openImportDialog } from './components/transfer/TransferDialogs'
+import { openExportDialog, openImportDialog, openTabExport } from './components/transfer/TransferDialogs'
 import { JobsPanel } from './components/transfer/JobsPanel'
 import { ProfilerView } from './components/profiler/ProfilerView'
 import { PlaygroundView } from './components/playground/PlaygroundView'
@@ -151,6 +151,10 @@ function startExport(): void {
   const t = currentTarget()
   if (!t) return toast('Connect to a server first', 'info')
   if (!t.db) return toast('Select a database or collection in the tree to export', 'info')
+  // The active collection tab offers its query result, page and selection too.
+  const s = useStore.getState()
+  const tab = s.tabs.find((x) => x.id === s.activeTab)
+  if (tab?.kind === 'query' && tab.connId === t.connId && tab.db === t.db && tab.coll === t.coll) return void openTabExport(tab)
   void openExportDialog({ connId: t.connId, db: t.db, collections: t.coll ? [t.coll] : undefined })
 }
 

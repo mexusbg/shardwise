@@ -24,6 +24,7 @@ import {
   viewDocumentDialog
 } from '../editing/dialogs'
 import { addFieldToBuilder } from '../vqb/vqbActions'
+import { openTabExport } from '../transfer/TransferDialogs'
 import { shortcutLabel } from '../../lib/commands'
 
 /** Drag payload types used between result views and the Filter Builder. */
@@ -136,6 +137,8 @@ export function docMenu(tab: QueryTab, docIndex: number, path: string, extra: Me
         { label: many ? `Copy Selected Documents (${selectedDocs.length})` : 'Copy Document', onClick: () => copyDocs(selectedDocs) }
       ]
     },
+    // The query result, this page, the selection or the whole collection, as JSON, CSV, Excel or BSON.
+    { label: 'Export…', icon: 'export', shortcut: shortcutLabel('query.export') || undefined, onClick: () => void openTabExport(tab) },
     { separator: true },
     { label: 'Show as JSON…', icon: 'json', shortcut: shortcutLabel('query.showJson') || undefined, onClick: () => viewDocumentDialog(tab, docIndex) },
     { label: 'Edit as JSON…', icon: 'edit', shortcut: shortcutLabel('query.editJson') || undefined, onClick: () => editDocumentDialog(tab, docIndex) },

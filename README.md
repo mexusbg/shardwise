@@ -125,7 +125,8 @@ Click a value to query it, and export the result as JSON Schema or as a validato
 ### Move and compare data
 
 - **Import / export:** JSON (mongo shell, canonical and relaxed Extended JSON, plain JSON), CSV, Excel, and BSON
-  through the bundled `mongodump` / `mongorestore` (folder or archive, gzip).
+  through the bundled `mongodump` / `mongorestore` (folder or archive, gzip). Right-click a document and choose
+  **Export…** to export the query result, the current page, the selected documents or the whole collection.
 - **Copy and paste** collections and whole databases, also between connections, with their indexes and views.
 - **Compare & sync:** compare two collections by a key field, field by field, and sync them with a dry run first.
 - **MongoDB → SQL** and **SQL → MongoDB** for PostgreSQL, MySQL / MariaDB, SQL Server and SQLite. The relational
