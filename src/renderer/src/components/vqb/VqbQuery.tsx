@@ -247,9 +247,9 @@ function RuleRow({ rule: r, parent, index }: { rule: Rule; parent: Group; index:
         )}
         <ChipSelect className="vqb-op" value={r.op} groups={groups} title={OP_HINT[r.op]} onChange={(op) => set((x) => changeRuleOp(x, op))} />
         {operand(r, set, err)}
+        <NodeActions node={r} what="condition" />
       </div>
       {err && <div className="vqb-error">{tab.vqb.errorMessage}</div>}
-      <NodeActions node={r} what="condition" />
     </div>
   )
 }

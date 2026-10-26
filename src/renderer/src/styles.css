@@ -150,6 +150,18 @@ button {
   color: inherit;
 }
 
+/* Chromium marks an input "autofilled" when a value is picked from its suggestion list (<datalist>) and paints it
+   light blue with black text, whatever the theme. Keep the theme's colours instead. */
+input:autofill,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  box-shadow: 0 0 0 1000px var(--bg-input) inset;
+  transition: background-color 0s 600000s;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

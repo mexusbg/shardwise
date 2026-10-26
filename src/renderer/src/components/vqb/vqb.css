@@ -345,7 +345,7 @@
   background: color-mix(in srgb, var(--rail) 3%, transparent);
 }
 .vqb .vqb-grp.disabled > .vqb-grp-body,
-.vqb .vqb-grp.disabled > .vqb-grp-head > :not(.vqb-actions):not(.vqb-grip) {
+.vqb .vqb-grp.disabled > .vqb-grp-head > :not(.vqb-row-menu):not(.vqb-grip) {
   opacity: 0.45;
 }
 .vqb .vqb-grp-head {
@@ -468,7 +468,7 @@
 .vqb .vqb-rule:focus-within {
   background: var(--vqb-hover);
 }
-.vqb .vqb-rule.disabled > .vqb-line {
+.vqb .vqb-rule.disabled > .vqb-line > :not(.vqb-row-menu) {
   opacity: 0.45;
 }
 .vqb .vqb-rule.disabled .vqb-field-input,
@@ -855,65 +855,42 @@
   opacity: 1;
 }
 
-.vqb .vqb-actions {
-  position: absolute;
-  top: -19px;
-  right: 4px;
-  z-index: 3;
-  display: inline-flex;
-  gap: 1px;
-  padding: 1px;
-  border-radius: 6px;
-  background: var(--bg-2);
-  border: 1px solid var(--vqb-line);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(2px);
-  transition:
-    opacity var(--vqb-t),
-    transform var(--vqb-t);
-}
-.vqb .vqb-grp-head > .vqb-actions {
-  top: 1px;
-  right: 0;
-}
-.vqb .vqb-rule:hover > .vqb-actions,
-.vqb .vqb-rule:focus-within > .vqb-actions,
-.vqb .vqb-entry:hover > .vqb-actions,
-.vqb .vqb-entry:focus-within > .vqb-actions,
-.vqb .vqb-grp-head:hover > .vqb-actions,
-.vqb .vqb-grp-head:focus-within > .vqb-actions {
-  opacity: 1;
-  pointer-events: auto;
-  transform: none;
-}
-.vqb.dnd .vqb-actions {
-  display: none;
-}
-.vqb .vqb-actions button {
+/* Row menu (turn on/off, duplicate, delete): part of the row's layout, faint until the row is hovered. */
+.vqb .vqb-row-menu {
+  flex: none;
   width: 22px;
-  height: 18px;
+  height: 22px;
+  margin-left: auto;
   padding: 0;
   border: 0;
   border-radius: 5px;
   background: none;
-  color: var(--text-2);
+  color: var(--text-3);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity var(--vqb-t),
+    background-color var(--vqb-t);
 }
-.vqb .vqb-actions button:hover {
+.vqb .vqb-rule:hover .vqb-row-menu,
+.vqb .vqb-entry:hover > .vqb-row-menu,
+.vqb .vqb-grp-head:hover > .vqb-row-menu,
+.vqb .vqb-row-menu:focus-visible,
+.vqb .vqb-row-menu.off {
+  opacity: 1;
+}
+.vqb .vqb-row-menu:hover {
   background: var(--bg-hover);
   color: var(--text);
 }
-.vqb .vqb-actions button.on {
+.vqb .vqb-row-menu.off {
   color: var(--warn);
 }
-.vqb .vqb-actions button.danger:hover {
-  color: var(--danger);
-  background: var(--danger-soft);
+.vqb.dnd .vqb-row-menu {
+  visibility: hidden;
 }
 
 /* ---------- drop targets: empty states & group / list footers ---------- */
@@ -1059,7 +1036,7 @@
     0 6px 18px rgba(0, 0, 0, 0.28);
   opacity: 1;
 }
-.vqb .vqb-ghost .vqb-actions,
+.vqb .vqb-ghost .vqb-row-menu,
 .vqb .vqb-ghost .vqb-grip,
 .vqb .vqb-ghost .vqb-foot {
   display: none;
@@ -1088,26 +1065,8 @@
 .vqb .vqb-entry:focus-within {
   background: var(--vqb-hover);
 }
-.vqb .vqb-entry.disabled > :not(.vqb-actions):not(.vqb-grip) {
+.vqb .vqb-entry.disabled > :not(.vqb-row-menu):not(.vqb-grip) {
   opacity: 0.45;
-}
-.vqb .vqb-entry > .vqb-actions {
-  position: static;
-  flex: none;
-  max-width: 0;
-  overflow: hidden;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
-  transform: none;
-  transition:
-    opacity var(--vqb-t),
-    max-width var(--vqb-t);
-}
-.vqb .vqb-entry:hover > .vqb-actions,
-.vqb .vqb-entry:focus-within > .vqb-actions {
-  max-width: 72px;
 }
 .vqb .vqb-list > .vqb-empty {
   margin-left: -12px;

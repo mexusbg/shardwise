@@ -1,7 +1,8 @@
 import { Fragment, useRef } from 'react'
-import type { CSSProperties, ReactElement, ReactNode } from 'react'
+import type { CSSProperties, MouseEvent, ReactElement, ReactNode } from 'react'
 import { EDITABLE_TYPES, TYPE_LABELS } from '@shared/bsonValue'
 import type { EditableType } from '@shared/bsonValue'
+import { showMenuAt } from '../ContextMenu'
 import { Icon } from '../Icon'
 import { cls } from './vqbDnd'
 
@@ -184,20 +185,24 @@ const Eye = ({ off }: { off?: boolean }): ReactElement => (
   </svg>
 )
 
-/** Hover-revealed row controls: enable/disable, duplicate, remove. */
+/**
+ * Row menu: turn on/off, duplicate, delete. A button in the row's own layout (not a hover overlay), so it never
+ * covers a neighbouring row and never stays shown after the pointer leaves.
+ */
 export function RowActions({ enabled, onEnabled, onDuplicate, onRemove, what }: { enabled: boolean; onEnabled: (on: boolean) => void; onDuplicate: () => void; onRemove: () => void; what: string }): ReactElement {
+  const open = (e: MouseEvent): void => {
+    const r = e.currentTarget.getBoundingClientRect()
+    showMenuAt(r.left, r.bottom + 2, [
+      { label: enabled ? `Turn off ${what}` : `Turn on ${what}`, icon: 'view', onClick: () => onEnabled(!enabled) },
+      { label: `Duplicate ${what}`, icon: 'duplicate', onClick: onDuplicate },
+      { separator: true },
+      { label: `Delete ${what}`, icon: 'trash', danger: true, onClick: onRemove }
+    ])
+  }
   return (
-    <span className="vqb-actions">
-      <button className={cls(!enabled && 'on')} title={enabled ? `Turn this ${what} off` : `Turn this ${what} on`} aria-pressed={!enabled} onClick={() => onEnabled(!enabled)}>
-        <Eye off={!enabled} />
-      </button>
-      <button title={`Duplicate ${what}`} onClick={onDuplicate}>
-        <Icon name="duplicate" size={13} />
-      </button>
-      <button className="danger" title={`Delete ${what}`} onClick={onRemove}>
-        <Icon name="trash" size={13} />
-      </button>
-    </span>
+    <button className={cls('vqb-row-menu', !enabled && 'off')} title={`${what[0].toUpperCase()}${what.slice(1)} options`} aria-haspopup="menu" onClick={open}>
+      {enabled ? <Icon name="more" size={13} /> : <Eye off />}
+    </button>
   )
 }
 

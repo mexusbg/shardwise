@@ -293,7 +293,7 @@ interface RowProps {
   children: ReactNode
 }
 
-/** Field row; the hover actions open into the free space before the controls, so nothing shifts. */
+/** Field row: drag handle, rank, field, its controls, then the row menu. */
 function ItemRow({ item, mime, drop, edit, rank, controls, children }: RowProps): ReactElement {
   const [over, handlers] = useDrop(drop)
   return (
@@ -306,6 +306,7 @@ function ItemRow({ item, mime, drop, edit, rank, controls, children }: RowProps)
       )}
       {children}
       <span className="grow" />
+      {controls}
       <RowActions
         what="field"
         enabled={item.enabled}
@@ -313,7 +314,6 @@ function ItemRow({ item, mime, drop, edit, rank, controls, children }: RowProps)
         onDuplicate={() => edit((l) => insertItem(l, { ...item, id: nid() }, l.findIndex((x) => x.id === item.id) + 1))}
         onRemove={() => edit((l) => l.filter((x) => x.id !== item.id))}
       />
-      {controls}
     </div>
   )
 }
