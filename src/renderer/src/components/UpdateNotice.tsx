@@ -6,26 +6,42 @@ import { useStore } from '../state/store'
 import { Icon } from './Icon'
 
 const DISMISSED = 'shardwise.update.dismissed'
-/** After launch, so the check never competes with opening connections. */
-const DELAY_MS = 10_000
+const ANNOUNCED = 'shardwise.update.announced'
+/** After launch, so the check never competes with opening the window and the saved session. */
+const DELAY_MS = 3_000
 
-const dismissedVersion = (): string | null => {
+const read = (key: string): string | null => {
   try {
-    return localStorage.getItem(DISMISSED)
+    return localStorage.getItem(key)
   } catch {
     return null
   }
 }
+const write = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // Then it only lasts for this launch.
+  }
+}
 
-/** Status bar: "Shardwise 0.3.0 is available" once per launch when Settings → About allows the check. */
+/**
+ * New version available (Settings → About allows the check): a card in the corner the first time a version is
+ * found, and a link in the status bar on every launch until dismissed for that version.
+ */
 export function UpdateNotice(): ReactElement | null {
   const [info, setInfo] = useState<UpdateInfo | null>(null)
+  const [card, setCard] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => {
       if (!useStore.getState().settings.checkUpdates) return
       api.checkForUpdates().then(
-        (r) => r.status === 'available' && r.latest !== dismissedVersion() && setInfo(r),
+        (r) => {
+          if (r.status !== 'available' || !r.latest || r.latest === read(DISMISSED)) return
+          setInfo(r)
+          setCard(r.latest !== read(ANNOUNCED))
+        },
         () => {}
       )
     }, DELAY_MS)
@@ -33,25 +49,45 @@ export function UpdateNotice(): ReactElement | null {
   }, [])
 
   if (!info?.url) return null
+  const closeCard = (): void => {
+    write(ANNOUNCED, info.latest ?? '')
+    setCard(false)
+  }
   return (
-    <span className="update-notice">
-      <a href={info.url} target="_blank" rel="noreferrer" title={`You have ${info.current}. Opens the release page to download it.`}>
-        <Icon name="import" size={12} /> Shardwise {info.latest} is available
-      </a>
-      <button
-        className="btn ghost icon small"
-        title="Hide until the next version"
-        onClick={() => {
-          try {
-            localStorage.setItem(DISMISSED, info.latest ?? '')
-          } catch {
-            // Only hides it for this launch then.
-          }
-          setInfo(null)
-        }}
-      >
-        <Icon name="close" size={11} />
-      </button>
-    </span>
+    <>
+      <span className="update-notice">
+        <a href={info.url} target="_blank" rel="noreferrer" title={`You have ${info.current}. Opens the release page to download it.`}>
+          <Icon name="import" size={12} /> Shardwise {info.latest} is available
+        </a>
+        <button
+          className="btn ghost icon small"
+          title="Hide until the next version"
+          onClick={() => {
+            write(DISMISSED, info.latest ?? '')
+            closeCard()
+            setInfo(null)
+          }}
+        >
+          <Icon name="close" size={11} />
+        </button>
+      </span>
+      {card && (
+        <div className="update-card" role="status">
+          <Icon name="import" size={18} className="update-card-icon" />
+          <div className="update-card-text">
+            <b>Shardwise {info.latest} is available</b>
+            <span className="muted">You have {info.current}. Install the new version over this one; settings and connections are kept.</span>
+          </div>
+          <div className="update-card-actions">
+            <button className="btn small" onClick={closeCard}>
+              Later
+            </button>
+            <a className="btn primary small" href={info.url} target="_blank" rel="noreferrer" onClick={closeCard}>
+              Download
+            </a>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

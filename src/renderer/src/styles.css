@@ -1828,6 +1828,46 @@ textarea.input:focus {
 .update-notice a:hover {
   text-decoration: underline;
 }
+/* First launch that finds a new version: a card above the status bar, over dialogs too, until Download or Later. */
+.update-card {
+  position: fixed;
+  right: 16px;
+  bottom: 36px;
+  z-index: 290;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 12px;
+  width: min(380px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+.update-card-icon {
+  color: var(--accent);
+  margin-top: 1px;
+}
+.update-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.update-card-text b {
+  font-size: 13.5px;
+}
+.update-card-actions {
+  grid-column: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.update-card-actions a.btn {
+  text-decoration: none;
+}
 
 /* About */
 .about {
