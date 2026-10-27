@@ -150,6 +150,15 @@ button {
   color: inherit;
 }
 
+/* Links: Chromium's default dark blue is unreadable on the dark theme. --accent-2 keeps 4.5:1 on panels in both
+   themes (plain --accent drops to about 4.1 on the light grey ones). */
+a {
+  color: var(--accent-2);
+}
+a:hover {
+  text-decoration: underline;
+}
+
 /* Chromium marks an input "autofilled" when a value is picked from its suggestion list (<datalist>) and paints it
    light blue with black text, whatever the theme. Keep the theme's colours instead. */
 input:autofill,
