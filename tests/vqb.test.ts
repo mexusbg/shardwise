@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { Decimal128, Long, ObjectId } from 'bson'
 import { parseFilter, toJSString } from 'mongodb-query-parser'
 import { filterToGroup, groupToFilter } from '@shared/vqb/filter'
-import { projectionToItems, itemsToProjection, sortToItems, itemsToSort } from '@shared/vqb/projectionSort'
+import { projectionToItems, itemsToProjection, hiddenByShow, sortToItems, itemsToSort } from '@shared/vqb/projectionSort'
 import { newGroup, newRule } from '@shared/vqb/types'
 import type { Group, Rule } from '@shared/vqb/types'
 
@@ -182,10 +182,36 @@ describe('filterToGroup', () => {
 
 describe('projection and sort', () => {
   it('round-trips projection', () => {
-    const p = { a: 1, b: 0, c: { $slice: 5 } }
+    const p = { a: 1, c: { $slice: 5 } }
     const items = projectionToItems(p)!
-    expect(items.map((i) => i.mode)).toEqual(['include', 'exclude', 'slice'])
+    expect(items.map((i) => i.mode)).toEqual(['include', 'slice'])
     expect(itemsToProjection(items)).toEqual(p)
+    expect(itemsToProjection(projectionToItems({ b: 0, c: { $slice: -2 } })!)).toEqual({ b: 0, c: { $slice: -2 } })
+  })
+
+  // MongoDB refuses to mix 1 and 0 ("Cannot do inclusion on field … in exclusion projection"), except for _id.
+  it('leaves Hide rows out while other fields are shown: they are not returned anyway', () => {
+    const items = projectionToItems({ processedAt: 0, createdAt: 1, action: 1 })!
+    expect(itemsToProjection(items)).toEqual({ createdAt: 1, action: 1 })
+    expect(hiddenByShow(items)).toEqual(['processedAt'])
+  })
+
+  it('keeps _id: 0 next to shown fields, which MongoDB allows', () => {
+    const items = projectionToItems({ _id: 0, name: 1 })!
+    expect(itemsToProjection(items)).toEqual({ _id: 0, name: 1 })
+    expect(hiddenByShow(items)).toEqual([])
+  })
+
+  it('keeps Hide rows when nothing is shown (an exclusion projection)', () => {
+    const items = projectionToItems({ a: 0, b: 0 })!
+    expect(itemsToProjection(items)).toEqual({ a: 0, b: 0 })
+    expect(hiddenByShow(items)).toEqual([])
+  })
+
+  it('ignores rows that are turned off when deciding', () => {
+    const items = projectionToItems({ a: 1, b: 0 })!
+    items[0].enabled = false
+    expect(itemsToProjection(items)).toEqual({ b: 0 })
   })
 
   it('round-trips sort', () => {

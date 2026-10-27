@@ -217,6 +217,8 @@ export function syncTextToVqb(tabId: string, part: 'query' | 'projection' | 'sor
     }
     patchTab(tabId, { vqb: { ...v, root, useQuery: true, unsupported: undefined, errorRuleId: undefined } })
   } else if (part === 'projection') {
+    // Unchanged text keeps the builder's rows, including Hide rows the text leaves out (see hiddenByShow).
+    if (JSON.stringify(itemsToProjection(v.projection)) === JSON.stringify(parsed ?? null)) return
     const items = projectionToItems(parsed)
     if (items) patchTab(tabId, { vqb: { ...v, projection: items, useProjection: true } })
   } else {

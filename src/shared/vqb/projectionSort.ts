@@ -34,10 +34,23 @@ export function projectionToItems(p: unknown): ProjectionItem[] | null {
   return items
 }
 
+const active = (items: ProjectionItem[]): ProjectionItem[] => items.filter((it) => it.enabled && it.field)
+
+/**
+ * Hide rows that are left out of the projection because other fields are shown: MongoDB refuses to mix 1 and 0
+ * (except `_id: 0`), and a field that is not shown is not returned anyway.
+ */
+export function hiddenByShow(items: ProjectionItem[]): string[] {
+  const on = active(items)
+  if (!on.some((it) => it.mode === 'include')) return []
+  return on.filter((it) => it.mode === 'exclude' && it.field !== '_id').map((it) => it.field)
+}
+
 export function itemsToProjection(items: ProjectionItem[]): Doc | null {
   const out: Doc = {}
-  for (const it of items) {
-    if (!it.enabled || !it.field) continue
+  const skip = new Set(hiddenByShow(items))
+  for (const it of active(items)) {
+    if (skip.has(it.field)) continue
     if (it.mode === 'slice') {
       const v = parseShellValue(it.slice || '0')
       out[it.field] = { $slice: v }

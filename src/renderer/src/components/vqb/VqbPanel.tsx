@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { DragEvent, KeyboardEvent, ReactElement, ReactNode } from 'react'
 import { arrayFieldState, collectPaths } from '@shared/docPaths'
-import { itemsToProjection } from '@shared/vqb/projectionSort'
+import { hiddenByShow, itemsToProjection } from '@shared/vqb/projectionSort'
 import { newProjectionItem, newSortItem, nid } from '@shared/vqb/types'
 import type { ProjectionItem, SortItem } from '@shared/vqb/types'
 import { api } from '../../lib/api'
@@ -193,6 +193,11 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
             make={(f) => newProjectionItem(f)}
             render={(it, patch) => <ProjectionControls item={it as ProjectionItem} patch={patch} arrays={arrayFieldState(tab.docs ?? [], it.field)} />}
           />
+          {hiddenByShow(v.projection).length > 0 && (
+            <div className="vqb-note">
+              Only the fields on Show are returned, so {hiddenByShow(v.projection).join(', ')} {hiddenByShow(v.projection).length === 1 ? 'is' : 'are'} left out without Hide.
+            </div>
+          )}
           {v.projection.some((it) => it.enabled && it.field) && v.projection.every((it) => !it.enabled || !it.field || it.mode === 'slice') && (
             <div className="vqb-note">Slice only shortens arrays: every other field is still returned. Add Show rows to choose the fields.</div>
           )}
