@@ -2,7 +2,7 @@
   "name": "shardwise",
   "productName": "Shardwise",
   "desktopName": "shardwise.desktop",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Cross-platform MongoDB GUI with a visual query builder",
   "main": "./out/main/index.js",
   "author": {
