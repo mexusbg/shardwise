@@ -43,7 +43,7 @@ interface Session {
 const MAX_SESSIONS = 32
 const MAX_BODY = 8 * 1024 * 1024
 /** Reported to MCP clients; kept equal to package.json by tests/mcp.test.ts. */
-export const MCP_SERVER_VERSION = '0.2.6'
+export const MCP_SERVER_VERSION = '0.2.7'
 
 const INSTRUCTIONS =
   'Shardwise gives read access to the MongoDB connections its user chose to expose. Start with list_connections, then list_databases / list_collections, and call collection_schema before writing queries. find and aggregate results are capped; prefer projections, filters and $group over fetching many documents. Write tools exist only when the user allowed writes, and every write must be approved by the user in Shardwise.'
