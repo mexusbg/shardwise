@@ -3,6 +3,8 @@ import type { KeyboardEvent, ReactElement } from 'react'
 import type { CollectionInfo } from '@shared/api'
 import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
 import { api } from '../lib/api'
+import { byUsage } from '@shared/connectionUsage'
+import { connectionUsage } from '../lib/connectionUsage'
 import { openInMongosh } from './shell/openInMongosh'
 import {
   collKey,
@@ -435,7 +437,7 @@ export function Sidebar(): ReactElement {
             <div>Not connected.</div>
             {saved.length > 0 ? (
               <div className="col" style={{ marginTop: 12, alignItems: 'stretch' }}>
-                {saved.slice(0, 8).map((c) => (
+                {byUsage(saved, connectionUsage()).slice(0, 8).map((c) => (
                   <button key={c.id} className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => connect(c.id)}>
                     <Icon name="server" style={{ color: c.color ?? 'var(--leaf)' }} />
                     <span className="ellipsis">{c.name}</span>

@@ -20,6 +20,7 @@ import { effectiveCollation, formatCollation } from '@shared/collation'
 import { applyDateSettings } from '../lib/datetime'
 import { applyUiSettings } from '../lib/uiPrefs'
 import { rememberedView } from '../lib/viewMemory'
+import { noteConnectionUse } from '../lib/connectionUsage'
 import { api } from '../lib/api'
 
 export interface LiveConn {
@@ -301,6 +302,7 @@ export async function connect(configId: string): Promise<string | null> {
     const r = await api.connect(configId, Object.keys(secrets).length ? secrets : undefined)
     const live: LiveConn = { connId: r.connId, configId, name: cfg.name, color: cfg.color, serverVersion: r.serverVersion, topology: r.topology, readOnly: !!cfg.readOnly }
     set((s) => ({ live: { ...s.live, [r.connId]: live }, expanded: { ...s.expanded, [r.connId]: true }, treeSelection: r.connId }))
+    noteConnectionUse(configId)
     await refreshDatabases(r.connId)
     return r.connId
   } catch (e) {
