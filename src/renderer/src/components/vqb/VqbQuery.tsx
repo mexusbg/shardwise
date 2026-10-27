@@ -176,6 +176,7 @@ function GroupBlock({ group: g, parent, depth }: { group: Group; parent?: Group;
       {(parent || !empty) && (
         <div className="vqb-grp-head" {...(parent ? headDrop : {})}>
           {parent && <DragHandle mime={MIME_NODE} id={g.id} title="Drag to move this group" />}
+          {parent && <NodeActions node={g} what="group" />}
           <PillSelect
             value={arr ? 'elemMatch' : g.op}
             label={mode.label}
@@ -191,7 +192,6 @@ function GroupBlock({ group: g, parent, depth }: { group: Group; parent?: Group;
           ) : (
             <span className="vqb-hint">of the following</span>
           )}
-          {parent && <NodeActions node={g} what="group" />}
         </div>
       )}
       {err && <div className="vqb-error">{tab.vqb.errorMessage}</div>}
@@ -233,6 +233,7 @@ function RuleRow({ rule: r, parent, index }: { rule: Rule; parent: Group; index:
     <div className={cls('vqb-rule', !r.enabled && 'disabled', err && 'error', over && 'drop-before')} {...drop}>
       <DragHandle mime={MIME_NODE} id={r.id} title="Drag to move this condition" />
       <div className="vqb-line">
+        <NodeActions node={r} what="condition" />
         {r.op === 'text' ? (
           <span className="vqb-field static" title="$text uses the collection's text index">
             text index
@@ -247,7 +248,6 @@ function RuleRow({ rule: r, parent, index }: { rule: Rule; parent: Group; index:
         )}
         <ChipSelect className="vqb-op" value={r.op} groups={groups} title={OP_HINT[r.op]} onChange={(op) => set((x) => changeRuleOp(x, op))} />
         {operand(r, set, err)}
-        <NodeActions node={r} what="condition" />
       </div>
       {err && <div className="vqb-error">{tab.vqb.errorMessage}</div>}
     </div>

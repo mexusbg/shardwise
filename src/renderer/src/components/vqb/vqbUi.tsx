@@ -1,8 +1,7 @@
 import { Fragment, useRef } from 'react'
-import type { CSSProperties, MouseEvent, ReactElement, ReactNode } from 'react'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
 import { EDITABLE_TYPES, TYPE_LABELS } from '@shared/bsonValue'
 import type { EditableType } from '@shared/bsonValue'
-import { showMenuAt } from '../ContextMenu'
 import { Icon } from '../Icon'
 import { cls } from './vqbDnd'
 
@@ -138,11 +137,11 @@ export function PillSelect<T extends string>({ value, label, options, onChange, 
   )
 }
 
-export function Seg<T extends string | number>({ value, options, onChange, label, children }: { value: T; options: { value: T; label: ReactNode; title?: string }[]; onChange: (v: T) => void; label: string; children?: ReactNode }): ReactElement {
+export function Seg<T extends string | number>({ value, options, onChange, label, children }: { value: T; options: { value: T; label: ReactNode; title?: string; disabled?: boolean }[]; onChange: (v: T) => void; label: string; children?: ReactNode }): ReactElement {
   return (
     <span className="vqb-seg" role="radiogroup" aria-label={label}>
       {options.map((o) => (
-        <button key={String(o.value)} role="radio" aria-checked={o.value === value} className={cls(o.value === value && 'on')} title={o.title} onClick={() => o.value !== value && onChange(o.value)}>
+        <button key={String(o.value)} role="radio" aria-checked={o.value === value} className={cls(o.value === value && 'on')} title={o.title} disabled={o.disabled && o.value !== value} onClick={() => o.value !== value && onChange(o.value)}>
           {o.label}
         </button>
       ))}
@@ -186,23 +185,22 @@ const Eye = ({ off }: { off?: boolean }): ReactElement => (
 )
 
 /**
- * Row menu: turn on/off, duplicate, delete. A button in the row's own layout (not a hover overlay), so it never
- * covers a neighbouring row and never stays shown after the pointer leaves.
+ * Row tools at the start of the line: turn on/off, duplicate, delete. Always visible and part of the row's own
+ * layout, so they never cover another row.
  */
 export function RowActions({ enabled, onEnabled, onDuplicate, onRemove, what }: { enabled: boolean; onEnabled: (on: boolean) => void; onDuplicate: () => void; onRemove: () => void; what: string }): ReactElement {
-  const open = (e: MouseEvent): void => {
-    const r = e.currentTarget.getBoundingClientRect()
-    showMenuAt(r.left, r.bottom + 2, [
-      { label: enabled ? `Turn off ${what}` : `Turn on ${what}`, icon: 'view', onClick: () => onEnabled(!enabled) },
-      { label: `Duplicate ${what}`, icon: 'duplicate', onClick: onDuplicate },
-      { separator: true },
-      { label: `Delete ${what}`, icon: 'trash', danger: true, onClick: onRemove }
-    ])
-  }
   return (
-    <button className={cls('vqb-row-menu', !enabled && 'off')} title={`${what[0].toUpperCase()}${what.slice(1)} options`} aria-haspopup="menu" onClick={open}>
-      {enabled ? <Icon name="more" size={13} /> : <Eye off />}
-    </button>
+    <span className="vqb-acts">
+      <button className={cls('vqb-act', !enabled && 'off')} aria-pressed={!enabled} title={enabled ? `Turn this ${what} off` : `Turn this ${what} on`} onClick={() => onEnabled(!enabled)}>
+        <Eye off={!enabled} />
+      </button>
+      <button className="vqb-act" title={`Duplicate ${what}`} onClick={onDuplicate}>
+        <Icon name="duplicate" size={12} />
+      </button>
+      <button className="vqb-act danger" title={`Delete ${what}`} onClick={onRemove}>
+        <Icon name="trash" size={12} />
+      </button>
+    </span>
   )
 }
 

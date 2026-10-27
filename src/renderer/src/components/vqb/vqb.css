@@ -291,8 +291,19 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.vqb .vqb-seg button:hover:not(.on) {
+.vqb .vqb-seg button:hover:not(.on):not(:disabled) {
   color: var(--text);
+}
+/* e.g. Slice on a field that is not an array: visibly unavailable, the tooltip says why. */
+.vqb .vqb-seg button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.vqb .vqb-note {
+  margin: 6px 0 2px 12px;
+  color: var(--text-2);
+  font-size: 11.5px;
+  line-height: 1.4;
 }
 .vqb .vqb-seg button.on {
   background: var(--bg);
@@ -345,7 +356,7 @@
   background: color-mix(in srgb, var(--rail) 3%, transparent);
 }
 .vqb .vqb-grp.disabled > .vqb-grp-body,
-.vqb .vqb-grp.disabled > .vqb-grp-head > :not(.vqb-row-menu):not(.vqb-grip) {
+.vqb .vqb-grp.disabled > .vqb-grp-head > :not(.vqb-acts):not(.vqb-grip) {
   opacity: 0.45;
 }
 .vqb .vqb-grp-head {
@@ -468,7 +479,7 @@
 .vqb .vqb-rule:focus-within {
   background: var(--vqb-hover);
 }
-.vqb .vqb-rule.disabled > .vqb-line > :not(.vqb-row-menu) {
+.vqb .vqb-rule.disabled > .vqb-line > :not(.vqb-acts) {
   opacity: 0.45;
 }
 .vqb .vqb-rule.disabled .vqb-field-input,
@@ -678,7 +689,7 @@
 
 /* values: badge + input travel together and wrap as one unit */
 .vqb .vqb-val {
-  flex: 1 1 124px;
+  flex: 1 1 100px;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -701,7 +712,7 @@
   gap: 4px;
 }
 .vqb .vqb-val:not(.range) > .vqb-in {
-  min-width: 90px;
+  min-width: 64px;
 }
 .vqb .vqb-val .input.small,
 .vqb .vqb-val .select.small,
@@ -855,12 +866,17 @@
   opacity: 1;
 }
 
-/* Row menu (turn on/off, duplicate, delete): part of the row's layout, faint until the row is hovered. */
-.vqb .vqb-row-menu {
+/* Row tools (turn on/off, duplicate, delete): first on the line, always visible, in the row's own layout. */
+.vqb .vqb-acts {
   flex: none;
-  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-right: 2px;
+}
+.vqb .vqb-act {
+  width: 20px;
   height: 22px;
-  margin-left: auto;
   padding: 0;
   border: 0;
   border-radius: 5px;
@@ -870,26 +886,19 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.55;
-  transition:
-    opacity var(--vqb-t),
-    background-color var(--vqb-t);
 }
-.vqb .vqb-rule:hover .vqb-row-menu,
-.vqb .vqb-entry:hover > .vqb-row-menu,
-.vqb .vqb-grp-head:hover > .vqb-row-menu,
-.vqb .vqb-row-menu:focus-visible,
-.vqb .vqb-row-menu.off {
-  opacity: 1;
-}
-.vqb .vqb-row-menu:hover {
+.vqb .vqb-act:hover {
   background: var(--bg-hover);
   color: var(--text);
 }
-.vqb .vqb-row-menu.off {
+.vqb .vqb-act.off {
   color: var(--warn);
 }
-.vqb.dnd .vqb-row-menu {
+.vqb .vqb-act.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.vqb.dnd .vqb-acts {
   visibility: hidden;
 }
 
@@ -1036,7 +1045,7 @@
     0 6px 18px rgba(0, 0, 0, 0.28);
   opacity: 1;
 }
-.vqb .vqb-ghost .vqb-row-menu,
+.vqb .vqb-ghost .vqb-acts,
 .vqb .vqb-ghost .vqb-grip,
 .vqb .vqb-ghost .vqb-foot {
   display: none;
@@ -1065,7 +1074,7 @@
 .vqb .vqb-entry:focus-within {
   background: var(--vqb-hover);
 }
-.vqb .vqb-entry.disabled > :not(.vqb-row-menu):not(.vqb-grip) {
+.vqb .vqb-entry.disabled > :not(.vqb-acts):not(.vqb-grip) {
   opacity: 0.45;
 }
 .vqb .vqb-list > .vqb-empty {

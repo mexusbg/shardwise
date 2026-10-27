@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { DragEvent, KeyboardEvent, ReactElement, ReactNode } from 'react'
-import { collectPaths } from '@shared/docPaths'
+import { arrayFieldState, collectPaths } from '@shared/docPaths'
 import { itemsToProjection } from '@shared/vqb/projectionSort'
 import { newProjectionItem, newSortItem, nid } from '@shared/vqb/types'
 import type { ProjectionItem, SortItem } from '@shared/vqb/types'
@@ -191,8 +191,11 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
             mime={MIME_PROJECTION}
             empty="Drag a column here to show or hide it"
             make={(f) => newProjectionItem(f)}
-            render={(it, patch) => <ProjectionControls item={it as ProjectionItem} patch={patch} />}
+            render={(it, patch) => <ProjectionControls item={it as ProjectionItem} patch={patch} arrays={arrayFieldState(tab.docs ?? [], it.field)} />}
           />
+          {v.projection.some((it) => it.enabled && it.field) && v.projection.every((it) => !it.enabled || !it.field || it.mode === 'slice') && (
+            <div className="vqb-note">Slice only shortens arrays: every other field is still returned. Add Show rows to choose the fields.</div>
+          )}
         </Card>
         <Card id="order" title="Order" hint="how results are sorted" count={v.sort.length} on={v.useSort} onToggle={(on) => toggle('useSort', on)}>
           <ItemList
@@ -293,12 +296,19 @@ interface RowProps {
   children: ReactNode
 }
 
-/** Field row: drag handle, rank, field, its controls, then the row menu. */
+/** Field row: drag handle, row tools, rank, field, then its controls. */
 function ItemRow({ item, mime, drop, edit, rank, controls, children }: RowProps): ReactElement {
   const [over, handlers] = useDrop(drop)
   return (
     <div className={cls('vqb-entry', !item.enabled && 'disabled', over && 'drop-before')} {...handlers}>
       <DragHandle mime={mime} id={item.id} title="Drag to reorder" />
+      <RowActions
+        what="field"
+        enabled={item.enabled}
+        onEnabled={(enabled) => edit((l) => l.map((x) => (x.id === item.id ? { ...x, enabled } : x)))}
+        onDuplicate={() => edit((l) => insertItem(l, { ...item, id: nid() }, l.findIndex((x) => x.id === item.id) + 1))}
+        onRemove={() => edit((l) => l.filter((x) => x.id !== item.id))}
+      />
       {rank !== undefined && (
         <span className="vqb-rank" title={rank === 1 ? 'Sorted by this field first' : `Then by this field (${rank})`}>
           {rank}
@@ -307,13 +317,6 @@ function ItemRow({ item, mime, drop, edit, rank, controls, children }: RowProps)
       {children}
       <span className="grow" />
       {controls}
-      <RowActions
-        what="field"
-        enabled={item.enabled}
-        onEnabled={(enabled) => edit((l) => l.map((x) => (x.id === item.id ? { ...x, enabled } : x)))}
-        onDuplicate={() => edit((l) => insertItem(l, { ...item, id: nid() }, l.findIndex((x) => x.id === item.id) + 1))}
-        onRemove={() => edit((l) => l.filter((x) => x.id !== item.id))}
-      />
     </div>
   )
 }
@@ -327,20 +330,23 @@ function sliceOk(it: ProjectionItem): boolean {
   }
 }
 
-const MODES: { value: ProjectionItem['mode']; label: string; title: string }[] = [
-  { value: 'include', label: 'Show', title: 'Return this field (1)' },
-  { value: 'exclude', label: 'Hide', title: 'Leave this field out (0)' },
-  { value: 'slice', label: 'Slice', title: 'Return part of an array ($slice)' }
-]
+const SLICE_HELP = 'Return part of an array ($slice): 5 = first five, -5 = last five, [10, 5] = skip ten, take five'
 
-function ProjectionControls({ item, patch }: { item: ProjectionItem; patch: Patch }): ReactElement {
+/** Show / Hide / Slice; Slice only for fields that hold arrays in the loaded documents (MongoDB ignores it otherwise). */
+function ProjectionControls({ item, patch, arrays }: { item: ProjectionItem; patch: Patch; arrays: 'array' | 'other' | 'unknown' }): ReactElement {
+  const noArray = arrays === 'other'
+  const modes: { value: ProjectionItem['mode']; label: string; title: string; disabled?: boolean }[] = [
+    { value: 'include', label: 'Show', title: 'Return this field (1)' },
+    { value: 'exclude', label: 'Hide', title: 'Leave this field out (0)' },
+    { value: 'slice', label: 'Slice', title: noArray ? `Only for array fields: ${item.field} is not an array in these results` : SLICE_HELP, disabled: noArray }
+  ]
   return (
-    <Seg label="Projection" value={item.mode} options={MODES} onChange={(mode) => patch({ mode })}>
+    <Seg label="Projection" value={item.mode} options={modes} onChange={(mode) => patch(mode === 'slice' && !item.slice.trim() ? { mode, slice: '5' } : { mode })}>
       {item.mode === 'slice' && (
         <input
           className={cls('vqb-slice', !sliceOk(item) && 'invalid')}
           spellCheck={false}
-          placeholder="n"
+          placeholder="5"
           title="Array elements: 5 (first five), -5 (last five) or [skip, n]"
           value={item.slice}
           onChange={(e) => patch({ slice: e.target.value })}

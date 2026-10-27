@@ -37,6 +37,20 @@ export function getPath(doc: unknown, path: string): unknown {
   return cur
 }
 
+/**
+ * Whether `path` holds an array in the given documents: 'array' if any of them does, 'other' if it only holds
+ * other values, 'unknown' if no document has it (e.g. nothing loaded yet).
+ */
+export function arrayFieldState(docs: unknown[], path: string): 'array' | 'other' | 'unknown' {
+  let seen = false
+  for (const d of docs) {
+    const v = getPath(d, path)
+    if (Array.isArray(v)) return 'array'
+    if (v !== undefined) seen = true
+  }
+  return seen ? 'other' : 'unknown'
+}
+
 export function hasPath(doc: unknown, path: string): boolean {
   const segs = path.split('.')
   const last = segs.pop()!
