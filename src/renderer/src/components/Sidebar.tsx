@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactElement } from 'react'
 import type { CollectionInfo } from '@shared/api'
+import type { ConnectionConfig } from '@shared/connection'
 import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
 import { api } from '../lib/api'
 import { byUsage } from '@shared/connectionUsage'
@@ -384,6 +385,51 @@ function ConnectionNode({ l, filter }: { l: LiveConn; filter: string }): ReactEl
   )
 }
 
+/** Saved connections to open with one click while nothing is connected: as many as fit, most used first. */
+function QuickConnect({ saved }: { saved: ConnectionConfig[] }): ReactElement {
+  const ref = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(8)
+
+  useLayoutEffect(() => {
+    const list = ref.current
+    const tree = list?.closest('.tree')
+    const empty = list?.closest('.tree-empty')
+    if (!list || !(tree instanceof HTMLElement) || !(empty instanceof HTMLElement)) return
+    const measure = (): void => {
+      const rows = list.querySelectorAll<HTMLElement>(':scope > .btn')
+      if (!rows.length) return
+      const gap = parseFloat(getComputedStyle(list).rowGap) || 0
+      const step = rows[0].offsetHeight + gap
+      const rowsHeight = rows.length * step - gap
+      // Everything but the rows ("Not connected.", the link, paddings) stays the same whatever the count.
+      const fixed = empty.offsetHeight - rowsHeight + (parseFloat(getComputedStyle(tree).paddingBottom) || 0)
+      const n = Math.max(1, Math.floor((tree.clientHeight - fixed + gap) / step))
+      setFit((prev) => (prev === n ? prev : n))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(tree)
+    return () => {
+      ro.disconnect()
+    }
+  }, [saved.length])
+
+  return (
+    <div ref={ref} className="col" style={{ marginTop: 12, alignItems: 'stretch' }}>
+      {byUsage(saved, connectionUsage()).slice(0, fit).map((c) => (
+        <button key={c.id} className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => connect(c.id)}>
+          <Icon name="server" style={{ color: c.color ?? 'var(--leaf)' }} />
+          <span className="ellipsis">{c.name}</span>
+          {c.readOnly && <Icon name="lock" size={11} style={{ marginLeft: 'auto', opacity: 0.7 }} />}
+        </button>
+      ))}
+      <button className="link" style={{ marginTop: 6 }} onClick={() => openConnectionManager()}>
+        Open Connection Manager…
+      </button>
+    </div>
+  )
+}
+
 export function Sidebar(): ReactElement {
   const live = useStore((s) => s.live)
   const saved = useStore((s) => s.connections)
@@ -436,18 +482,7 @@ export function Sidebar(): ReactElement {
           <div className="tree-empty">
             <div>Not connected.</div>
             {saved.length > 0 ? (
-              <div className="col" style={{ marginTop: 12, alignItems: 'stretch' }}>
-                {byUsage(saved, connectionUsage()).slice(0, 8).map((c) => (
-                  <button key={c.id} className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => connect(c.id)}>
-                    <Icon name="server" style={{ color: c.color ?? 'var(--leaf)' }} />
-                    <span className="ellipsis">{c.name}</span>
-                    {c.readOnly && <Icon name="lock" size={11} style={{ marginLeft: 'auto', opacity: 0.7 }} />}
-                  </button>
-                ))}
-                <button className="link" style={{ marginTop: 6 }} onClick={() => openConnectionManager()}>
-                  Open Connection Manager…
-                </button>
-              </div>
+              <QuickConnect saved={saved} />
             ) : (
               <button className="btn primary" style={{ marginTop: 12 }} onClick={() => openConnectionManager()}>
                 <Icon name="plug" /> Connect…
