@@ -135,7 +135,7 @@ function AllNone({ items, selected, onChange }: { items: string[]; selected: str
   return (
     <span className="row">
       <span className="faint tr-small">
-        {selected.length} of {items.length} selected
+        {items.filter((x) => selected.includes(x)).length} of {items.length} selected
       </span>
       <button className="btn ghost small" onClick={() => onChange([...new Set([...selected, ...items])])}>
         All
@@ -321,6 +321,7 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
   const [bom, setBom] = useState(true)
   const [fields, setFields] = useState<string[] | null>(null)
   const [fieldSel, setFieldSel] = useState<string[]>([])
+  const [fieldFilter, setFieldFilter] = useState('')
   const [detecting, setDetecting] = useState(false)
   const [gzip, setGzip] = useState(false)
   const [file, setFile] = useState('')
@@ -367,6 +368,8 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
   const names = all.map((c) => c.name)
   const visible = filter ? names.filter((n) => n.toLowerCase().includes(filter.toLowerCase())) : names
   const chosen = names.filter((n) => sel.includes(n))
+  const fieldQuery = fieldFilter.trim().toLowerCase()
+  const visibleFields = fields && fieldQuery ? fields.filter((f) => f.toLowerCase().includes(fieldQuery)) : fields
   const typeOf = (n: string): CollectionInfo['type'] | undefined => all.find((c) => c.name === n)?.type
 
   // The tab's scopes apply while only the tab's own collection is chosen.
@@ -564,15 +567,18 @@ function ExportDialog({ o, close }: { o: ExportOpts; close: () => void }): React
                 {fields && (
                   <>
                     <span className="spacer" />
-                    <AllNone items={fields} selected={fieldSel} onChange={setFieldSel} />
+                    <AllNone items={visibleFields ?? fields} selected={fieldSel} onChange={setFieldSel} />
                     <button className="btn ghost small" title="Discover fields automatically" onClick={() => setFields(null)}>
                       Reset
                     </button>
                   </>
                 )}
               </div>
+              {fields && fields.length > 8 && (
+                <input className="input tr-filter" placeholder="Filter fields…" value={fieldFilter} onChange={(e) => setFieldFilter(e.target.value)} />
+              )}
               {fields ? (
-                <CheckList items={fields} selected={fieldSel} onChange={setFieldSel} grid empty="No fields found" />
+                <CheckList items={visibleFields ?? fields} selected={fieldSel} onChange={setFieldSel} grid empty={fieldQuery ? 'No matching fields' : 'No fields found'} />
               ) : (
                 <div className="faint tr-small">
                   Fields are discovered automatically{chosen.length > 1 ? ' for each collection' : ''}. Use Auto-detect to choose them
