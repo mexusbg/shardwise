@@ -12,6 +12,7 @@ import type { MenuItem } from '../ContextMenu'
 import { Icon } from '../Icon'
 import { canWrite, editValueDialog, saveInPlace } from '../editing/dialogs'
 import { docMenu, isContainer, sameResultTab, selectRow, startFieldDrag, typeLabel, ValueText } from './common'
+import { CellEditor } from './CellEditor'
 
 const ROW_H = 26
 
@@ -135,13 +136,13 @@ export const TreeView = memo(function TreeView({ tab }: { tab: QueryTab }): Reac
     setEdit({ key: r.key, docIndex: r.docIndex, path: r.path, text: editText(r.value) })
   }
 
-  const finishEdit = (save: boolean): void => {
+  const finishEdit = (text: string | null): void => {
     const e = editRef.current
     if (!e) return
     editRef.current = null
     setEdit(null)
     scrollRef.current?.focus()
-    if (save) void saveInPlace(tab.id, e.docIndex, e.path, e.text)
+    if (text !== null) void saveInPlace(tab.id, e.docIndex, e.path, text)
   }
 
   const onClick = (e: MouseEvent, r: Row): void => {
@@ -259,20 +260,7 @@ export const TreeView = memo(function TreeView({ tab }: { tab: QueryTab }): Reac
                 </div>
                 <div title={editing || r.container ? undefined : cellText(r.value)}>
                   {editing ? (
-                    <input
-                      className="cell-edit"
-                      autoFocus
-                      value={editing.text}
-                      onChange={(e) => setEdit({ ...editing, text: e.target.value })}
-                      onKeyDown={(e) => {
-                        e.stopPropagation()
-                        if (e.key === 'Enter') finishEdit(true)
-                        else if (e.key === 'Escape') finishEdit(false)
-                      }}
-                      onBlur={() => finishEdit(true)}
-                      onClick={(e) => e.stopPropagation()}
-                      onDoubleClick={(e) => e.stopPropagation()}
-                    />
+                    <CellEditor initial={editing.text} path={r.path} text={bsonTypeOf(r.value) === 'string'} onDone={finishEdit} />
                   ) : (
                     <ValueText v={r.value} />
                   )}

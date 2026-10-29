@@ -13,6 +13,7 @@ import type { MenuItem } from '../ContextMenu'
 import { canWrite, copyPath, copyValue, deleteSelected, fieldOpDialog, saveInPlace } from '../editing/dialogs'
 import { addFieldToBuilder } from '../vqb/vqbActions'
 import { docMenu, isContainer, sameResultTab, selectRow, startFieldDrag, ValueText } from './common'
+import { CellEditor } from './CellEditor'
 import { matchCommand } from '../../lib/commands'
 
 const TABLE_COMMANDS = ['table.edit', 'table.parent', 'table.delete', 'table.copyValue', 'table.selectAll'] as const
@@ -43,31 +44,6 @@ function computeColumns(values: unknown[]): string[] {
   if (out.includes('_id')) out.splice(out.indexOf('_id'), 1), out.unshift('_id')
   if (scalar) out.unshift(SCALAR_COL)
   return out
-}
-
-function CellEditor({ initial, onDone }: { initial: string; onDone: (text: string | null) => void }): ReactElement {
-  const [v, setV] = useState(initial)
-  const done = useRef(false)
-  const finish = (text: string | null): void => {
-    if (done.current) return
-    done.current = true
-    onDone(text)
-  }
-  return (
-    <input
-      className="cell-edit"
-      autoFocus
-      value={v}
-      onFocus={(e) => e.target.select()}
-      onChange={(e) => setV(e.target.value)}
-      onKeyDown={(e) => {
-        e.stopPropagation()
-        if (e.key === 'Enter') finish(v)
-        if (e.key === 'Escape') finish(null)
-      }}
-      onBlur={() => finish(v)}
-    />
-  )
 }
 
 /** Type of the value; dates also show the exact UTC instant, whatever zone they are displayed in. */
@@ -391,7 +367,7 @@ export const TableView = memo(function TableView({ tab }: { tab: QueryTab }): Re
                       title={missing ? undefined : cellTitle(v)}
                     >
                       {isEditing ? (
-                        <CellEditor initial={editText(v)} onDone={(t) => finishEdit(row, c, t)} />
+                        <CellEditor initial={editText(v)} path={fullPath(c)} text={bsonTypeOf(v) === 'string'} onDone={(t) => finishEdit(row, c, t)} />
                       ) : (
                         <ValueText v={v} missing={missing} />
                       )}

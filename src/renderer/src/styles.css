@@ -1075,6 +1075,48 @@ textarea.input:focus {
   padding: 0 4px;
   outline: none;
 }
+/* Inline cell editor: the input plus, for strings, a button that opens the value in a large text box. */
+.cell-edit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+}
+.cell-edit-wrap input.cell-edit {
+  flex: 1;
+  min-width: 0;
+}
+.cell-edit-more {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-3);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.cell-edit-more:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+textarea.text-value-edit {
+  display: block;
+  width: 100%;
+  height: min(60vh, 460px);
+  min-height: 120px;
+  resize: vertical;
+  padding: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  tab-size: 2;
+}
 
 /* ---------- VQB ---------- */
 
