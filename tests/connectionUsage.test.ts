@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { byUsage, parseUsage, recordUse } from '@shared/connectionUsage'
+import { byName, byUsage, parseUsage, recordUse } from '@shared/connectionUsage'
 
 const conns = ['AMARANT', 'All Apps 1', 'Apolonia', 'Atletica'].map((name, i) => ({ id: `c${i}`, name }))
 const names = (xs: { name: string }[]) => xs.map((x) => x.name)
@@ -21,5 +21,12 @@ describe('connection usage', () => {
     expect(parseUsage(null)).toEqual({})
     expect(parseUsage('[1]')).toEqual({})
     expect(parseUsage('{"a":{"count":2,"last":5},"b":{"count":"x"},"c":null}')).toEqual({ a: { count: 2, last: 5 } })
+  })
+})
+
+describe('byName', () => {
+  it('sorts ignoring case, numbers in natural order', () => {
+    const xs = ['Cloud 10', 'beta', 'Cloud 9', 'Alpha', 'AMARANT'].map((name) => ({ name }))
+    expect(names(byName(xs))).toEqual(['Alpha', 'AMARANT', 'beta', 'Cloud 9', 'Cloud 10'])
   })
 })

@@ -4,7 +4,7 @@ import type { CollectionInfo } from '@shared/api'
 import type { ConnectionConfig } from '@shared/connection'
 import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
 import { api } from '../lib/api'
-import { byUsage } from '@shared/connectionUsage'
+import { byName, byUsage } from '@shared/connectionUsage'
 import { connectionUsage } from '../lib/connectionUsage'
 import { openInMongosh } from './shell/openInMongosh'
 import {
@@ -416,7 +416,7 @@ function QuickConnect({ saved }: { saved: ConnectionConfig[] }): ReactElement {
 
   return (
     <div ref={ref} className="col" style={{ marginTop: 12, alignItems: 'stretch' }}>
-      {byUsage(saved, connectionUsage()).slice(0, fit).map((c) => (
+      {byUsage(byName(saved), connectionUsage()).slice(0, fit).map((c) => (
         <button key={c.id} className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => connect(c.id)}>
           <Icon name="server" style={{ color: c.color ?? 'var(--leaf)' }} />
           <span className="ellipsis">{c.name}</span>

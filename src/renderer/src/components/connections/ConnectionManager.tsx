@@ -7,6 +7,9 @@ import { connect, errorText, reloadConnections, toast, useStore } from '../../st
 import { Icon } from '../Icon'
 import { confirmDialog, Modal, openModal } from '../Modal'
 import { editConnection } from './ConnectionEditor'
+import { byName, byUsage } from '@shared/connectionUsage'
+import { connectionSort, connectionUsage, setConnectionSort } from '../../lib/connectionUsage'
+import type { ConnectionSort } from '../../lib/connectionUsage'
 import { openExportConnections, openImportConnections } from './ConnectionTransfer'
 
 function Manager({ close }: { close: () => void }): ReactElement {
@@ -14,18 +17,21 @@ function Manager({ close }: { close: () => void }): ReactElement {
   const live = useStore((s) => s.live)
   const [selected, setSelected] = useState<string | null>(connections[0]?.id ?? null)
   const [filter, setFilter] = useState('')
+  const [sort, setSort] = useState<ConnectionSort>(connectionSort)
   const sel = connections.find((c) => c.id === selected)
 
   const groups = useMemo(() => {
     const f = filter.toLowerCase()
-    const list = connections.filter((c) => !f || c.name.toLowerCase().includes(f) || connectionHostLabel(c).toLowerCase().includes(f))
+    const matching = connections.filter((c) => !f || c.name.toLowerCase().includes(f) || connectionHostLabel(c).toLowerCase().includes(f))
+    const sorted = byName(matching)
+    const list = sort === 'usage' ? byUsage(sorted, connectionUsage()) : sorted
     const map = new Map<string, ConnectionConfig[]>()
     for (const c of list) {
       const k = c.folder ?? ''
       map.set(k, [...(map.get(k) ?? []), c])
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
-  }, [connections, filter])
+  }, [connections, filter, sort])
 
   const doConnect = async (id: string): Promise<void> => {
     close()
@@ -95,6 +101,25 @@ function Manager({ close }: { close: () => void }): ReactElement {
     >
       <div className="row" style={{ marginBottom: 10 }}>
         <input className="input grow" placeholder="Filter connections…" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <div className="segmented" title="Order of the connections (within each folder)">
+          {(
+            [
+              ['name', 'A–Z'],
+              ['usage', 'Most used']
+            ] as const
+          ).map(([k, label]) => (
+            <button
+              key={k}
+              className={sort === k ? 'on' : ''}
+              onClick={() => {
+                setSort(k)
+                setConnectionSort(k)
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button className="btn" disabled={!sel} onClick={() => sel && edit(sel)}>
           <Icon name="edit" /> Edit
         </button>

@@ -6,6 +6,11 @@ export function recordUse(usage: ConnectionUsage, id: string, now: number): Conn
   return { ...usage, [id]: { count: (prev?.count ?? 0) + 1, last: now } }
 }
 
+/** By name, ignoring case, with numbers in natural order ("Cloud 9" before "Cloud 10"). */
+export function byName<T extends { name: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+}
+
 /** Most opened first, then most recently opened; connections never opened keep their given (A-Z) order after them. */
 export function byUsage<T extends { id: string }>(items: T[], usage: ConnectionUsage): T[] {
   return items
