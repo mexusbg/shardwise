@@ -4,6 +4,7 @@ import { docText } from '@shared/docText'
 import type { QueryTab } from '../../state/store'
 import { useStore } from '../../state/store'
 import { CodeEditor } from '../CodeEditor'
+import { useDateSettingsKey } from '../../lib/datetime'
 import { sameResultTab } from './common'
 
 const MAX_CHARS = 3 * 1024 * 1024
@@ -11,6 +12,8 @@ const MAX_CHARS = 3 * 1024 * 1024
 export const JsonView = memo(function JsonView({ tab }: { tab: QueryTab }): ReactElement {
   const docs = tab.docs
   const style = useStore((s) => s.settings.jsonStyle)
+  // Shell syntax writes dates in the zone of the date settings.
+  const dates = useDateSettingsKey()
   const text = useMemo(() => {
     if (!docs) return ''
     const parts: string[] = []
@@ -23,7 +26,7 @@ export const JsonView = memo(function JsonView({ tab }: { tab: QueryTab }): Reac
     }
     return parts.join('\n\n')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [docs, tab.rev, style])
+  }, [docs, tab.rev, style, dates])
 
   if (!docs?.length) return <div className="result-empty">No documents</div>
   if (text === null) {

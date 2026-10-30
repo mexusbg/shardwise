@@ -1,4 +1,4 @@
-import { dataDateEditText, dataDateText, parseDateInZone } from './dateFormat'
+import { dataDateEditText, dataDateText, getDataDateDisplay, parseDateInZone, resolveZone } from './dateFormat'
 import {
   Binary,
   BSONRegExp,
@@ -156,9 +156,18 @@ const numberText = (v: unknown): string => {
 }
 
 /** Shell-syntax text of any value, e.g. `ObjectId('…')`. */
+// ISODate('…Z') as toJSString writes it; inside a string literal the quote would be escaped ('), so text never matches.
+const UTC_ISODATE = /ISODate\('(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)'\)/g
+
+/**
+ * mongosh syntax of a value. Dates are written in the zone of Settings → Dates & time zones with its offset
+ * (`ISODate('2026-10-30T16:00:00.000+02:00')`), which parses back to the same instant.
+ */
 export function shellText(v: unknown, indent: number | string = 0): string {
   if (v === undefined) return 'undefined'
-  return toJSString(v as object, indent) ?? String(v)
+  const text = toJSString(v as object, indent) ?? String(v)
+  const zone = resolveZone(getDataDateDisplay().zone)
+  return zone === 'UTC' ? text : text.replace(UTC_ISODATE, (_, iso: string) => `ISODate('${dataDateEditText(new Date(iso))}')`)
 }
 
 /** Text the user sees in an editor for a value of an editable type (inverse of parseTyped). */
