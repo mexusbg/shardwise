@@ -157,7 +157,7 @@ export function createApi(
     createIndex: (connId, db, coll, keys, options) => ops.createIndex(mgr.get(connId), db, coll, keys, options),
 
     aggregate: async (connId, db, coll, pipeline, opts) => aggregation.aggregate(mgr.get(connId), db, coll, pipeline, { maxTimeMS: (await timeout(connId)) || undefined, ...opts }),
-    checkForUpdates: () => checkLatestRelease(updateRepo(), app.getVersion(), appFetch),
+    checkForUpdates: () => checkLatestRelease(updateRepo(), app.getVersion(), appFetch, { platform: process.platform, arch: process.arch, appImage: !!process.env['APPIMAGE'] }),
     analyzeSample: async (connId, db, coll, size, opts) => {
       const res = await aggregation.aggregate(mgr.get(connId), db, coll, [{ $sample: { size } }], { maxTimeMS: (await timeout(connId)) || undefined })
       return analyzeSchema(res.docs, opts)

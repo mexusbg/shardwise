@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkLatestRelease, compareVersions, repoFromPackage, tagVersion } from '@shared/updates'
+import { checkLatestRelease, compareVersions, pickInstaller, repoFromPackage, tagVersion } from '@shared/updates'
 
 const repo = { owner: 'fidweb', repo: 'shardwise' }
 const json = (status: number, body: unknown): Response => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -33,6 +33,23 @@ describe('update check', () => {
     })
     expect(asked).toBe('https://api.github.com/repos/fidweb/shardwise/releases/latest')
     expect(r).toMatchObject({ status: 'available', current: '0.2.2', latest: '0.3.0', url: 'https://github.com/fidweb/shardwise/releases/tag/v0.3.0' })
+  })
+
+  it("links this machine's installer from the release", async () => {
+    const asset = (name: string): { name: string; browser_download_url: string } => ({ name, browser_download_url: `https://github.com/fidweb/shardwise/releases/download/v0.3.0/${name}` })
+    const assets = ['Shardwise-0.3.0-win-x64.exe', 'Shardwise-0.3.0-win-x64.exe.blockmap', 'Shardwise-0.3.0-mac-arm64.dmg', 'Shardwise-0.3.0-linux-x86_64.AppImage', 'Shardwise-0.3.0-linux-amd64.deb'].map(asset)
+    const pick = (platform: string, arch: string, appImage?: boolean): string | undefined => pickInstaller(assets, { platform, arch, appImage })?.name
+    expect(pick('win32', 'x64')).toBe('Shardwise-0.3.0-win-x64.exe')
+    expect(pick('darwin', 'arm64')).toBe('Shardwise-0.3.0-mac-arm64.dmg')
+    expect(pick('linux', 'x64', true)).toBe('Shardwise-0.3.0-linux-x86_64.AppImage')
+    expect(pick('linux', 'x64')).toBe('Shardwise-0.3.0-linux-amd64.deb')
+    // No build for it: the release page instead.
+    expect(pick('darwin', 'x64')).toBeUndefined()
+    expect(pick('win32', 'arm64')).toBeUndefined()
+
+    const r = await checkLatestRelease(repo, '0.2.2', async () => json(200, { tag_name: 'v0.3.0', html_url: 'https://github.com/fidweb/shardwise/releases/tag/v0.3.0', assets }), { platform: 'win32', arch: 'x64' })
+    expect(r.download).toEqual({ name: 'Shardwise-0.3.0-win-x64.exe', url: 'https://github.com/fidweb/shardwise/releases/download/v0.3.0/Shardwise-0.3.0-win-x64.exe' })
+    expect((await checkLatestRelease(repo, '0.2.2', async () => json(200, { tag_name: 'v0.3.0', assets }), { platform: 'darwin', arch: 'x64' })).download).toBeUndefined()
   })
 
   it('is current with the same or an older release, or none yet', async () => {

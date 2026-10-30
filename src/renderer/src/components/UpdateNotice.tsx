@@ -9,6 +9,8 @@ const DISMISSED = 'shardwise.update.dismissed'
 const ANNOUNCED = 'shardwise.update.announced'
 /** After launch, so the check never competes with opening the window and the saved session. */
 const DELAY_MS = 3_000
+/** Again while the app stays open, so a window left running for days still hears of new versions. */
+const RECHECK_MS = 6 * 60 * 60 * 1000
 
 const read = (key: string): string | null => {
   try {
@@ -34,7 +36,7 @@ export function UpdateNotice(): ReactElement | null {
   const [card, setCard] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => {
+    const check = (): void => {
       if (!useStore.getState().settings.checkUpdates) return
       api.checkForUpdates().then(
         (r) => {
@@ -44,11 +46,17 @@ export function UpdateNotice(): ReactElement | null {
         },
         () => {}
       )
-    }, DELAY_MS)
-    return () => clearTimeout(t)
+    }
+    const t = setTimeout(check, DELAY_MS)
+    const every = setInterval(check, RECHECK_MS)
+    return () => {
+      clearTimeout(t)
+      clearInterval(every)
+    }
   }, [])
 
   if (!info?.url) return null
+  const href = info.download?.url ?? info.url
   const closeCard = (): void => {
     write(ANNOUNCED, info.latest ?? '')
     setCard(false)
@@ -56,7 +64,7 @@ export function UpdateNotice(): ReactElement | null {
   return (
     <>
       <span className="update-notice">
-        <a href={info.url} target="_blank" rel="noreferrer" title={`You have ${info.current}. Opens the release page to download it.`}>
+        <a href={href} target="_blank" rel="noreferrer" title={`You have ${info.current}. ${info.download ? `Downloads ${info.download.name}.` : 'Opens the release page to download it.'}`}>
           <Icon name="import" size={12} /> Shardwise {info.latest} is available
         </a>
         <button
@@ -76,13 +84,18 @@ export function UpdateNotice(): ReactElement | null {
           <Icon name="import" size={18} className="update-card-icon" />
           <div className="update-card-text">
             <b>Shardwise {info.latest} is available</b>
-            <span className="muted">You have {info.current}. Install the new version over this one; settings and connections are kept.</span>
+            <span className="muted">
+              You have {info.current}. Install the new version over this one; settings and connections are kept.{' '}
+              <a href={info.url} target="_blank" rel="noreferrer">
+                What&apos;s new
+              </a>
+            </span>
           </div>
           <div className="update-card-actions">
             <button className="btn small" onClick={closeCard}>
               Later
             </button>
-            <a className="btn primary small" href={info.url} target="_blank" rel="noreferrer" onClick={closeCard}>
+            <a className="btn primary small" href={href} target="_blank" rel="noreferrer" title={info.download?.name} onClick={closeCard}>
               Download
             </a>
           </div>

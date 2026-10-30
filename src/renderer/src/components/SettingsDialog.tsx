@@ -465,9 +465,22 @@ function AboutTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement {
           {update && update !== 'checking' && (
             <div className="pref-hint about-update">
               {update.status === 'available' ? (
-                <a href={update.url} target="_blank" rel="noreferrer">
-                  Shardwise {update.latest} is available — open the download page
-                </a>
+                update.download ? (
+                  <>
+                    Shardwise {update.latest} is available —{' '}
+                    <a href={update.download.url} target="_blank" rel="noreferrer" title={update.download.name}>
+                      download it
+                    </a>{' '}
+                    ·{' '}
+                    <a href={update.url} target="_blank" rel="noreferrer">
+                      what&apos;s new
+                    </a>
+                  </>
+                ) : (
+                  <a href={update.url} target="_blank" rel="noreferrer">
+                    Shardwise {update.latest} is available — open the download page
+                  </a>
+                )
               ) : update.status === 'current' ? (
                 `You have the latest version (${update.current}).`
               ) : update.status === 'unconfigured' ? (

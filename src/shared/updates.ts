@@ -1,6 +1,7 @@
 /**
  * "Check for updates": the newest GitHub release of the public repository (`repository` in package.json) compared
- * with the running version. Nothing is downloaded; the user gets a link to the release page.
+ * with the running version. Nothing is downloaded here; the user gets a link to this machine's installer (or the release
+ * page when the release has none for it).
  */
 
 export interface UpdateInfo {
@@ -8,8 +9,10 @@ export interface UpdateInfo {
   status: 'available' | 'current' | 'unconfigured' | 'error'
   current: string
   latest?: string
-  /** Release page to download from. */
+  /** Release page. */
   url?: string
+  /** The release's installer for this machine, when it has one. */
+  download?: { url: string; name: string }
   name?: string
   publishedAt?: string
   error?: string
@@ -59,10 +62,33 @@ export function compareVersions(a: string, b: string): number {
   return 0
 }
 
+/** What the installer has to fit: `process.platform`, `process.arch`, and whether this is a running AppImage. */
+export interface InstallTarget {
+  platform: string
+  arch: string
+  appImage?: boolean
+}
+
+interface ReleaseAsset {
+  name?: string
+  browser_download_url?: string
+}
+
+const ARCH_NAMES: Record<string, RegExp> = { x64: /[-_.](x64|amd64|x86_64)[-_.]/i, arm64: /[-_.](arm64|aarch64)[-_.]/i }
+
+/** The asset this machine installs from: the .exe on Windows, the .dmg on macOS, the AppImage or .deb on Linux. */
+export function pickInstaller(assets: ReleaseAsset[], target: InstallTarget): { url: string; name: string } | null {
+  const ext = target.platform === 'win32' ? '.exe' : target.platform === 'darwin' ? '.dmg' : target.platform === 'linux' ? (target.appImage ? '.appimage' : '.deb') : null
+  const arch = ARCH_NAMES[target.arch]
+  if (!ext || !arch) return null
+  const a = assets.find((x) => x.name && x.browser_download_url && x.name.toLowerCase().endsWith(ext) && arch.test(x.name))
+  return a ? { url: a.browser_download_url!, name: a.name! } : null
+}
+
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
 
 /** Asks GitHub for the latest (non-draft, non-pre-release) release of `repo`. */
-export async function checkLatestRelease(repo: GitHubRepo | null, current: string, fetch: FetchLike): Promise<UpdateInfo> {
+export async function checkLatestRelease(repo: GitHubRepo | null, current: string, fetch: FetchLike, target?: InstallTarget): Promise<UpdateInfo> {
   if (!repo) return { status: 'unconfigured', current }
   try {
     const res = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`, {
@@ -70,14 +96,16 @@ export async function checkLatestRelease(repo: GitHubRepo | null, current: strin
     })
     if (res.status === 404) return { status: 'current', current }
     if (!res.ok) return { status: 'error', current, error: `GitHub answered ${res.status}${res.status === 403 ? ' (rate limit: try again later)' : ''}` }
-    const r = (await res.json()) as { tag_name?: string; html_url?: string; name?: string; published_at?: string }
+    const r = (await res.json()) as { tag_name?: string; html_url?: string; name?: string; published_at?: string; assets?: ReleaseAsset[] }
     if (!r.tag_name) return { status: 'error', current, error: 'GitHub returned no release version' }
     const latest = tagVersion(r.tag_name)
+    const download = target && Array.isArray(r.assets) ? pickInstaller(r.assets, target) : null
     return {
       status: compareVersions(latest, current) > 0 ? 'available' : 'current',
       current,
       latest,
       url: r.html_url ?? `https://github.com/${repo.owner}/${repo.repo}/releases/latest`,
+      ...(download ? { download } : {}),
       ...(r.name ? { name: r.name } : {}),
       ...(r.published_at ? { publishedAt: r.published_at } : {})
     }
