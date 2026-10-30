@@ -21,7 +21,9 @@ win:
   artifactName: ${productName}-${version}-win-${arch}.${ext}
 nsis:
   oneClick: false
-  allowToChangeInstallationDirectory: true
+  # Off on purpose: with it every manual upgrade removes the shortcuts and so the taskbar pin. The folder page
+  # comes from build/installer.nsh instead.
+  allowToChangeInstallationDirectory: false
   createDesktopShortcut: true
 mac:
   target:
