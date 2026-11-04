@@ -83,6 +83,19 @@ export function ValueText({ v, missing }: { v: unknown; missing?: boolean }): Re
   return <span className={`t-${t}`}>{t === 'string' ? s.replace(/\n/g, '⏎') : s}</span>
 }
 
+/** The value as Compass shows it: quoted strings, ObjectId('…'), sizes for objects and arrays. */
+export function FieldValue({ v }: { v: unknown }): ReactElement {
+  const t = bsonTypeOf(v)
+  if (t === 'object') return <span className="lv-size">Object ({Object.keys(v as object).length})</span>
+  if (t === 'array') {
+    const n = (v as unknown[]).length
+    return <span className="lv-size">Array ({n ? n : 'empty'})</span>
+  }
+  if (t === 'string') return <span className="t-string">&quot;{(v as string).replace(/\n/g, '⏎')}&quot;</span>
+  if (t === 'objectId') return <span className="t-objectId">ObjectId(&apos;{cellText(v)}&apos;)</span>
+  return <span className={`t-${t}`}>{cellText(v)}</span>
+}
+
 export const typeLabel = (v: unknown): string => {
   const t: BsonTypeName = bsonTypeOf(v)
   if (t === 'object') return 'Object'
@@ -95,14 +108,14 @@ export const isContainer = (v: unknown): boolean => {
   return t === 'object' || t === 'array'
 }
 
-/** Context menu for a value / field inside a document (Table and Tree views). */
+/** Context menu for a value / field inside a document (Table and List views). */
 export function docMenu(tab: QueryTab, docIndex: number, path: string, extra: MenuItem[] = []): MenuItem[] {
   const doc = tab.docs![docIndex]
   const v = path ? getPath(doc, path) : doc
   const isField = !!path
   const many = tab.selection.length > 1
   const selectedDocs = many ? tab.selection.map((i) => tab.docs![i]) : [doc]
-  // Keyboard shortcuts of the table grid (the Tree view has its own fixed keys).
+  // Keyboard shortcuts of the table grid (the List view has its own fixed keys).
   const key = (id: 'table.copyValue' | 'table.delete'): string | undefined => (tab.view === 'table' ? shortcutLabel(id) || undefined : undefined)
   return [
     ...extra,

@@ -73,6 +73,14 @@ const P: Record<string, ReactElement> = {
       <path d="M3 10h18M3 15h18M9 10v10M15 10v10" />
     </>
   ),
+  // Stacked document cards (List view).
+  cards: (
+    <>
+      <rect x="4" y="3.5" width="16" height="7.5" rx="1.5" />
+      <rect x="4" y="13" width="16" height="7.5" rx="1.5" />
+      <path d="M7 6.5h6M7 16h6" />
+    </>
+  ),
   tree: (
     <>
       <path d="M5 4v14a2 2 0 0 0 2 2h3M5 9h5" />

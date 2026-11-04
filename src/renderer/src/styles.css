@@ -1018,57 +1018,118 @@ textarea.input:focus {
 
 /* ---------- Tree view ---------- */
 
-.tv {
+/* List view: one card per document, one line per field (like Compass). */
+.lv {
   flex: 1;
+  min-height: 0;
   overflow: auto;
+  padding: 4px 0;
+}
+.lv-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 5px 12px;
+}
+.lv-card {
+  position: relative;
+  padding: 8px 12px 8px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   font-family: var(--mono);
   font-size: 12px;
 }
-.tv-head,
-.tv-row {
-  display: grid;
-  grid-template-columns: var(--tv-key, 38%) 1fr 120px;
-  align-items: center;
-  height: var(--row-h);
-  border-bottom: 1px solid var(--border);
+.lv-card:hover {
+  border-color: var(--border-strong);
 }
-.tv-head {
-  position: sticky;
-  top: 0;
+.lv-card.sel {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
+.lv-actions {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  display: none;
+  gap: 2px;
+  padding: 2px;
   background: var(--bg-2);
-  font-family: var(--font);
-  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   z-index: 1;
 }
-.tv-head > div,
-.tv-row > div {
-  padding: 0 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.lv-card:hover .lv-actions {
+  display: flex;
 }
-.tv-row:hover {
-  background: var(--bg-hover);
-}
-.tv-row.sel {
-  background: var(--accent-soft);
-}
-.tv-row .tv-key {
+.lv-field {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-height: 20px;
+  line-height: 20px;
+  border-radius: 3px;
 }
-.tv-row .twisty {
-  width: 14px;
+.lv-field:hover {
+  background: var(--bg-hover);
+}
+.lv-field .twisty {
   flex: none;
+  width: 14px;
   display: inline-flex;
   justify-content: center;
   color: var(--text-3);
   cursor: pointer;
 }
-.tv-row input.cell-edit {
+.lv-key {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-weight: 600;
+}
+.lv-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lv-size {
+  color: var(--text-3);
+}
+.lv-type {
+  flex: none;
+  min-width: 70px;
+  padding-left: 8px;
+  text-align: right;
+  color: var(--text-3);
+  font-family: var(--font);
+  font-size: 11px;
+}
+.lv-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+}
+.lv-more:hover {
+  text-decoration: underline;
+}
+
+.lv-field input.cell-edit {
   width: 100%;
-  height: 22px;
+  height: 20px;
   border: 1px solid var(--accent);
   border-radius: 3px;
   background: var(--bg-input);

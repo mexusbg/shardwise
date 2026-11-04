@@ -5,8 +5,11 @@ export type ViewMap = Record<string, ResultViewKind>
 
 export const VIEW_MEMORY_MAX = 500
 
-const VIEWS: ResultViewKind[] = ['table', 'tree', 'json']
+const VIEWS: ResultViewKind[] = ['table', 'list', 'json']
 export const isResultView = (v: unknown): v is ResultViewKind => VIEWS.includes(v as ResultViewKind)
+
+/** `v` as a result view, with the removed Tree view read as List; null for anything else. */
+export const toResultView = (v: unknown): ResultViewKind | null => (v === 'tree' ? 'list' : isResultView(v) ? v : null)
 
 export const viewKey = (configId: string, db: string, coll: string): string => JSON.stringify([configId, db, coll])
 
@@ -24,7 +27,10 @@ export function parseViewMap(text: string | null): ViewMap {
   try {
     const raw = JSON.parse(text) as unknown
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
-    return Object.fromEntries(Object.entries(raw).filter(([, v]) => isResultView(v))) as ViewMap
+    return Object.fromEntries(Object.entries(raw).flatMap(([k, v]) => {
+      const view = toResultView(v)
+      return view ? [[k, view]] : []
+    })) as ViewMap
   } catch {
     return {}
   }

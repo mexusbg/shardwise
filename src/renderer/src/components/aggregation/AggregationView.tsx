@@ -193,7 +193,10 @@ export function AggregationView({ tab }: { tab: ToolTab }): ReactElement {
   const [counts, setCounts] = useState<Record<string, StageCount>>({})
   const [input, setInput] = useState<Preview>({})
   const [output, setOutput] = useState<Preview>({})
-  const [previewView, setPreviewView] = useState<ViewMode>(() => (lsGet('agg.previewView') as ViewMode) || 'tree')
+  const [previewView, setPreviewView] = useState<ViewMode>(() => {
+    const v = lsGet('agg.previewView')
+    return v === 'tree' || !v ? 'list' : (v as ViewMode)
+  })
   const [run, setRun] = useState<RunState>({})
   const [explain, setExplain] = useState<ExplainState>({})
   const [pane, setPane] = useState<'results' | 'explain'>('results')
@@ -882,7 +885,7 @@ export function AggregationView({ tab }: { tab: ToolTab }): ReactElement {
               <ViewSwitch
                 value={previewView}
                 views={[
-                  ['tree', 'Tree', 'tree'],
+                  ['list', 'List', 'cards'],
                   ['json', 'JSON', 'json'],
                   ['table', 'Table', 'table']
                 ]}

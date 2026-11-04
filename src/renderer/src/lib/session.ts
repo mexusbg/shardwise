@@ -97,7 +97,7 @@ export async function restoreSession(session: SavedSession): Promise<void> {
       // `noAutoLoad` keeps the tab's own default-query loader from replacing the restored text.
       // Sessions saved before collation support keep the tab's default collation.
       const collation = typeof t.query.collation === 'string' ? { collationText: t.query.collation } : {}
-      patchTab(id, { noAutoLoad: true, queryText: t.query.query, projectionText: t.query.projection, sortText: t.query.sort, skipText: t.query.skip, limitText: t.query.limit, ...collation, view: t.view, pageSize: t.pageSize })
+      patchTab(id, { noAutoLoad: true, queryText: t.query.query, projectionText: t.query.projection, sortText: t.query.sort, skipText: t.query.skip, limitText: t.query.limit, ...collation, view: (t.view as string) === 'tree' ? 'list' : t.view, pageSize: t.pageSize })
       // Show the restored query in the Filter Builder too, so editing there does not replace it.
       syncTextToVqb(id, 'query')
       syncTextToVqb(id, 'projection')

@@ -196,7 +196,7 @@ function guardPath(tab: QueryTab, docIndex: number | undefined, path: string): b
 }
 
 // ---------------------------------------------------------------------------
-// In-place edit (used by Table and Tree views)
+// In-place edit (used by Table and List views)
 // ---------------------------------------------------------------------------
 
 /** Save a value typed into an in-place editor, keeping the original type. */

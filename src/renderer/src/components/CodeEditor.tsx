@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
-import { EditorState, Compartment } from '@codemirror/state'
-import type { Extension } from '@codemirror/state'
+import { EditorState, Compartment, Prec } from '@codemirror/state'
+import type { Extension, StateEffect } from '@codemirror/state'
 import { EditorView, keymap, placeholder as cmPlaceholder, lineNumbers, highlightActiveLine } from '@codemirror/view'
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
+import { defaultKeymap, history, historyKeymap, indentWithTab, insertNewlineAndIndent } from '@codemirror/commands'
 import { javascript } from '@codemirror/lang-javascript'
-import { bracketMatching, foldGutter, foldKeymap, syntaxHighlighting, HighlightStyle } from '@codemirror/language'
+import { bracketMatching, foldEffect, foldedRanges, foldGutter, foldKeymap, syntaxHighlighting, unfoldEffect, HighlightStyle } from '@codemirror/language'
 import { completionKeymap } from '@codemirror/autocomplete'
 import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete'
 import { tags as t } from '@lezer/highlight'
@@ -57,6 +57,8 @@ interface Props {
   onSubmit?: () => void
   /** Command whose shortcuts call onSubmit; default: "dialog.submit" inside a dialog, else "editor.submit". */
   submitCommand?: CommandId
+  /** Enter also calls onSubmit (Shift+Enter starts a new line); Enter still picks an open autocomplete suggestion. */
+  enterSubmits?: boolean
   onBlur?: () => void
   placeholder?: string
   readOnly?: boolean
@@ -73,6 +75,8 @@ interface Props {
   area?: EditorArea
   /** Show only the first line, cut with an ellipsis, until the editor gets focus (query bar). */
   collapse?: boolean
+  /** Ranges shown folded (full editors); applied again whenever the value or the ranges change. */
+  folds?: { from: number; to: number }[]
 }
 
 export function CodeEditor(p: Props): ReactElement {
@@ -100,6 +104,19 @@ export function CodeEditor(p: Props): ReactElement {
         const id: CommandId = latest.current.submitCommand ?? (host.current?.closest('.modal') ? 'dialog.submit' : 'editor.submit')
         return { [id]: submit }
       }),
+      Prec.high(
+        keymap.of([
+          {
+            key: 'Enter',
+            run: () => {
+              if (!latest.current.enterSubmits || !latest.current.onSubmit) return false
+              latest.current.onSubmit()
+              return true
+            }
+          },
+          { key: 'Shift-Enter', run: (v) => !!latest.current.enterSubmits && insertNewlineAndIndent(v) }
+        ])
+      ),
       keymap.of([
         ...defaultKeymap,
         ...historyKeymap,
@@ -136,6 +153,17 @@ export function CodeEditor(p: Props): ReactElement {
       v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: p.value } })
     }
   }, [p.value])
+
+  useEffect(() => {
+    const v = view.current
+    if (!v || !p.folds) return
+    const effects: StateEffect<unknown>[] = []
+    foldedRanges(v.state).between(0, v.state.doc.length, (from, to) => {
+      effects.push(unfoldEffect.of({ from, to }))
+    })
+    for (const r of p.folds) effects.push(foldEffect.of(r))
+    if (effects.length) v.dispatch({ effects })
+  }, [p.value, p.folds])
 
   useEffect(() => {
     view.current?.dispatch({

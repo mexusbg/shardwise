@@ -8,7 +8,7 @@ import { shortcutLabel } from '../../lib/commands'
 import { CodeEditor } from '../CodeEditor'
 import { Icon } from '../Icon'
 import { TableView } from '../views/TableView'
-import { TreeView } from '../views/TreeView'
+import { ListView } from '../views/ListView'
 import { JsonView } from '../views/JsonView'
 
 export type ResultPane = 'result' | 'console'
@@ -80,7 +80,7 @@ function ErrorPanel({ r }: { r: PlaygroundResult }): ReactElement {
 
 const VIEWS: [ViewMode, string, string][] = [
   ['table', 'Table', 'table'],
-  ['tree', 'Tree', 'tree'],
+  ['list', 'List', 'cards'],
   ['json', 'JSON', 'json']
 ]
 
@@ -120,8 +120,8 @@ export function ResultView({ tab }: { tab: PlaygroundTab }): ReactElement {
         </div>
         {docs.length === 0 ? (
           <div className="result-empty">No documents</div>
-        ) : view === 'tree' ? (
-          <TreeView tab={fake} />
+        ) : view === 'list' ? (
+          <ListView tab={fake} />
         ) : view === 'json' ? (
           <JsonView tab={fake} />
         ) : (

@@ -52,7 +52,7 @@ export interface AppSettings {
   rememberResultView: boolean
   /** New collection tabs open with the Filter Builder (visual query builder) shown. */
   filterBuilderOnOpen: boolean
-  /** Tree view: open the first document of a result automatically. */
+  /** No longer used (the Tree view was removed). */
   treeExpandFirst: boolean
   /** Text style of the JSON view and of copied documents. */
   jsonStyle: JsonStyle
@@ -134,7 +134,7 @@ export interface AppSettings {
 
 export type ShellConfirmMode = 'off' | 'destructive' | 'writes'
 
-export type ResultViewKind = 'table' | 'tree' | 'json'
+export type ResultViewKind = 'table' | 'list' | 'json'
 /** shell = mongosh syntax (`ObjectId('…')`), relaxed / canonical = Extended JSON v2. */
 export type JsonStyle = 'shell' | 'relaxed' | 'canonical'
 export type EditorArea = 'query' | 'pipeline' | 'shell' | 'sql' | 'playground'
@@ -157,7 +157,8 @@ export type SavedTab =
       coll: string
       isView: boolean
       query: { query: string; projection: string; sort: string; skip: string; limit: string; collation?: string }
-      view: 'table' | 'tree' | 'json' | 'explain' | 'code'
+      /** Sessions saved before 0.2.13 may hold 'tree' (now the List view). */
+      view: 'table' | 'list' | 'json' | 'explain' | 'code'
       pageSize: number
     }
   | { kind: 'playground'; configId: string; db: string; title: string; code: string; language: 'javascript' | 'typescript'; filePath?: string }

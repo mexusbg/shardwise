@@ -148,7 +148,7 @@ function WorkspaceTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement
 const PAGE_SIZES = [10, 20, 50, 100, 200, 500, 1000]
 const VIEWS: [ResultViewKind, string][] = [
   ['table', 'Table'],
-  ['tree', 'Tree'],
+  ['list', 'List'],
   ['json', 'JSON']
 ]
 const JSON_SAMPLE: Record<JsonStyle, string> = {
@@ -230,9 +230,6 @@ function DataTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement {
       </Group>
 
       <Group title="Showing documents">
-        <Field id="treeExpandFirst" label="Open the first document in Tree view">
-          <Switch checked={s.treeExpandFirst} onChange={(v) => setS({ ...s, treeExpandFirst: v })} />
-        </Field>
         <Field id="jsonStyle" label="JSON format" top hint="JSON view, Copy Document and Copy results.">
           <Segmented value={s.jsonStyle} options={Object.entries(JSON_STYLE_LABELS) as [JsonStyle, string][]} onChange={(jsonStyle) => setS({ ...s, jsonStyle })} />
           <div className="pref-sample mono">{JSON_SAMPLE[s.jsonStyle]}</div>

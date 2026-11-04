@@ -19,7 +19,7 @@ import { CodeEditor } from '../CodeEditor'
 import { Icon } from '../Icon'
 import { JsonView } from '../views/JsonView'
 import { TableView } from '../views/TableView'
-import { TreeView } from '../views/TreeView'
+import { ListView } from '../views/ListView'
 import { SqlEditor } from './SqlEditor'
 import type { SqlCompletionData } from './SqlEditor'
 import './sql.css'
@@ -155,7 +155,7 @@ const initialSql = (tab: ToolTab): string => {
 
 const VIEWS: [ViewMode, string, string][] = [
   ['table', 'Table', 'table'],
-  ['tree', 'Tree', 'tree'],
+  ['list', 'List', 'cards'],
   ['json', 'JSON', 'json']
 ]
 
@@ -427,8 +427,8 @@ export function SqlQueryView({ tab }: { tab: ToolTab }): ReactElement {
                 </div>
               ) : result!.docs.length === 0 ? (
                 <div className="result-empty">No documents</div>
-              ) : view === 'tree' ? (
-                <TreeView tab={fake} />
+              ) : view === 'list' ? (
+                <ListView tab={fake} />
               ) : view === 'json' ? (
                 <JsonView tab={fake} />
               ) : (

@@ -38,11 +38,10 @@ export const PREF_ENTRIES: PrefEntry[] = [
   { id: 'historyLimit', tab: 'data', label: 'Query history size', hint: 'How many recent queries are kept', keywords: 'entries limit prune recent runs' },
   { id: 'runQueryOnOpen', tab: 'data', label: 'Run the query when a collection opens', keywords: 'auto automatic execute open empty grid manual' },
   { id: 'pageSize', tab: 'data', label: 'Default page size', keywords: 'documents per page rows limit' },
-  { id: 'defaultResultView', tab: 'data', label: 'Default view', hint: 'Table, Tree or JSON for new collection tabs', keywords: 'result table tree json' },
+  { id: 'defaultResultView', tab: 'data', label: 'Default view', hint: 'Table, List or JSON for new collection tabs', keywords: 'result table list tree json' },
   { id: 'rememberResultView', tab: 'data', label: 'Remember the view per collection', keywords: 'last used result table tree json' },
   { id: 'filterBuilderOnOpen', tab: 'data', label: 'Show the Filter Builder when a collection opens', keywords: 'visual query builder vqb panel open default' },
   { id: 'defaultCollation', tab: 'data', label: 'Default collation', hint: 'Language-aware sort and case-insensitive matching for new query tabs', keywords: 'collation locale language sort order alphabetical case insensitive strength cyrillic bulgarian russian icu' },
-  { id: 'treeExpandFirst', tab: 'data', label: 'Expand the first document', hint: 'Tree view', keywords: 'tree open automatically' },
   { id: 'jsonStyle', tab: 'data', label: 'JSON style', hint: 'JSON view and copied documents', keywords: 'ejson extended relaxed canonical shell mongosh copy document format' },
 
   { id: 'editorFontFamily', tab: 'editing', label: 'Font', keywords: 'family monospace typeface code' },

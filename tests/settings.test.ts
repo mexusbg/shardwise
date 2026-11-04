@@ -172,20 +172,22 @@ describe('Settings search', () => {
 describe('view memory', () => {
   it('keeps the most recent views up to the maximum', () => {
     let m = {}
-    m = withView(m, 'a', 'tree', 3)
+    m = withView(m, 'a', 'list', 3)
     m = withView(m, 'b', 'json', 3)
     m = withView(m, 'c', 'table', 3)
     m = withView(m, 'a', 'json', 3)
-    m = withView(m, 'd', 'tree', 3)
+    m = withView(m, 'd', 'list', 3)
     expect(Object.keys(m)).toEqual(['c', 'a', 'd'])
-    expect(m).toEqual({ c: 'table', a: 'json', d: 'tree' })
+    expect(m).toEqual({ c: 'table', a: 'json', d: 'list' })
   })
 
   it('parses stored maps defensively', () => {
     expect(parseViewMap(null)).toEqual({})
     expect(parseViewMap('{oops')).toEqual({})
     expect(parseViewMap('[1,2]')).toEqual({})
-    expect(parseViewMap(JSON.stringify({ x: 'tree', y: 'explain', z: 3 }))).toEqual({ x: 'tree' })
+    expect(parseViewMap(JSON.stringify({ x: 'list', y: 'explain', z: 3 }))).toEqual({ x: 'list' })
+    // The Tree view was folded into List.
+    expect(parseViewMap(JSON.stringify({ t: 'tree' }))).toEqual({ t: 'list' })
   })
 
   it('keys collections unambiguously', () => {

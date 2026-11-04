@@ -25,7 +25,7 @@ import { deleteMatching, editDocumentDialog, insertDocumentDialog, pasteDocument
 import { updateDocumentsDialog } from './editing/UpdateDocumentsDialog'
 import { deleteDocumentsDialog } from './editing/DeleteDocumentsDialog'
 import { TableView } from './views/TableView'
-import { TreeView } from './views/TreeView'
+import { ListView } from './views/ListView'
 import { JsonView } from './views/JsonView'
 import { ExplainView } from './profiler/ExplainView'
 import { CodeView, findCodeQuery } from './codegen/CodeView'
@@ -51,6 +51,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
         onChange={(v) => setText('queryText', v)}
         onSubmit={run}
         submitCommand="query.run"
+        enterSubmits
         onBlur={() => syncTextToVqb(tab.id, 'query')}
         placeholder="{ field: 'value' }   — empty matches all documents"
         fields={fields}
@@ -86,6 +87,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
           onChange={(v) => setText('projectionText', v)}
           onSubmit={run}
           submitCommand="query.run"
+          enterSubmits
           onBlur={() => syncTextToVqb(tab.id, 'projection')}
           placeholder="{ field: 1 }"
           fields={fields}
@@ -99,6 +101,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
           onChange={(v) => setText('sortText', v)}
           onSubmit={run}
           submitCommand="query.run"
+          enterSubmits
           onBlur={() => syncTextToVqb(tab.id, 'sort')}
           placeholder="{ field: -1 }"
           fields={fields}
@@ -166,7 +169,7 @@ function ResultToolbar({ tab }: { tab: Tab }): ReactElement {
   useShortcut('query.run')
   const views: [ViewMode, string, string][] = [
     ['table', 'Table View', 'table'],
-    ['tree', 'Tree View', 'tree'],
+    ['list', 'List View', 'cards'],
     ['json', 'JSON View', 'json'],
     ['explain', 'Explain Plan', 'gauge'],
     ['code', 'Query Code', 'code']
@@ -289,7 +292,7 @@ function selectView(tab: Tab, view: ViewMode): void {
 
 const VIEW_COMMANDS: Record<ViewMode, CommandId> = {
   table: 'query.viewTable',
-  tree: 'query.viewTree',
+  list: 'query.viewList',
   json: 'query.viewJson',
   explain: 'query.explain',
   code: 'query.viewCode'
@@ -316,7 +319,7 @@ function useQueryTabCommands(tab: Tab, root: React.RefObject<HTMLDivElement | nu
     },
     'query.explain': view('explain'),
     'query.viewTable': view('table'),
-    'query.viewTree': view('tree'),
+    'query.viewList': view('list'),
     'query.viewJson': view('json'),
     'query.viewCode': view('code'),
     'query.focusBar': () => {
@@ -433,7 +436,7 @@ export function QueryTab({ tab }: { tab: Tab }): ReactElement {
           )}
           {tab.docs && tab.docs.length === 0 && !runError && tab.view !== 'explain' && tab.view !== 'code' && <div className="result-empty">No documents match the query.</div>}
           {tab.docs && tab.docs.length > 0 && tab.view === 'table' && <TableView tab={tab} />}
-          {tab.docs && tab.docs.length > 0 && tab.view === 'tree' && <TreeView tab={tab} />}
+          {tab.docs && tab.docs.length > 0 && tab.view === 'list' && <ListView tab={tab} />}
           {tab.docs && tab.docs.length > 0 && tab.view === 'json' && <JsonView tab={tab} />}
           {tab.view === 'explain' && <ExplainView tab={tab} />}
           {tab.view === 'code' && (

@@ -37,7 +37,7 @@ export interface LiveConn {
   readOnly?: boolean
 }
 
-export type ViewMode = 'table' | 'tree' | 'json' | 'explain' | 'code'
+export type ViewMode = 'table' | 'list' | 'json' | 'explain' | 'code'
 
 export interface VqbState {
   root: Group

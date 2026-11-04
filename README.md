@@ -57,16 +57,16 @@ arising from the use of the software or the inability to use it. You use it at y
 - **Filter Builder:** drag a cell or a column header into it to add a condition, a field or a sort order.
   `$and` / `$or` / `$nor` / `$elemMatch` groups, about 25 operators and typed values. It stays in sync with the
   query text in both directions.
-- **Table**, **Tree** and **JSON** views. Step into nested fields, hide and resize columns, and sort by clicking a
+- **Table**, **List** and **JSON** views. Step into nested fields, hide and resize columns, and sort by clicking a
   column header.
 - Collation picker, paging, document counts, and default queries per connection, database or collection.
 - **Ctrl+P** jumps to any collection by name. Typing in the connection tree jumps to the next matching name.
 - **Find in Database** searches for a value across all collections of a database.
 - Every query is kept in the query history. Save the ones you need in the Query Library, organised in folders.
 
-| Tree view | Edit a document as JSON |
+| List view | Edit a document as JSON |
 |---|---|
-| ![Tree view of a document](screenshots/tree.png) | ![Document editor](screenshots/edit-document.png) |
+| ![List view of documents](screenshots/list.png) | ![Document editor](screenshots/edit-document.png) |
 
 ### Edit data
 

@@ -1,4 +1,4 @@
-import type { AppSettings, EditorArea, JsonStyle, ResultViewKind } from './api'
+import type { AppSettings, EditorArea, JsonStyle } from './api'
 import { toCollation } from './collation'
 import type { Collation } from './collation'
 import { DEFAULT_PROXY_SETTINGS, normalizeProxySettings } from './proxy'
@@ -6,6 +6,7 @@ import { normalizeShellSettings, SHELL_DEFAULTS } from './shellOptions'
 import { COMMANDS } from './commands'
 import { normalizeOverrides } from './keymap'
 import { normalizeValueColors } from './valueColors'
+import { toResultView } from './viewMap'
 
 export const HISTORY_LIMIT_MIN = 100
 export const HISTORY_LIMIT_MAX = 10000
@@ -85,7 +86,7 @@ export function normalizeSettings(raw: unknown): AppSettings {
     ...d,
     ...(r as Partial<AppSettings>),
     runQueryOnOpen: bool(r.runQueryOnOpen, d.runQueryOnOpen),
-    defaultResultView: oneOf<ResultViewKind>(r.defaultResultView, ['table', 'tree', 'json'], d.defaultResultView),
+    defaultResultView: toResultView(r.defaultResultView) ?? d.defaultResultView,
     rememberResultView: bool(r.rememberResultView, d.rememberResultView),
     filterBuilderOnOpen: bool(r.filterBuilderOnOpen, d.filterBuilderOnOpen),
     treeExpandFirst: bool(r.treeExpandFirst, d.treeExpandFirst),

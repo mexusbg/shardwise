@@ -9,7 +9,7 @@ import type { QueryTab, ViewMode } from '../../state/store'
 import { CodeEditor } from '../CodeEditor'
 import { Icon } from '../Icon'
 import { TableView } from '../views/TableView'
-import { TreeView } from '../views/TreeView'
+import { ListView } from '../views/ListView'
 import { JsonView } from '../views/JsonView'
 import '../profiler/profiler.css'
 
@@ -46,14 +46,14 @@ export function docsTab(id: string, connId: string, db: string, docs: Doc[], vie
 
 export function DocsView({ tab }: { tab: QueryTab }): ReactElement {
   if (!tab.docs?.length) return <div className="result-empty">No documents</div>
-  if (tab.view === 'tree') return <TreeView tab={tab} />
+  if (tab.view === 'list') return <ListView tab={tab} />
   if (tab.view === 'json') return <JsonView tab={tab} />
   return <TableView tab={tab} />
 }
 
 export const VIEWS: [ViewMode, string, string][] = [
   ['table', 'Table', 'table'],
-  ['tree', 'Tree', 'tree'],
+  ['list', 'List', 'cards'],
   ['json', 'JSON', 'json']
 ]
 
