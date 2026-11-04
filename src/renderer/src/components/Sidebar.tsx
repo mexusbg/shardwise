@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactElement } from 'react'
 import type { CollectionInfo } from '@shared/api'
 import type { ConnectionConfig } from '@shared/connection'
@@ -36,6 +36,7 @@ import {
   openSqlTab,
   openUsersTab,
   refreshCollections,
+  revealTabInTree,
   refreshDatabases,
   reloadConnections,
   toast,
@@ -99,6 +100,9 @@ async function addDatabase(connId: string): Promise<void> {
 }
 
 const firstUserDb = (l: LiveConn): string => l.databases?.find((d) => !['admin', 'local', 'config'].includes(d.name))?.name ?? 'test'
+
+/** How long a newly active tab waits for its collection row to appear (the list may still be loading). */
+const REVEAL_WAIT_MS = 3_000
 
 /** "Paste …" for collections / databases copied in the tree (opens the copy dialog). */
 function pasteItem(connId: string, db?: string): MenuItem {
@@ -436,6 +440,25 @@ export function Sidebar(): ReactElement {
   const [filter, setFilter] = useState('')
   const lives = Object.values(live)
   const typed = useRef({ text: '', at: 0 })
+  const treeRef = useRef<HTMLDivElement>(null)
+  const activeTab = useStore((s) => s.activeTab)
+
+  // The active tab's collection is selected and scrolled to; its rows may appear only once the list has loaded.
+  useEffect(() => {
+    const key = revealTabInTree(activeTab)
+    if (!key) return
+    const until = Date.now() + REVEAL_WAIT_MS
+    let frame = 0
+    const scroll = (): void => {
+      const row = treeRef.current?.querySelector(`[data-tree-key="${CSS.escape(key)}"]`)
+      if (row) row.scrollIntoView({ block: 'nearest' })
+      else if (Date.now() < until) frame = requestAnimationFrame(scroll)
+    }
+    frame = requestAnimationFrame(scroll)
+    return () => {
+      cancelAnimationFrame(frame)
+    }
+  }, [activeTab])
 
   // Type-to-jump: letters select the next row at the same level whose name starts with them.
   const onTreeKey = (e: KeyboardEvent<HTMLDivElement>): void => {
@@ -474,7 +497,7 @@ export function Sidebar(): ReactElement {
           <input className="input small" style={{ width: '100%' }} placeholder="Filter collections…" value={filter} onChange={(e) => setFilter(e.target.value)} />
         </div>
       )}
-      <div className="tree" tabIndex={0} onKeyDown={onTreeKey}>
+      <div ref={treeRef} className="tree" tabIndex={0} onKeyDown={onTreeKey}>
         {lives.map((l) => (
           <ConnectionNode key={l.connId} l={l} filter={filter} />
         ))}

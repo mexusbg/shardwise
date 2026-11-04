@@ -287,7 +287,18 @@ export function guardWrite(connId: string, what = 'Changes'): boolean {
 export const dbKey = (connId: string, db: string): string => `${connId}/${db}`
 export const collKey = (connId: string, db: string, coll: string): string => `${connId}/${db}/${coll}`
 
-export async function connect(configId: string): Promise<string | null> {
+/** Connects in progress, by saved connection: a second click while one is opening waits for it instead. */
+const connecting = new Map<string, Promise<string | null>>()
+
+export function connect(configId: string): Promise<string | null> {
+  const pending = connecting.get(configId)
+  if (pending) return pending
+  const p = openConnection(configId).finally(() => connecting.delete(configId))
+  connecting.set(configId, p)
+  return p
+}
+
+async function openConnection(configId: string): Promise<string | null> {
   const cfg = get().connections.find((c) => c.id === configId)
   if (!cfg) return null
   const existing = Object.values(get().live).find((l) => l.configId === configId)
@@ -309,6 +320,19 @@ export async function connect(configId: string): Promise<string | null> {
     toast(`Could not connect to ${cfg.name}: ${errorText(e)}`, 'error')
     return null
   }
+}
+
+/** Expands the tree down to the tab's collection (or database) and selects that row; returns its key. */
+export function revealTabInTree(tabId: string | null): string | null {
+  const t = get().tabs.find((x) => x.id === tabId)
+  if (!t || !get().live[t.connId]) return null
+  const db = 'db' in t ? t.db : ''
+  const coll = 'coll' in t ? t.coll : undefined
+  const dk = db ? dbKey(t.connId, db) : ''
+  if (coll && !get().collections[dk]) void refreshCollections(t.connId, db)
+  const key = coll ? collKey(t.connId, db, coll) : dk || t.connId
+  set((s) => ({ expanded: { ...s.expanded, [t.connId]: true, ...(coll ? { [dk]: true } : {}) }, treeSelection: key }))
+  return key
 }
 
 export async function disconnect(connId: string): Promise<void> {
