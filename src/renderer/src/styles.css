@@ -351,6 +351,8 @@ textarea.input:focus {
 
 .segmented {
   display: inline-flex;
+  /* overflow: hidden lets a flex item shrink below its content; the text beside it wraps instead. */
+  flex-shrink: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
