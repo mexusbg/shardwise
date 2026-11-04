@@ -7,6 +7,7 @@ import { deserialize, EJSON } from 'bson'
 import { buildUri, parseUri } from '@shared/connection'
 import type { ConnectionConfig } from '@shared/connection'
 import type { Doc, ToolsStatus } from '@shared/api'
+import { refreshDnsServers } from '../net/dns'
 import { compareVersions, findBinDir } from './toolsDownload'
 
 const EXE = process.platform === 'win32' ? '.exe' : ''
@@ -188,6 +189,7 @@ export function viaLocalPort(cfg: ConnectionConfig, port: number): ConnectionCon
 export async function firstHost(cfg: ConnectionConfig): Promise<{ host: string; port: number }> {
   const c = cfg.mode === 'uri' ? parseUri(cfg.uri ?? '', cfg) : cfg
   if (c.mode === 'srv') {
+    refreshDnsServers()
     const recs = await dns.resolveSrv(`_mongodb._tcp.${c.srvHost}`)
     if (!recs.length) throw new Error(`No SRV records for ${c.srvHost}`)
     recs.sort((a, b) => a.priority - b.priority || b.weight - a.weight)

@@ -11,6 +11,7 @@ import type { ConnectResult, TestResult, TestStep } from '@shared/api'
 import { openSshTunnel } from './sshTunnel'
 import type { Tunnel } from './sshTunnel'
 import { readOnlyClient, ReadOnlyError } from './readOnly'
+import { refreshDnsServers } from '../net/dns'
 import { connectVia, describeRoute, openProxyBridge, ProxyError, proxyRouter } from '../net/proxy'
 import type { ProxyBridge, Route } from '../net/proxy'
 
@@ -152,6 +153,7 @@ function withProxyCause(e: unknown, bridge: ProxyBridge | undefined): Error {
 /** Open a client (and SSH tunnel / proxy bridge when configured). Calls `step` as each stage completes. */
 export async function openClient(cfg: ConnectionConfig, step: (s: TestStep) => void = () => {}): Promise<Opened> {
   assertSecretsGiven(cfg)
+  refreshDnsServers()
   // Fails early (e.g. an unreadable CA file) before a tunnel is opened.
   clientOptions(cfg)
   let tunnel: Tunnel | undefined
