@@ -258,10 +258,10 @@ try {
   if (!enterRan) throw new Error('Enter in a builder value did not run the query')
   await shot('05b-vqb-run')
 
-  await win.locator('.segmented button', { hasText: 'Tree' }).click()
-  await win.waitForSelector('.tv-row')
-  await win.locator('.tv-row').first().dblclick()
-  await shot('06-tree-view')
+  await win.locator('.segmented button', { hasText: 'List' }).click()
+  await win.waitForSelector('.lv-card')
+  await win.locator('.lv-card').first().click()
+  await shot('06-list-view')
   await win.locator('.segmented button', { hasText: 'JSON' }).click()
   await shot('07-json-view')
   await win.locator('.segmented button', { hasText: 'Table' }).click()
@@ -844,7 +844,7 @@ try {
   await win.waitForTimeout(1200)
   const idle = await win.evaluate(() => {
     const q = [...document.querySelectorAll('.qtab')].find((x) => x.getBoundingClientRect().width > 0)
-    return !!q && !q.querySelector('.grid tbody tr, .tv-row') && (q.textContent ?? '').includes('Press Run')
+    return !!q && !q.querySelector('.grid tbody tr, .lv-card') && (q.textContent ?? '').includes('Press Run')
   })
   console.log('collection opened without running:', idle)
   if (!idle) throw new Error('The collection ran its query although "Run on open" is off')
@@ -856,7 +856,7 @@ try {
   if (fontSize !== '16px') throw new Error(`Editor font size preference not applied (${fontSize})`)
   await shot('52-open-without-run')
   await win.locator('.qtab:visible .querybar .btn.primary', { hasText: 'Run' }).click()
-  await win.waitForSelector('.qtab:visible .grid tbody tr, .qtab:visible .tv-row')
+  await win.waitForSelector('.qtab:visible .grid tbody tr, .qtab:visible .lv-card')
 
   // Settings → Shortcuts: rebind "Run query" (Ctrl+Enter → Ctrl+Shift+K), run with the new key, then restore the default.
   {

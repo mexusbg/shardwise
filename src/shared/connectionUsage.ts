@@ -19,6 +19,11 @@ export function byUsage<T extends { id: string }>(items: T[], usage: ConnectionU
     .map((x) => x.it)
 }
 
+/** Starred connections first; the order is otherwise kept. */
+export function starredFirst<T extends { starred?: boolean }>(items: T[]): T[] {
+  return [...items.filter((c) => c.starred), ...items.filter((c) => !c.starred)]
+}
+
 export function parseUsage(text: string | null): ConnectionUsage {
   if (!text) return {}
   const raw = JSON.parse(text) as unknown

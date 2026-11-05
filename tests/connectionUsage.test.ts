@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { byName, byUsage, parseUsage, recordUse } from '@shared/connectionUsage'
+import { byName, byUsage, parseUsage, recordUse, starredFirst } from '@shared/connectionUsage'
 
 const conns = ['AMARANT', 'All Apps 1', 'Apolonia', 'Atletica'].map((name, i) => ({ id: `c${i}`, name }))
 const names = (xs: { name: string }[]) => xs.map((x) => x.name)
 
 describe('connection usage', () => {
+  it('lists starred connections first and keeps the order otherwise', () => {
+    const list = conns.map((c, i) => ({ ...c, starred: i === 1 || i === 3 }))
+    expect(names(starredFirst(list))).toEqual(['All Apps 1', 'Atletica', 'AMARANT', 'Apolonia'])
+    expect(names(starredFirst(byUsage(list, recordUse({}, 'c2', 1))))).toEqual(['All Apps 1', 'Atletica', 'Apolonia', 'AMARANT'])
+  })
+
   it('keeps the given order when nothing was opened', () => {
     expect(names(byUsage(conns, {}))).toEqual(['AMARANT', 'All Apps 1', 'Apolonia', 'Atletica'])
   })

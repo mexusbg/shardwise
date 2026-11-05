@@ -579,6 +579,8 @@ export interface Api extends CompareApi, MigrationApi, MaskingApi, AiApi, TasksA
   listConnections(): ConnectionConfig[]
   saveConnection(c: ConnectionConfig): ConnectionConfig
   deleteConnection(id: string): void
+  /** Star (favourite) or unstar a saved connection. */
+  setConnectionStarred(id: string, starred: boolean): void
   reorderConnections(ids: string[]): void
   exportConnectionsToFile(ids: string[], path: string, o: { format: 'shardwise' | 'uri'; includePasswords: boolean; passphrase?: string }): number
   previewConnectionImport(path: string, passphrase?: string): ConnectionImportPreview

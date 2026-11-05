@@ -128,6 +128,16 @@ export class Store {
     return saved
   }
 
+  /** Star or unstar a saved connection; only the flag changes (its stored secrets are not re-encrypted). */
+  async setConnectionStarred(id: string, starred: boolean): Promise<void> {
+    const d = await this.load()
+    const c = d.connections.find((x) => x.id === id)
+    if (!c) throw new Error('Connection not found')
+    if (starred) c.starred = true
+    else delete c.starred
+    await this.persist()
+  }
+
   async deleteConnection(id: string): Promise<void> {
     const d = await this.load()
     d.connections = d.connections.filter((c) => c.id !== id)

@@ -112,6 +112,7 @@ export function createApi(
       return saved
     },
     deleteConnection: (id) => store.deleteConnection(id),
+    setConnectionStarred: (id, starred) => store.setConnectionStarred(id, starred),
     reorderConnections: (ids) => store.reorderConnections(ids),
     exportConnectionsToFile: async (ids, path, o) => {
       const all = await store.listConnections()

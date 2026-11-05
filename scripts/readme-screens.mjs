@@ -192,7 +192,7 @@ const closeTabs = async () => {
 }
 const openColl = async (coll) => {
   await win.locator('.tree-row', { hasText: new RegExp(`^${coll}`) }).first().dblclick()
-  await win.waitForSelector('.qtab:visible .grid tbody tr td, .qtab:visible .tv-row')
+  await win.waitForSelector('.qtab:visible .grid tbody tr td, .qtab:visible .lv-card')
 }
 
 try {
@@ -219,18 +219,17 @@ try {
     await win.locator('.qtab:visible .grid tbody tr').nth(1).locator('td').nth(2).click()
   })
 
-  await step('tree', async () => {
+  await step('list', async () => {
     await setEditor(win.locator('.qtab:visible .querybar .cm-content').nth(1), '')
     await win.keyboard.press('Control+Enter')
     await win.waitForTimeout(800)
-    await win.locator('.qtab:visible .segmented button', { hasText: 'Tree' }).click()
-    await win.waitForSelector('.qtab:visible .tv-row')
-    await win.locator('.qtab:visible .tv-row').first().dblclick()
-    await win.waitForTimeout(300)
-    const addr = win.locator('.qtab:visible .tv-row', { hasText: 'address' }).first()
-    await addr.dblclick().catch(() => {})
-    const tags = win.locator('.qtab:visible .tv-row', { hasText: 'tags' }).first()
-    await tags.dblclick().catch(() => {})
+    await win.locator('.qtab:visible .segmented button', { hasText: 'List' }).click()
+    await win.waitForSelector('.qtab:visible .lv-card')
+    // Open the first document's address and tags in place, and select that document.
+    const card = win.locator('.qtab:visible .lv-card').first()
+    for (const f of ['address:', 'tags:']) await card.locator('.lv-field', { hasText: f }).first().locator('.twisty').click().catch(() => {})
+    await card.click({ position: { x: 300, y: 10 } })
+    await win.mouse.move(W - 20, H - 20)
   })
 
   await step('edit-document', async () => {

@@ -7,6 +7,8 @@ export interface ConnectionConfig {
   name: string
   folder?: string
   color?: string
+  /** Starred (favourite): listed before the other connections. */
+  starred?: boolean
   /** srv = mongodb+srv://host, standalone = single host, replicaSet = host list, uri = raw URI */
   mode: 'srv' | 'standalone' | 'replicaSet' | 'uri'
   uri?: string

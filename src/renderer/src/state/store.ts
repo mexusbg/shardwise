@@ -240,6 +240,18 @@ export async function saveSettings(s: Partial<AppSettings>): Promise<void> {
   set({ settings })
 }
 
+/** Star (favourite) or unstar a saved connection; starred ones are listed first. */
+export async function toggleStarred(id: string): Promise<void> {
+  const c = get().connections.find((x) => x.id === id)
+  if (!c) return
+  try {
+    await api.setConnectionStarred(id, !c.starred)
+    await reloadConnections()
+  } catch (e) {
+    toast(errorText(e), 'error')
+  }
+}
+
 export async function reloadConnections(): Promise<void> {
   const connections = await api.listConnections()
   const before = get().connections

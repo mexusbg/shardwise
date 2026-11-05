@@ -21,6 +21,22 @@ describe('Store', () => {
     expect(back.auth.password).toBe('p@ss')
   })
 
+  it('stars and unstars a connection without touching its stored secrets', async () => {
+    const file = join(mkdtempSync(join(tmpdir(), 'mg-store-')), 'shardwise.json')
+    const store = new Store(file, codec)
+    const c = await store.saveConnection({ ...newConnectionConfig(), auth: { mechanism: 'DEFAULT', username: 'u', password: 'p@ss' } })
+    const sealed = () => JSON.parse(readFileSync(file, 'utf8')).connections[0].auth.password
+    const before = sealed()
+    await store.setConnectionStarred(c.id, true)
+    expect((await new Store(file, codec).getConnection(c.id)).starred).toBe(true)
+    expect(sealed()).toBe(before)
+    await store.setConnectionStarred(c.id, false)
+    const back = await new Store(file, codec).getConnection(c.id)
+    expect(back.starred).toBeUndefined()
+    expect(back.auth.password).toBe('p@ss')
+    await expect(store.setConnectionStarred('missing', true)).rejects.toThrow()
+  })
+
   it('resolves the most specific default query', async () => {
     const file = join(mkdtempSync(join(tmpdir(), 'mg-store-')), 'shardwise.json')
     const store = new Store(file, codec)

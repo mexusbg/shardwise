@@ -1397,6 +1397,49 @@ textarea.text-value-edit {
 .list-row.selected {
   background: var(--bg-active);
 }
+/* Star (favourite) toggle of a saved connection: faint until the row is hovered, filled when starred. */
+.conn-star {
+  flex: none;
+  display: inline-flex;
+  padding: 2px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--text-3);
+  opacity: 0.45;
+  cursor: pointer;
+}
+.conn-row:hover .conn-star,
+.conn-star:focus-visible {
+  opacity: 1;
+}
+.conn-star:hover {
+  color: var(--warn);
+}
+.conn-star.on {
+  color: var(--warn);
+  opacity: 1;
+}
+.conn-star.on svg {
+  fill: currentColor;
+}
+/* Saved connection buttons on the not-connected sidebar: the star sits over the button's right edge. */
+.sb-saved {
+  position: relative;
+  display: flex;
+}
+.sb-saved > .btn {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  padding-right: 28px;
+}
+.sb-saved > .conn-star {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
 .steps {
   margin: 10px 0 0;

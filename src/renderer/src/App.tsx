@@ -357,41 +357,17 @@ function RestoreCard(): ReactElement | null {
 }
 
 function Welcome(): ReactElement {
-  const live = useStore((s) => s.live)
-  const hasLive = Object.keys(live).length > 0
-  const runKey = useShortcut('query.run')
-  const closeKey = useShortcut('tab.close')
   return (
     <div className="welcome">
       <div className="welcome-card">
         <Icon name="leaf" size={48} style={{ color: 'var(--leaf)' }} />
         <h1>Shardwise</h1>
         <RestoreCard />
-        {hasLive ? (
-          <div>Double-click a collection in the tree to open it.</div>
-        ) : (
-          <div>Connect to a MongoDB server to browse databases, build queries visually and edit documents.</div>
-        )}
         <div className="row">
           <button className="btn primary" onClick={() => openConnectionManager()}>
             <Icon name="plug" /> Connect…
           </button>
         </div>
-        {(runKey || closeKey) && (
-          <div className="faint" style={{ marginTop: 18, fontSize: 12 }}>
-            {runKey && (
-              <>
-                <span className="kbd">{runKey}</span> runs the query
-              </>
-            )}
-            {runKey && closeKey && ' · '}
-            {closeKey && (
-              <>
-                <span className="kbd">{closeKey}</span> closes the tab
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )

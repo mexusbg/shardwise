@@ -1,8 +1,9 @@
 # Shardwise
 
 A free, open-source MongoDB GUI for Windows, macOS and Linux. Query with a visual Filter Builder or in shell
-syntax, browse results as a table, tree or JSON, edit documents in place, build aggregation pipelines stage by
-stage, read explain plans, analyse schemas, and move data between MongoDB, files and SQL databases.
+syntax, browse results as a table, a list of documents or JSON, edit documents in place, build aggregation
+pipelines stage by stage, read explain plans, analyse schemas, and move data between MongoDB, files and SQL
+databases.
 
 > **Please read [Before you use it](#before-you-use-it) first.** Shardwise was built mainly with an AI model,
 > some features have so far been verified only by automated tests, and it comes with no warranty.
@@ -18,7 +19,7 @@ stage, read explain plans, analyse schemas, and move data between MongoDB, files
 **How it was made.** Shardwise was created mainly with Claude, Anthropic's AI model, under the direction of its
 author.
 
-**How it was tested.** The project has a large automated test suite: about 880 unit and integration tests, many of
+**How it was tested.** The project has a large automated test suite: about 910 unit and integration tests, many of
 them against a real MongoDB server, and an end-to-end test that clicks through the packaged app on Windows and
 Linux. Some features have only been verified by these automated tests and have not yet been tested in everyday use
 with real-world data. Expect rough edges, especially with unusual data, very large collections and less common
@@ -44,7 +45,8 @@ arising from the use of the software or the inability to use it. You use it at y
 - Authentication with SCRAM, X.509, LDAP, Kerberos and AWS IAM; TLS with your own CA and client certificates.
 - SSH tunnels (password or key) that also work with SRV and replica sets; HTTP and SOCKS proxies.
 - Passwords encrypted with the operating system's keychain, or asked for each time you connect.
-- Folders and colours for connections, and read-only connections that refuse every write.
+- Folders and colours for connections, starred connections listed first, and read-only connections that refuse
+  every write.
 - Import connections from Studio 3T®, MongoDB Compass and Robo 3T exports; export them as URIs or as
   passphrase-encrypted JSON.
 
@@ -53,12 +55,13 @@ arising from the use of the software or the inability to use it. You use it at y
 ### Browse and query
 
 - Query, projection, sort, skip and limit in shell syntax (`ObjectId("…")`, `ISODate("…")`, regex literals), with
-  autocomplete of field names.
+  autocomplete of field names. Enter runs the query, Shift+Enter starts a new line.
 - **Filter Builder:** drag a cell or a column header into it to add a condition, a field or a sort order.
   `$and` / `$or` / `$nor` / `$elemMatch` groups, about 25 operators and typed values. It stays in sync with the
   query text in both directions.
-- **Table**, **List** and **JSON** views. Step into nested fields, hide and resize columns, and sort by clicking a
-  column header.
+- **Table**, **List** and **JSON** views. In the table, step into nested fields, hide and resize columns, and sort
+  by clicking a column header. The list shows each document as a card, one field per line with its type, and edits
+  values in place. The list and JSON views show nested objects and arrays folded or expanded.
 - Collation picker, paging, document counts, and default queries per connection, database or collection.
 - **Ctrl+P** jumps to any collection by name. Typing in the connection tree jumps to the next matching name.
 - **Find in Database** searches for a value across all collections of a database.
