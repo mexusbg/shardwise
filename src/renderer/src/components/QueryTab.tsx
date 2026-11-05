@@ -33,6 +33,7 @@ import { openAskAi } from './ai/AskAi'
 import { explainQueryWithAi, fixQueryWithAi } from './ai/AiActions'
 import { QueryHistoryButton } from './history/QueryHistoryButton'
 import { VqbPanel } from './vqb/VqbPanel'
+import { toggleFilterBuilder } from './vqb/vqbActions'
 import { openTabExport } from './transfer/TransferDialogs'
 import { CollationButton } from './collation/CollationPicker'
 
@@ -63,7 +64,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
         <button className="btn primary" onClick={run} title={runKey ? `Run query (${runKey})` : 'Run query'} disabled={tab.loading}>
           <Icon name="play" size={12} /> Run
         </button>
-        <button className={`btn icon ${tab.vqbOpen ? 'active' : ''}`} title="Toggle Filter Builder" onClick={() => patchTab(tab.id, { vqbOpen: !tab.vqbOpen })}>
+        <button className={`btn icon ${tab.vqbOpen ? 'active' : ''}`} title="Toggle Filter Builder" onClick={() => toggleFilterBuilder(tab.id)}>
           <Icon name="builder" />
         </button>
         <button className="btn icon" title="Ask AI to write the query" onClick={() => openAskAi(tab)}>
@@ -82,6 +83,7 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
 
       <div className="qlabel">Projection</div>
       <div className="qrow2">
+        <div className="qfield">
         <CodeEditor
           value={tab.projectionText}
           onChange={(v) => setText('projectionText', v)}
@@ -95,6 +97,8 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
         collapse
           invalid={err?.part === 'projection'}
         />
+        </div>
+        <div className="qfield">
         <div className="qlabel">Sort</div>
         <CodeEditor
           value={tab.sortText}
@@ -109,10 +113,13 @@ function QueryBar({ tab, fields }: { tab: Tab; fields: string[] }): ReactElement
         collapse
           invalid={err?.part === 'sort'}
         />
-        <div className="qlabel">Skip</div>
-        <input className="input mono" value={tab.skipText} placeholder="0" onChange={(e) => patchTab(tab.id, { skipText: e.target.value.replace(/\D/g, '') })} onKeyDown={(e) => e.key === 'Enter' && run()} />
-        <div className="qlabel">Limit</div>
-        <input className="input mono" value={tab.limitText} placeholder="none" onChange={(e) => patchTab(tab.id, { limitText: e.target.value.replace(/\D/g, '') })} onKeyDown={(e) => e.key === 'Enter' && run()} />
+        </div>
+        <div className="qfield fixed">
+          <div className="qlabel">Skip</div>
+          <input className="input mono" value={tab.skipText} placeholder="0" onChange={(e) => patchTab(tab.id, { skipText: e.target.value.replace(/\D/g, '') })} onKeyDown={(e) => e.key === 'Enter' && run()} />
+          <div className="qlabel">Limit</div>
+          <input className="input mono" value={tab.limitText} placeholder="none" onChange={(e) => patchTab(tab.id, { limitText: e.target.value.replace(/\D/g, '') })} onKeyDown={(e) => e.key === 'Enter' && run()} />
+        </div>
       </div>
       {err && (
         <div className="qerr">
@@ -327,7 +334,7 @@ function useQueryTabCommands(tab: Tab, root: React.RefObject<HTMLDivElement | nu
       if (!el) return false
       el.focus()
     },
-    'query.toggleFilterBuilder': () => patchTab(tab.id, { vqbOpen: !tab.vqbOpen }),
+    'query.toggleFilterBuilder': () => toggleFilterBuilder(tab.id),
     // The selected document (the first one when nothing is selected).
     'query.editJson': () => {
       if (!tab.docs?.length) return false

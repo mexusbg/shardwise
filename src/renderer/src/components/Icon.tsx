@@ -300,6 +300,19 @@ const P: Record<string, ReactElement> = {
       <circle cx="19" cy="12" r="1.4" fill="currentColor" />
     </>
   ),
+  // Fold a side panel: the bar marks the panel's edge, the chevron points the way it goes.
+  panelLeft: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9 4v16M16 10l-2 2 2 2" />
+    </>
+  ),
+  panelRight: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M15 4v16M8 10l2 2-2 2" />
+    </>
+  ),
   link: (
     <>
       <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7L12 6.3" />

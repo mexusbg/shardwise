@@ -6,6 +6,7 @@ import { newProjectionItem, newSortItem, nid } from '@shared/vqb/types'
 import type { ProjectionItem, SortItem } from '@shared/vqb/types'
 import { api } from '../../lib/api'
 import { emptyVqb, errorText, patchTab, toast } from '../../state/store'
+import { useFolds } from '../../state/folds'
 import type { QueryTab, VqbState } from '../../state/store'
 import { runQuery, setVqb } from '../../state/queryActions'
 import { Icon } from '../Icon'
@@ -130,6 +131,14 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
   }
   const [dragActive, dragHandlers] = useDragActive()
   const [width, resizeHandlers, resizing] = useResizableWidth()
+  const folded = useFolds((s) => s.vqb)
+  if (folded)
+    return (
+      <button className="fold-strip right" title="Show the Filter Builder" onClick={() => useFolds.getState().setFolded('vqb', false)}>
+        <Icon name="panelLeft" size={14} />
+        <span className="fold-label">Filter Builder</span>
+      </button>
+    )
   return (
     <div className={cls('vqb', dragActive && 'dnd')} style={{ width }} onKeyDown={(e) => keys(e, run)} {...dragHandlers}>
       <div className={cls('splitter vqb-splitter', resizing && 'dragging')} title="Drag to resize · double-click to reset" {...resizeHandlers} />
@@ -145,6 +154,9 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
           </button>
           <button className="btn small" title="Remove every condition, field and order" onClick={reset}>
             Clear
+          </button>
+          <button className="btn ghost icon small" title="Fold the builder to the side" onClick={() => useFolds.getState().setFolded('vqb', true)}>
+            <Icon name="panelRight" size={13} />
           </button>
           <button className="btn ghost icon small" title="Close the builder" onClick={() => patchTab(tab.id, { vqbOpen: false })}>
             <Icon name="close" size={13} />

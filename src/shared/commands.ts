@@ -16,6 +16,7 @@ const DEFS = [
   { id: 'app.openShell', label: 'Open shell for the current database', category: 'Application', scope: 'global', keys: [], keywords: 'mongosh console terminal' },
   { id: 'app.openPlayground', label: 'Open playground for the current database', category: 'Application', scope: 'global', keys: [], keywords: 'script javascript' },
   { id: 'app.openSql', label: 'Open SQL query for the current database', category: 'Application', scope: 'global', keys: [] },
+  { id: 'app.toggleSidebar', label: 'Fold or unfold the connections sidebar', category: 'Application', scope: 'global', keys: ['Mod-Shift-b'], keywords: 'collapse hide show panel tree' },
   { id: 'app.toggleAssistant', label: 'Show or hide the AI assistant', category: 'Application', scope: 'global', keys: [], keywords: 'claude ai chat' },
 
   // --- Tabs ---

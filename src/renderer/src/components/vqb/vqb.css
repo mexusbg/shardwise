@@ -78,7 +78,7 @@
   align-items: center;
   gap: 6px;
   height: 28px;
-  padding: 0 3px 0 10px;
+  padding: 0 4px 0 10px;
   border-radius: 8px;
   background: var(--bg-input);
   border: 1px solid var(--vqb-line);
@@ -132,7 +132,8 @@
   flex: 1;
   overflow: auto;
   scrollbar-gutter: stable;
-  padding: 12px 2px 24px 12px;
+  /* The stable gutter (10px) sits right of the padding: cards keep clear space on both sides, scrollbar or not. */
+  padding: 12px 4px 24px 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;

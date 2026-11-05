@@ -4,6 +4,7 @@ import type { Rule } from '@shared/vqb/types'
 import { getTab, patchTab } from '../../state/store'
 import type { VqbState } from '../../state/store'
 import { setVqb } from '../../state/queryActions'
+import { useFolds } from '../../state/folds'
 
 export * from '@shared/vqb/tree'
 
@@ -13,11 +14,21 @@ export function editVqb(tabId: string, fn: (v: VqbState) => Partial<VqbState>): 
   if (v) setVqb(tabId, { ...v, ...fn(v) })
 }
 
+/** Toolbar button / Mod+B: a folded builder unfolds, an open one closes, a closed one opens unfolded. */
+export function toggleFilterBuilder(tabId: string): void {
+  const open = getTab(tabId)?.vqbOpen
+  const folds = useFolds.getState()
+  if (open && folds.vqb) return folds.setFolded('vqb', false)
+  if (!open) folds.setFolded('vqb', false)
+  patchTab(tabId, { vqbOpen: !open })
+}
+
 /** "Add to Query Builder" / field drop: open the builder and append a rule for the field to the root group. */
 export function addFieldToBuilder(tabId: string, path: string, value: unknown, hasValue: boolean): void {
   const tab = getTab(tabId)
   if (!tab) return
   patchTab(tabId, { vqbOpen: true })
+  useFolds.getState().setFolded('vqb', false)
   const rule = seedRule(ruleFromField(path, value, hasValue, tab.docs ?? []))
   editVqb(tabId, (v) => ({ root: insertNode(v.root, v.root.id, rule), useQuery: true }))
 }

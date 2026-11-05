@@ -56,7 +56,7 @@ arising from the use of the software or the inability to use it. You use it at y
 
 - Query, projection, sort, skip and limit in shell syntax (`ObjectId("…")`, `ISODate("…")`, regex literals), with
   autocomplete of field names. Enter runs the query, Shift+Enter starts a new line.
-- **Filter Builder:** drag a cell or a column header into it to add a condition, a field or a sort order.
+- **Filter Builder:** drag a cell or a column header into it to add a condition, a field or a sort order. Fold it to a thin strip at the side, or fold the connections sidebar the same way (Ctrl+Shift+B).
   `$and` / `$or` / `$nor` / `$elemMatch` groups, about 25 operators and typed values. It stays in sync with the
   query text in both directions.
 - **Table**, **List** and **JSON** views. In the table, step into nested fields, hide and resize columns, and sort

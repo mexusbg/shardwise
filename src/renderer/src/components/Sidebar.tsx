@@ -6,6 +6,8 @@ import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
 import { api } from '../lib/api'
 import { byName, byUsage, starredFirst } from '@shared/connectionUsage'
 import { connectionUsage } from '../lib/connectionUsage'
+import { withShortcut } from '../lib/commands'
+import { useFolds } from '../state/folds'
 import { openInMongosh } from './shell/openInMongosh'
 import {
   collKey,
@@ -504,6 +506,9 @@ export function Sidebar(): ReactElement {
           disabled={!lives.length}
         >
           <Icon name="refresh" size={14} />
+        </button>
+        <button className="btn ghost icon small" title={withShortcut('Fold the connections', 'app.toggleSidebar')} onClick={() => useFolds.getState().setFolded('sidebar', true)}>
+          <Icon name="panelLeft" size={14} />
         </button>
       </div>
       {lives.length > 0 && (

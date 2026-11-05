@@ -455,7 +455,7 @@ export function ServerStatusView({ tab }: { tab: ToolTab }): ReactElement {
             {(s?.version || info?.version) && <span className="badge">MongoDB {s?.version || info?.version}</span>}
             {topology && <span className="badge">{topology}</span>}
             {s && <span className="faint">up {uptimeText(s.uptime)}</span>}
-            {s?.process && <span className="faint mono">{s.process}</span>}
+            {s?.process && <span className="faint mono ellipsis" title={s.process}>{s.process}</span>}
           </span>
         </div>
         <span className="spacer" />

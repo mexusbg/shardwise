@@ -126,7 +126,9 @@ writeFileSync(
     settings: { pageSize: 50, toolsPath: '', queryTimeoutMS: 0, theme: process.env.THEME ?? 'dark' }
   })
 )
-writeFileSync(join(userData, 'window-state.json'), JSON.stringify({ bounds: { width: 1500, height: 920 }, maximized: false }))
+// E2E_WIDTH=1100 runs the whole tour in a narrower window (text that fits at 1500 px may not at 1100).
+const WIDTH = Number(process.env.E2E_WIDTH) || 1500
+writeFileSync(join(userData, 'window-state.json'), JSON.stringify({ bounds: { width: WIDTH, height: 920 }, maximized: false }))
 
 // E2E_EXE=path/to/Shardwise.exe runs the packaged app instead of the dev build; E2E_ARGS adds switches
 // (e.g. --no-sandbox for an unpacked Linux build, whose chrome-sandbox is not setuid root).
@@ -137,29 +139,76 @@ const win = await app.firstWindow()
 const errors = []
 win.on('pageerror', (e) => errors.push(e.stack ?? String(e)))
 win.on('console', (m) => m.type() === 'error' && errors.push(m.text().slice(0, 1500)))
-await win.setViewportSize({ width: 1500, height: 920 }).catch(() => {})
-// Visible controls that end within EDGE_PX of the window's right edge (cramped against it), per screen.
-const EDGE_PX = Number(process.env.E2E_EDGE_PX) || 8
+await win.setViewportSize({ width: WIDTH, height: 920 }).catch(() => {})
+// Layout report per screen (informational): text or controls touching the window's right edge (EDGE), cut off by a
+// clipping box without an ellipsis (CLIP), or flush against the right border of the card or panel around them (FLUSH).
+// Text is measured by its own glyphs, not the padded box around it. Data views that scroll by design are skipped.
 const edgeReport = new Map()
 const checkRightEdge = async (name) => {
   const hits = await win
-    .evaluate((edge) => {
-      const w = document.documentElement.clientWidth
-      const out = []
-      for (const el of document.querySelectorAll('button, input, select, .btn, .badge, .chip, [role="button"]')) {
-        const r = el.getBoundingClientRect()
-        if (!r.width || !r.height || r.right <= 0) continue
-        const cs = window.getComputedStyle(el)
-        if (cs.visibility === 'hidden' || cs.display === 'none') continue
-        if (r.right > w - edge && r.left < w) {
-          const label = (el.getAttribute('title') || el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || el.tagName).trim().slice(0, 40)
-          const parent = el.parentElement?.className?.toString().split(' ')[0] ?? ''
-          out.push(`${label} [${parent}] right=${Math.round(w - r.right)}px`)
+    .evaluate(() => {
+      const W = document.documentElement.clientWidth
+      const out = new Set()
+      const SKIP = '.grid, .cm-editor, .lv, .tabstrip, .fold-strip, .xterm, .toast, .ctx'
+      const CONTROL = 'button, input, select, textarea, .btn, .badge, .chip, [role="button"]'
+      // Right edge of what is drawn: a control's box, or the text itself (not the padded block around it).
+      const contentRight = (el) => {
+        if (el.matches(CONTROL)) return el.getBoundingClientRect().right
+        let right = -Infinity
+        for (const n of el.childNodes) {
+          if (n.nodeType !== 3 || !n.textContent.trim()) continue
+          const range = document.createRange()
+          range.selectNodeContents(n)
+          for (const r of range.getClientRects()) if (r.width) right = Math.max(right, r.right)
+        }
+        return right
+      }
+      const desc = (el) => {
+        const t = (el.getAttribute('title') || el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 36)
+        const c = (el.className?.toString() || el.tagName.toLowerCase()).split(' ')[0]
+        const p = el.parentElement?.className?.toString().split(' ')[0] ?? ''
+        return `"${t}" <${c} in ${p}>`
+      }
+      for (const el of document.querySelectorAll('body *')) {
+        if (el.closest(SKIP)) continue
+        if (el.parentElement?.closest(CONTROL) && !el.matches(CONTROL)) continue
+        const isControl = el.matches(CONTROL)
+        if (!isControl && ![...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) continue
+        const box = el.getBoundingClientRect()
+        if (box.width < 2 || box.height < 2 || box.right <= 0 || box.left >= W) continue
+        const cs = getComputedStyle(el)
+        if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) === 0) continue
+        const right = contentRight(el)
+        if (!Number.isFinite(right)) continue
+        // 1. Touching the window's right edge.
+        if (right > W - 6) out.add(`EDGE ${desc(el)} gap=${Math.round(W - right)}`)
+        // 2. Cut off by a clipping ancestor without an ellipsis.
+        let ellipsis = cs.textOverflow === 'ellipsis'
+        for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+          const acs = getComputedStyle(a)
+          if (acs.textOverflow === 'ellipsis') ellipsis = true
+          if (acs.overflowX === 'visible') continue
+          const ar = a.getBoundingClientRect()
+          const sb = a.offsetWidth - a.clientWidth - parseFloat(acs.borderLeftWidth) - parseFloat(acs.borderRightWidth)
+          const inner = ar.right - parseFloat(acs.borderRightWidth) - sb
+          if (right > inner + 1 && !ellipsis) out.add(`CLIP ${desc(el)} by <${a.className.toString().split(' ')[0] || a.tagName}> over=${Math.round(right - inner)}`)
+          break
+        }
+        // 3. Flush against the right border of the box drawn around it (card, panel, modal).
+        if (el.matches('.segmented > *, .kb-chip > *, input, select, textarea')) continue
+        for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+          const acs = getComputedStyle(a)
+          if (!(parseFloat(acs.borderRightWidth) > 0 && acs.borderRightStyle !== 'none')) continue
+          const ar = a.getBoundingClientRect()
+          const sb = a.offsetWidth - a.clientWidth - parseFloat(acs.borderLeftWidth) - parseFloat(acs.borderRightWidth)
+          const gap = ar.right - parseFloat(acs.borderRightWidth) - sb - right
+          if (gap >= -0.5 && gap < 3) out.add(`FLUSH ${desc(el)} in <${a.className.toString().split(' ')[0] || a.tagName}> gap=${Math.round(gap)}`)
+          break
         }
       }
-      return out
-    }, EDGE_PX)
-    .catch(() => [])
+      return [...out]
+    })
+    .catch((e) => [String(e)])
   if (hits.length) edgeReport.set(name, hits)
 }
 const shot = async (name) => {
@@ -219,6 +268,19 @@ try {
   await win.locator('.tree-row', { hasText: 'customers' }).first().dblclick()
   await win.waitForSelector('.grid tbody tr td')
   await shot('04-table-view')
+
+  // Folding: the connections sidebar and the Filter Builder each fold to a strip and come back from it.
+  if (!(await win.locator('.vqb').count())) await win.locator('button[title="Toggle Filter Builder"]').click()
+  await win.locator('button[title^="Fold the connections"]').click()
+  await win.locator('button[title="Fold the builder to the side"]').click()
+  await win.waitForSelector('.fold-strip.left')
+  await win.waitForSelector('.fold-strip.right')
+  await shot('04b-panels-folded')
+  await win.locator('.fold-strip.left').click()
+  await win.locator('.fold-strip.right').click()
+  await win.waitForSelector('.sidebar')
+  await win.waitForSelector('.vqb')
+  console.log('panels fold and unfold: true')
 
   // Tree type-to-jump: from "customers", p → products; after a pause o → orders, o again wraps back to
   // orders (orders_copy only appears after the import further down).
@@ -682,6 +744,25 @@ try {
     await win.locator('.ctx-item', { hasText: 'Tasks' }).first().click()
     await win.waitForTimeout(1500)
   })
+  // Many tabs open by now: arrows and the all-tabs list page through the ones that do not fit.
+  {
+    const bar = win.locator('.tabbar')
+    const overflowing = await bar.evaluate((el) => el.scrollWidth > el.clientWidth + 1)
+    const arrows = await win.locator('.tab-scroll').count()
+    if (overflowing && arrows !== 3) throw new Error(`Tabs overflow but ${arrows} of 3 tab-strip buttons are shown`)
+    await bar.evaluate((el) => el.scrollTo({ left: 0 }))
+    await win.waitForTimeout(150)
+    const before = await bar.evaluate((el) => el.scrollLeft)
+    await win.getByRole('button', { name: 'Scroll tabs right' }).click()
+    await win.waitForTimeout(500)
+    const after = await bar.evaluate((el) => el.scrollLeft)
+    console.log('tab strip: overflowing', overflowing, '· right arrow scrolls', after > before)
+    if (after <= before) throw new Error('The right tab arrow did not scroll the tabs')
+    await win.getByRole('button', { name: 'All tabs' }).click()
+    await win.waitForSelector('.ctx .ctx-item')
+    await shot('43b-all-tabs')
+    await win.keyboard.press('Escape')
+  }
   await tool('44-paste-collection', async () => {
     await collMenu('products', 'Copy Collection')
     await dbMenu('analytics', 'Paste Collection')
@@ -975,7 +1056,7 @@ try {
   process.exitCode = 1
 } finally {
   if (edgeReport.size) {
-    console.log(`Controls within ${EDGE_PX} px of the right edge:\n` + [...edgeReport].map(([s, h]) => `  ${s}: ${h.join(' · ')}`).join('\n'))
+    console.log(`Layout report (${WIDTH} px wide):\n` + [...edgeReport].map(([s, h]) => `  ${s}: ${h.join(' · ')}`).join('\n'))
   }
   if (errors.length) console.log('Renderer errors:\n' + errors.join('\n'))
   await app.close().catch(() => {})

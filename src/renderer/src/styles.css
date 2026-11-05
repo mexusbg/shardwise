@@ -472,6 +472,43 @@ textarea.input:focus {
   border-right: 1px solid var(--border);
   min-width: 180px;
 }
+/* A side panel folded to a thin strip (connections sidebar, Filter Builder); clicking it unfolds the panel. */
+.fold-strip {
+  flex: none;
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border: 0;
+  background: var(--bg-2);
+  color: var(--text-2);
+  font: inherit;
+  cursor: pointer;
+}
+.fold-strip.left {
+  border-right: 1px solid var(--border);
+}
+.fold-strip.right {
+  border-left: 1px solid var(--border);
+}
+.fold-strip:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.fold-strip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.fold-label {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .splitter {
   width: 5px;
   margin-left: -3px;
@@ -637,18 +674,62 @@ textarea.input:focus {
 
 /* ---------- Tabs ---------- */
 
-.tabbar {
+/* Tab strip: the tabs scroll sideways inside it; arrows and an all-tabs list appear when they do not fit. */
+.tabstrip {
   display: flex;
   align-items: stretch;
   height: 34px;
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
+  flex: none;
+  min-width: 0;
+}
+.tabbar {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  flex: none;
+  scrollbar-width: none;
 }
 .tabbar::-webkit-scrollbar {
-  height: 4px;
+  display: none;
+}
+.tab-scroll {
+  flex: none;
+  width: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: var(--bg-2);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.tab-scroll:first-child {
+  border-right: 1px solid var(--border);
+}
+.tabbar + .tab-scroll {
+  border-left: 1px solid var(--border);
+}
+.tab-scroll.list {
+  width: 28px;
+  margin-right: 4px;
+}
+.tab-scroll:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.tab-scroll:disabled {
+  color: var(--text-3);
+  opacity: 0.4;
+  cursor: default;
+}
+.tab-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 .tab {
   display: flex;
@@ -766,12 +847,48 @@ textarea.input:focus {
   text-align: right;
 }
 .querybar .qrow2 {
-  /* Also uses the width under the Run / builder / history buttons. */
+  /* Also uses the width under the Run / builder / history buttons. Sort, then Skip / Limit wrap to new lines when
+     the tab is too narrow for one row, so no editor is squeezed to nothing. */
   grid-column: 2 / 4;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto 70px auto 70px;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   align-items: start;
+  min-width: 0;
+}
+.querybar .qfield {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+.querybar .qfield > .cm-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.querybar .qfield.fixed {
+  flex: none;
+}
+.querybar .qfield.fixed .input {
+  width: 70px;
+}
+/* A narrow tab (small window, Filter Builder open): the buttons move under the Query editor, which gets the row. */
+.qtab-main {
+  container: qtab / inline-size;
+}
+@container qtab (max-width: 620px) {
+  .querybar {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .querybar > .row {
+    grid-column: 2;
+    flex-wrap: wrap;
+  }
+  .querybar .qrow2,
+  .querybar .qerr {
+    grid-column: 2;
+  }
 }
 .querybar .qerr {
   grid-column: 2 / 4;
@@ -1919,7 +2036,9 @@ textarea.text-value-edit {
 .pref-font-sample {
   margin-top: 8px;
   padding: 6px 10px;
-  white-space: pre;
+  /* Large sizes wrap inside the box instead of running under its right edge. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .pref-pending {
   font-size: 12px;

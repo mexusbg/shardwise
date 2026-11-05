@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
 import { newConnectionConfig } from '@shared/connection'
 import { onEvent } from './lib/api'
@@ -26,7 +26,7 @@ import {
 import type { AnyTab } from './state/store'
 import { runQuery } from './state/queryActions'
 import { editConnection } from './components/connections/ConnectionEditor'
-import { ContextMenuHost, showMenu } from './components/ContextMenu'
+import { ContextMenuHost, showMenu, showMenuAt } from './components/ContextMenu'
 import { Icon } from './components/Icon'
 import { ModalHost } from './components/Modal'
 import { QueryTab } from './components/QueryTab'
@@ -43,6 +43,7 @@ import { openQuickOpen } from './components/QuickOpen'
 import { UpdateNotice } from './components/UpdateNotice'
 import { McpApprovalHost } from './components/mcp/McpApproval'
 import { AssistantPanel, useAssistant } from './components/ai/AssistantPanel'
+import { useFolds } from './state/folds'
 import { initSession, restoreSession } from './lib/session'
 import { valueColorsCss } from '@shared/valueColors'
 
@@ -190,6 +191,7 @@ function useAppCommands(): void {
       if (t) openSqlTab(t.connId, t.db, currentTarget()?.coll)
     },
     'app.toggleAssistant': () => useAssistant.getState().toggle(),
+    'app.toggleSidebar': () => useFolds.getState().toggle('sidebar'),
     'tab.close': () => {
       const id = useStore.getState().activeTab
       // Without tabs the key goes on to the window menu (Close Window).
@@ -216,13 +218,74 @@ function useAppCommands(): void {
   })
 }
 
+const tabIcon = (t: AnyTab): string => (isToolTab(t) ? t.icon : t.kind === 'profiler' ? 'gauge' : t.kind === 'playground' ? 'code' : t.isView ? 'view' : 'collection')
+const tabLabel = (t: AnyTab): string =>
+  t.kind === 'query' ? t.coll : t.kind === 'profiler' ? 'Profiler' : t.kind === 'playground' ? `${t.title}${t.dirty ? ' •' : ''}` : t.title
+
+/**
+ * Tabs that do not fit scroll sideways. Arrows at both ends page through them (disabled at either end), the wheel
+ * scrolls them, the list button jumps to any tab, and the active tab is always scrolled into view.
+ */
 function TabBar(): ReactElement {
   const tabs = useStore((s) => s.tabs)
   const active = useStore((s) => s.activeTab)
   const live = useStore((s) => s.live)
   useShortcut('tab.close')
+  const bar = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ overflow: false, start: true, end: true })
+
+  const measure = useCallback((): void => {
+    const el = bar.current
+    if (!el) return
+    const next = { overflow: el.scrollWidth > el.clientWidth + 1, start: el.scrollLeft <= 1, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 }
+    setEdges((prev) => (prev.overflow === next.overflow && prev.start === next.start && prev.end === next.end ? prev : next))
+  }, [])
+
+  useLayoutEffect(() => {
+    const el = bar.current
+    if (!el) return
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+    }
+  }, [measure])
+
+  useLayoutEffect(() => {
+    bar.current?.querySelector('.tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    measure()
+  }, [active, tabs.length, measure])
+
+  const page = (dir: 1 | -1): void => {
+    const el = bar.current
+    if (el) el.scrollBy({ left: dir * Math.max(120, el.clientWidth * 0.7), behavior: 'smooth' })
+  }
+  const listTabs = (e: React.MouseEvent<HTMLButtonElement>): void => {
+    const r = e.currentTarget.getBoundingClientRect()
+    showMenuAt(
+      r.right - 240,
+      r.bottom + 2,
+      tabs.map((t) => ({ label: t.db ? `${tabLabel(t)} · ${t.db}` : tabLabel(t), icon: t.id === active ? 'check' : tabIcon(t), onClick: () => useStore.setState({ activeTab: t.id }) }))
+    )
+  }
+
   return (
-    <div className="tabbar">
+    <div className={`tabstrip ${edges.overflow ? 'overflowing' : ''}`}>
+      {edges.overflow && (
+        <button className="tab-scroll" aria-label="Scroll tabs left" title="Show the tabs to the left" disabled={edges.start} onClick={() => page(-1)}>
+          <Icon name="chevronLeft" size={14} />
+        </button>
+      )}
+      <div
+        ref={bar}
+        className="tabbar"
+        onScroll={measure}
+        onWheel={(e) => {
+          // A vertical wheel scrolls the tabs sideways.
+          if (bar.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) bar.current.scrollLeft += e.deltaY
+        }}
+      >
       {tabs.map((t) => (
         <div
           key={t.id}
@@ -258,10 +321,8 @@ function TabBar(): ReactElement {
               <Icon name="lock" size={11} />
             </span>
           )}
-          <Icon name={isToolTab(t) ? t.icon : t.kind === 'profiler' ? 'gauge' : t.kind === 'playground' ? 'code' : t.isView ? 'view' : 'collection'} size={13} />
-          <span className="ellipsis">
-            {t.kind === 'query' ? t.coll : t.kind === 'profiler' ? 'Profiler' : t.kind === 'playground' ? `${t.title}${t.dirty ? ' •' : ''}` : t.title}
-          </span>
+          <Icon name={tabIcon(t)} size={13} />
+          <span className="ellipsis">{tabLabel(t)}</span>
           <span className="faint ellipsis" style={{ fontSize: 11 }}>
             {t.db}
           </span>
@@ -275,6 +336,17 @@ function TabBar(): ReactElement {
           </button>
         </div>
       ))}
+      </div>
+      {edges.overflow && (
+        <>
+          <button className="tab-scroll" aria-label="Scroll tabs right" title="Show the tabs to the right" disabled={edges.end} onClick={() => page(1)}>
+            <Icon name="chevronRight" size={14} />
+          </button>
+          <button className="tab-scroll list" aria-label="All tabs" title={`All ${tabs.length} tabs`} onClick={listTabs}>
+            <Icon name="chevronDown" size={14} />
+          </button>
+        </>
+      )}
     </div>
   )
 }
@@ -417,6 +489,7 @@ export function App(): ReactElement {
   const treeSel = useStore((s) => s.treeSelection)
   const live = useStore((s) => s.live)
   const assistantOpen = useAssistant((s) => s.open)
+  const sidebarFolded = useFolds((s) => s.sidebar)
   useAppCommands()
   useShortcut('app.connectionManager')
 
@@ -487,10 +560,19 @@ export function App(): ReactElement {
         </button>
       </div>
       <div className="main">
-        <div className="sidebar" style={{ width: sidebarW }}>
-          <Sidebar />
-        </div>
-        <div className={`splitter ${dragging ? 'dragging' : ''}`} onMouseDown={startDrag} />
+        {sidebarFolded ? (
+          <button className="fold-strip left" title={withShortcut('Show the connections', 'app.toggleSidebar')} onClick={() => useFolds.getState().setFolded('sidebar', false)}>
+            <Icon name="panelRight" size={14} />
+            <span className="fold-label">Connections</span>
+          </button>
+        ) : (
+          <>
+            <div className="sidebar" style={{ width: sidebarW }}>
+              <Sidebar />
+            </div>
+            <div className={`splitter ${dragging ? 'dragging' : ''}`} onMouseDown={startDrag} />
+          </>
+        )}
         <div className="content">
           {tabs.length > 0 && <TabBar />}
           {tabs.map((t) => (
