@@ -47,8 +47,8 @@ arising from the use of the software or the inability to use it. You use it at y
 - Passwords encrypted with the operating system's keychain, or asked for each time you connect.
 - A progress dialog while a connection opens shows each step (SSH tunnel, server, version, databases), with Cancel,
   and Retry or Edit when it fails.
-- Folders and colours for connections, starred connections listed first, and read-only connections that refuse
-  every write.
+- Folders, colours and comments for connections (the comment shows in the Connection Manager and when you point
+  at a connection), starred connections listed first, and read-only connections that refuse every write.
 - Import connections from Studio 3T®, MongoDB Compass and Robo 3T exports; export them as URIs or as
   passphrase-encrypted JSON.
 

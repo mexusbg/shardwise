@@ -92,6 +92,7 @@ writeFileSync(
         id: 'atlas',
         name: 'Production (Atlas)',
         color: '#d1242f',
+        comment: 'Customer-facing cluster.\nRead replicas in eu-west.',
         folder: 'Cloud',
         mode: 'srv',
         srvHost: 'cluster0.example.mongodb.net',
@@ -234,6 +235,16 @@ try {
   await win.getByRole('button', { name: 'Connect', exact: true }).first().click()
   await win.waitForSelector('.modal')
   await shot('02-connection-manager')
+  // A comment replaces the address in the Connection Manager and leads the tooltips.
+  {
+    const row = win.locator('.list-row', { hasText: 'Production (Atlas)' })
+    const shown = (await row.locator('.conn-comment-text').textContent())?.trim()
+    const rowTip = await row.getAttribute('title')
+    const sideTip = await win.locator('.sb-saved > .btn', { hasText: 'Production (Atlas)' }).getAttribute('title')
+    const ok = shown === 'Customer-facing cluster. · Read replicas in eu-west.' && !!rowTip?.startsWith('Customer-facing cluster.') && !!sideTip?.startsWith('Customer-facing cluster.')
+    console.log('connection comment in manager and tooltips:', ok)
+    if (!ok) throw new Error(`Connection comment not shown (row: ${shown}; tooltips: ${rowTip} / ${sideTip})`)
+  }
   await win.locator('.list-row', { hasText: 'Production (Atlas)' }).click()
   await win.getByRole('button', { name: 'Edit' }).click()
   await win.waitForSelector('text=Import from URI')

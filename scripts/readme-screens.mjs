@@ -137,7 +137,7 @@ writeFileSync(
     connections: [
       conn('local', 'Local development', '#13aa52'),
       {
-        ...conn('atlas', 'Production cluster', '#d1242f', { folder: 'Cloud', mode: 'srv', srvHost: 'cluster0.example.mongodb.net' }),
+        ...conn('atlas', 'Production cluster', '#d1242f', { folder: 'Cloud', mode: 'srv', srvHost: 'cluster0.example.mongodb.net', comment: 'Customer-facing cluster, read replicas in eu-west' }),
         auth: { mechanism: 'DEFAULT', username: 'app', authSource: 'admin', askPassword: true },
         tls: { enabled: true, useSystemCA: true },
         readOnly: true

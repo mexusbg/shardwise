@@ -242,7 +242,7 @@ export class McpBridge {
     const live = new Set(this.mgr.liveConnections().map((l) => l.configId))
     return (await this.getConfigs())
       .filter((c) => c.exposeToMcp)
-      .map((c) => ({ id: c.id, name: c.name, host: connectionHostLabel(c), connected: live.has(c.id), ...(c.readOnly ? { readOnly: true } : {}) }))
+      .map((c) => ({ id: c.id, name: c.name, host: connectionHostLabel(c), ...(c.comment?.trim() ? { comment: c.comment.trim() } : {}), connected: live.has(c.id), ...(c.readOnly ? { readOnly: true } : {}) }))
   }
 
   private async resolve(name: string): Promise<{ client: MongoClient; config: ConnectionConfig }> {

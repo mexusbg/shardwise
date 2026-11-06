@@ -9,6 +9,8 @@ export interface ConnectionConfig {
   color?: string
   /** Starred (favourite): listed before the other connections. */
   starred?: boolean
+  /** Free-text note: shown in the Connection Manager instead of the address, and as the tooltip of the connection. */
+  comment?: string
   /** srv = mongodb+srv://host, standalone = single host, replicaSet = host list, uri = raw URI */
   mode: 'srv' | 'standalone' | 'replicaSet' | 'uri'
   uri?: string
@@ -455,7 +457,18 @@ export function parseDbList(text: string): string[] {
   return [...new Set(text.split(/[\n,]/).map((s) => s.trim()).filter(Boolean))]
 }
 
+/** A comment on one line (line breaks become " · "), for list rows. */
+export const oneLine = (s: string): string => s.trim().split(/\s*\n\s*/).filter(Boolean).join(' · ')
+
+/** Tooltip of a saved connection: its comment (when there is one), then name and address. */
+export function connectionTooltip(c: ConnectionConfig): string {
+  const where = `${c.name} · ${connectionHostLabel(c)}`
+  const note = c.comment?.trim()
+  return note ? `${note}\n\n${where}` : where
+}
+
 /** Short "host" label for the tree and tab titles. */
+
 export function connectionHostLabel(c: ConnectionConfig): string {
   if (c.mode === 'uri') {
     const m = /^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?]*)/.exec(c.uri ?? '')

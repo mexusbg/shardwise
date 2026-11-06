@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactElement } from 'react'
 import type { CollectionInfo } from '@shared/api'
+import { connectionTooltip } from '@shared/connection'
 import type { ConnectionConfig } from '@shared/connection'
 import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
 import { api } from '../lib/api'
@@ -268,6 +269,7 @@ function collMenu(connId: string, db: string, c: CollectionInfo): MenuItem[] {
 }
 
 function ConnectionNode({ l, filter }: { l: LiveConn; filter: string }): ReactElement {
+  const comment = useStore((s) => s.connections.find((c) => c.id === l.configId)?.comment?.trim())
   const expanded = useStore((s) => s.expanded)
   const collections = useStore((s) => s.collections)
   const counts = useStore((s) => s.counts)
@@ -296,7 +298,7 @@ function ConnectionNode({ l, filter }: { l: LiveConn; filter: string }): ReactEl
           select(l.connId)
           showMenu(e, connMenu(l))
         }}
-        title={`MongoDB ${l.serverVersion} — ${l.topology}`}
+        title={`${comment ? `${comment}\n\n` : ''}MongoDB ${l.serverVersion} — ${l.topology}`}
       >
         <span className="twisty" onClick={() => toggleExpanded(l.connId)}>
           <Icon name={open ? 'chevronDown' : 'chevronRight'} size={12} />
@@ -425,7 +427,7 @@ function QuickConnect({ saved }: { saved: ConnectionConfig[] }): ReactElement {
     <div ref={ref} className="col" style={{ marginTop: 12, alignItems: 'stretch' }}>
       {starredFirst(byUsage(byName(saved), connectionUsage())).slice(0, fit).map((c) => (
         <div key={c.id} className="sb-saved conn-row">
-          <button className="btn" onClick={() => connect(c.id)}>
+          <button className="btn" onClick={() => connect(c.id)} title={connectionTooltip(c)}>
             <Icon name="server" style={{ color: c.color ?? 'var(--leaf)' }} />
             <span className="ellipsis">{c.name}</span>
             {c.readOnly && <Icon name="lock" size={11} style={{ marginLeft: 'auto', opacity: 0.7 }} />}

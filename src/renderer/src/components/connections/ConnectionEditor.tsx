@@ -274,6 +274,18 @@ function Editor({ initial, onDone }: { initial: ConnectionConfig; onDone: (c: Co
         </div>
       </div>
 
+      <div className="field">
+        <label htmlFor="conn-comment">Comment</label>
+        <textarea
+          id="conn-comment"
+          className="input conn-comment"
+          rows={2}
+          placeholder="What this connection is for. Shown in the Connection Manager and when you point at the connection."
+          value={c.comment ?? ''}
+          onChange={(e) => patch({ comment: e.target.value || undefined })}
+        />
+      </div>
+
       <div className="field" style={{ marginBottom: 16 }}>
         <label>Import from URI</label>
         <div className="row">
