@@ -7,7 +7,7 @@ import type { Socket } from 'net'
 import { buildUri, parseUri, secretsToAsk } from '@shared/connection'
 import { formatHostPort, stripBrackets } from '@shared/proxy'
 import type { Compressor, ConnectionConfig, TlsConfig } from '@shared/connection'
-import type { ConnectResult, TestResult, TestStep } from '@shared/api'
+import type { ConnectResult, ConnectStep, TestResult, TestStep } from '@shared/api'
 import { openSshTunnel } from './sshTunnel'
 import type { Tunnel } from './sshTunnel'
 import { readOnlyClient, ReadOnlyError } from './readOnly'
@@ -150,8 +150,38 @@ function withProxyCause(e: unknown, bridge: ProxyBridge | undefined): Error {
   return last ? new Error(`${err.message} — proxy: ${last.message}`) : err
 }
 
+/** A connect attempt stopped by the user (`ConnectionManager.connect` with an aborted signal). */
+export class ConnectCancelled extends Error {
+  constructor() {
+    super('Cancelled')
+    this.name = 'ConnectCancelled'
+  }
+}
+
+export interface OpenOptions {
+  /** Called as a stage starts (`step` reports how it ended). */
+  begin?: (name: string, detail?: string) => void
+  /** Aborting closes whatever is open so far and makes the attempt fail with ConnectCancelled. */
+  signal?: AbortSignal
+}
+
+/** The servers a connection is opened to, for progress messages ("db1:27017, db2:27017", "cluster0.example.net (SRV)"). */
+export function describeServers(cfg: ConnectionConfig): string {
+  const seeds = seedHosts(cfg)
+  if (!seeds.length) return ''
+  if (seeds[0].srv) return `${seeds[0].host} (SRV)`
+  const list = seeds.slice(0, 3).map((h) => formatHostPort(h.host, h.port))
+  return seeds.length > 3 ? `${list.join(', ')} +${seeds.length - 3} more` : list.join(', ')
+}
+
 /** Open a client (and SSH tunnel / proxy bridge when configured). Calls `step` as each stage completes. */
-export async function openClient(cfg: ConnectionConfig, step: (s: TestStep) => void = () => {}): Promise<Opened> {
+export async function openClient(cfg: ConnectionConfig, step: (s: TestStep) => void = () => {}, o: OpenOptions = {}): Promise<Opened> {
+  const { begin = () => {}, signal } = o
+  const checkCancelled = async (tunnel?: Tunnel): Promise<void> => {
+    if (!signal?.aborted) return
+    await tunnel?.close()
+    throw new ConnectCancelled()
+  }
   assertSecretsGiven(cfg)
   refreshDnsServers()
   // Fails early (e.g. an unreadable CA file) before a tunnel is opened.
@@ -176,6 +206,7 @@ export async function openClient(cfg: ConnectionConfig, step: (s: TestStep) => v
       }
     }
     try {
+      begin('SSH tunnel', `${cfg.ssh.username ? `${cfg.ssh.username}@` : ''}${formatHostPort(sshHost, sshPort)}`)
       tunnel = await openSshTunnel(cfg.ssh, sock)
       step({ name: 'SSH tunnel', ok: true, detail: `${cfg.ssh.username}@${cfg.ssh.host}:${cfg.ssh.port || 22}` })
     } catch (e) {
@@ -187,17 +218,25 @@ export async function openClient(cfg: ConnectionConfig, step: (s: TestStep) => v
     bridge = await openBridgeIfNeeded(cfg, step)
     tunnel = bridge
   }
+  await checkCancelled(tunnel)
   const client = new MongoClient(buildUri(cfg, true), clientOptions(cfg, tunnel))
+  // Closing the client makes a connect that is still selecting a server fail at once.
+  const onAbort = (): void => void client.close().catch(() => {})
+  signal?.addEventListener('abort', onAbort, { once: true })
   try {
+    begin('Connect', describeServers(cfg))
     // A proxy that rejects the credentials or cannot be reached ends the attempt at once.
     await (bridge ? Promise.race([client.connect(), bridge.failure]) : client.connect())
+    await checkCancelled()
     step({ name: 'Connect', ok: true })
   } catch (e) {
-    const err = withProxyCause(e, bridge)
+    const err = signal?.aborted ? new ConnectCancelled() : withProxyCause(e, bridge)
     step({ name: 'Connect', ok: false, detail: err.message })
     await client.close().catch(() => {})
     await tunnel?.close()
     throw err
+  } finally {
+    signal?.removeEventListener('abort', onAbort)
   }
   return { client, tunnel }
 }
@@ -220,11 +259,19 @@ export class ConnectionManager {
 
   constructor(private onLost: (connId: string, error: string) => void = () => {}) {}
 
-  async connect(cfg: ConnectionConfig): Promise<ConnectResult> {
-    const { client, tunnel } = await openClient(cfg)
+  /** `progress` gets each stage as it starts and ends; aborting `signal` stops the attempt (ConnectCancelled). */
+  async connect(cfg: ConnectionConfig, o: { progress?: (s: ConnectStep) => void; signal?: AbortSignal } = {}): Promise<ConnectResult> {
+    const { progress = () => {}, signal } = o
+    const report = (s: TestStep): void => progress({ name: s.name, state: s.ok ? 'ok' : 'failed', detail: s.detail })
+    const { client, tunnel } = await openClient(cfg, report, { signal, begin: (name, detail) => progress({ name, state: 'running', detail }) })
     const connId = randomUUID()
+    const onAbort = (): void => void client.close().catch(() => {})
+    signal?.addEventListener('abort', onAbort, { once: true })
     try {
+      progress({ name: 'Server info', state: 'running' })
       const info = await serverInfo(client)
+      if (signal?.aborted) throw new ConnectCancelled()
+      progress({ name: 'Server info', state: 'ok', detail: `MongoDB ${info.version} · ${info.topology}` })
       const live: Live = { client, tunnel, config: cfg, guarded: client }
       live.guarded = readOnlyClient(
         client,
@@ -237,9 +284,13 @@ export class ConnectionManager {
       })
       return { connId, serverVersion: info.version, topology: info.topology }
     } catch (e) {
+      const err = signal?.aborted ? new ConnectCancelled() : e
+      progress({ name: 'Server info', state: 'failed', detail: (err as Error).message })
       await client.close().catch(() => {})
       await tunnel?.close()
-      throw e
+      throw err
+    } finally {
+      signal?.removeEventListener('abort', onAbort)
     }
   }
 

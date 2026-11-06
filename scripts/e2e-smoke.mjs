@@ -415,9 +415,23 @@ try {
   await win.keyboard.press('End')
   await win.keyboard.press('Enter')
   await win.keyboard.insertText('vip: true,')
+  // Numbers are plain in the editor (age: 18, score: 0) and keep their BSON types when saved.
+  const editorText = await win.locator('.modal .cm-content').innerText()
+  const plainInEditor = !/NumberInt|NumberLong\('\d{1,15}'\)|Double\(/.test(editorText) && /age: \d+/.test(editorText)
   await win.locator('.modal .btn.primary', { hasText: 'Update' }).click()
   await win.waitForTimeout(800)
   if (await win.locator('.modal').count()) await win.keyboard.press('Escape')
+  {
+    const c = await MongoClient.connect(uri)
+    const wrong = await c
+      .db('shop')
+      .collection('customers')
+      .countDocuments({ $or: [{ age: { $not: { $type: 'int' } } }, { score: { $not: { $type: 'double' } } }, { visits: { $not: { $type: 'long' } } }, { balance: { $not: { $type: 'decimal' } } }] })
+    await c.close()
+    console.log('plain numbers in editor:', plainInEditor, '· types kept on save:', wrong === 0)
+    if (!plainInEditor) throw new Error('The document editor shows typed numbers (NumberInt / Double) with Numbers set to Plain')
+    if (wrong) throw new Error(`Saving from the document editor changed number types (${wrong} documents)`)
+  }
 
   // Show as JSON (Ctrl+Shift+J) is read-only but focusable: Ctrl+F opens the find panel in it.
   await win.locator('.qtab:visible .grid tbody tr').nth(1).locator('td.rownum').click()
@@ -754,7 +768,8 @@ try {
     await win.waitForTimeout(150)
     const before = await bar.evaluate((el) => el.scrollLeft)
     await win.getByRole('button', { name: 'Scroll tabs right' }).click()
-    await win.waitForTimeout(500)
+    // The arrow scrolls smoothly: wait for it to move (up to 3 s on a busy machine) instead of a fixed pause.
+    await win.waitForFunction((b) => (document.querySelector('.tabbar')?.scrollLeft ?? 0) > b, before, { timeout: 3000 }).catch(() => {})
     const after = await bar.evaluate((el) => el.scrollLeft)
     console.log('tab strip: overflowing', overflowing, '· right arrow scrolls', after > before)
     if (after <= before) throw new Error('The right tab arrow did not scroll the tabs')

@@ -45,6 +45,8 @@ arising from the use of the software or the inability to use it. You use it at y
 - Authentication with SCRAM, X.509, LDAP, Kerberos and AWS IAM; TLS with your own CA and client certificates.
 - SSH tunnels (password or key) that also work with SRV and replica sets; HTTP and SOCKS proxies.
 - Passwords encrypted with the operating system's keychain, or asked for each time you connect.
+- A progress dialog while a connection opens shows each step (SSH tunnel, server, version, databases), with Cancel,
+  and Retry or Edit when it fails.
 - Folders and colours for connections, starred connections listed first, and read-only connections that refuse
   every write.
 - Import connections from Studio 3T®, MongoDB Compass and Robo 3T exports; export them as URIs or as
@@ -74,7 +76,8 @@ arising from the use of the software or the inability to use it. You use it at y
 ### Edit data
 
 - Edit values in place, change a value's type with conversion, or edit the whole document as JSON (Ctrl+F finds
-  text in it).
+  text in it). Numbers read plainly (`qty: 3, price: 221.21`) and keep their Int32, Long, Double or Decimal128
+  type when saved; write `NumberInt(5)` or `Double(5)` to change one.
 - Insert, paste and duplicate documents; set, rename, add and remove fields in one document, the matching
   documents or the whole collection.
 - **Update** and **Delete** dialogs with an editable query and a live count of the documents that will change.

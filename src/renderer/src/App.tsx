@@ -29,6 +29,7 @@ import { editConnection } from './components/connections/ConnectionEditor'
 import { ContextMenuHost, showMenu, showMenuAt } from './components/ContextMenu'
 import { Icon } from './components/Icon'
 import { ModalHost } from './components/Modal'
+import { ConnectProgressHost } from './components/connections/ConnectProgress'
 import { QueryTab } from './components/QueryTab'
 import { Sidebar } from './components/Sidebar'
 import { openConnectionManager } from './components/connections/ConnectionManager'
@@ -585,6 +586,7 @@ export function App(): ReactElement {
       <StatusBar />
       <Toasts />
       <JobsPanel />
+      <ConnectProgressHost />
       <ModalHost />
       <McpApprovalHost />
       <ContextMenuHost />

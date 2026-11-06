@@ -26,7 +26,8 @@ import { historyWrites } from '../changes/changesClient'
 import { historyCapText, isHistoryCapError } from '@shared/changeHistoryApi'
 import type { WriteOptions } from '@shared/changeHistoryApi'
 import { dataDateText } from '@shared/dateFormat'
-import { prefDocText } from '../../lib/docText'
+import { editorDocText, prefDocText } from '../../lib/docText'
+import { restoreNumberTypes } from '@shared/plainNumbers'
 import { collationLabel, toCollation } from '@shared/collation'
 
 /** ` (collation bg · 2)` for a filter scope with a collation. */
@@ -445,14 +446,16 @@ function parseDocsText(text: string): Doc[] {
 }
 
 function DocEditorBody({ tab, docIndex, doc, onDone, readOnly }: { tab: QueryTab; docIndex: number; doc: Doc; onDone: () => void; readOnly?: boolean }): ReactElement {
-  const [text, setText] = useState(shellText(doc, 2))
+  const [text, setText] = useState(() => editorDocText(doc))
+  const plainNums = useStore((s) => s.settings.jsonNumbers === 'plain')
   const [err, setErr] = useState<string | null>(null)
   const save = async (): Promise<void> => {
     let next: Doc
     try {
       const list = parseDocsText(text)
       if (list.length !== 1) throw new Error('Enter exactly one document')
-      next = list[0]
+      // Plain numbers (`qty: 3`) keep the type the field had: Int32, Long, Double or Decimal128.
+      next = restoreNumberTypes(list[0], doc) as Doc
     } catch (e) {
       return setErr(errorText(e))
     }
@@ -497,6 +500,7 @@ function DocEditorBody({ tab, docIndex, doc, onDone, readOnly }: { tab: QueryTab
         )
       }
     >
+      {!readOnly && plainNums && <NumberTypesHint />}
       <CodeEditor value={text} onChange={(v) => (setText(v), setErr(null))} full readOnly={readOnly} minHeight={360} maxHeight={560} onSubmit={readOnly ? undefined : save} invalid={!!err} autoFocus />
       {err && (
         <div className="notice error selectable" style={{ marginTop: 8 }}>
@@ -535,15 +539,28 @@ export async function viewDocumentDialog(tab: QueryTab, docIndex: number): Promi
   if (doc) void openModal<void>((close) => <DocEditorBody tab={tab} docIndex={docIndex} doc={doc} onDone={() => close()} readOnly />)
 }
 
-function InsertBody({ tab, initial, onDone }: { tab: QueryTab; initial: string; onDone: () => void }): ReactElement {
+/** Plain numbers hide their type; this says how saving treats them and how to change one. */
+function NumberTypesHint(): ReactElement {
+  return (
+    <div className="muted" style={{ marginBottom: 8 }}>
+      Numbers keep their field&apos;s type when saved; a whole-number field given a fraction becomes a Double. To change a type, write it out: <span className="mono">NumberInt(5)</span>, <span className="mono">Double(5)</span>, <span className="mono">NumberLong(5)</span>, <span className="mono">NumberDecimal(&apos;5.0&apos;)</span>.
+    </div>
+  )
+}
+
+/** Bare numbers take the types of `like` (the document being duplicated), matched by position. */
+const withTypesOf = (docs: Doc[], like?: Doc[]): Doc[] => (like?.length ? docs.map((d, i) => restoreNumberTypes(d, like[Math.min(i, like.length - 1)]) as Doc) : docs)
+
+function InsertBody({ tab, initial, typesFrom, onDone }: { tab: QueryTab; initial: string; typesFrom?: Doc[]; onDone: () => void }): ReactElement {
   const [text, setText] = useState(initial)
+  // Where bare numbers get their types from; Format JSON replaces it with what was formatted (typed values included).
+  const [types, setTypes] = useState(typesFrom)
   const [msg, setMsg] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null)
   const [added, setAdded] = useState(0)
 
   const validate = (): Doc[] | null => {
     try {
-      const d = parseDocsText(text)
-      return d
+      return withTypesOf(parseDocsText(text), types)
     } catch (e) {
       setMsg({ kind: 'error', text: errorText(e) })
       return null
@@ -588,7 +605,9 @@ function InsertBody({ tab, initial, onDone }: { tab: QueryTab; initial: string; 
             className="btn"
             onClick={() => {
               const d = validate()
-              if (d) setText(d.length === 1 ? shellText(d[0], 2) : shellText(d, 2))
+              if (!d) return
+              setTypes(d)
+              setText(d.length === 1 ? editorDocText(d[0]) : editorDocText(d))
             }}
           >
             Format JSON
@@ -619,9 +638,9 @@ function InsertBody({ tab, initial, onDone }: { tab: QueryTab; initial: string; 
   )
 }
 
-export function insertDocumentDialog(tab: QueryTab, initial = '{\n  \n}'): void {
+export function insertDocumentDialog(tab: QueryTab, initial = '{\n  \n}', typesFrom?: Doc[]): void {
   if (!canWrite(tab)) return
-  void openModal<void>((close) => <InsertBody tab={tab} initial={initial} onDone={() => close()} />)
+  void openModal<void>((close) => <InsertBody tab={tab} initial={initial} typesFrom={typesFrom} onDone={() => close()} />)
 }
 
 export async function duplicateDocument(tab: QueryTab, docIndex: number): Promise<void> {
@@ -629,7 +648,7 @@ export async function duplicateDocument(tab: QueryTab, docIndex: number): Promis
   if (!full) return
   const d = { ...full }
   delete d._id
-  insertDocumentDialog(tab, shellText(d, 2))
+  insertDocumentDialog(tab, editorDocText(d), [d])
 }
 
 /** Paste documents from the clipboard text into the insert dialog. */

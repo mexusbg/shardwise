@@ -13,6 +13,7 @@ import type {
 } from '@shared/api'
 import type { ConnectionConfig } from '@shared/connection'
 import { askSecrets } from '../components/connections/askSecrets'
+import { endAttempt, failAttempt, startAttempt, stepAttempt } from './connectProgress'
 import { newGroup } from '@shared/vqb/types'
 import type { Group, ProjectionItem, SortItem } from '@shared/vqb/types'
 import { DEFAULT_SETTINGS } from '@shared/settings'
@@ -321,17 +322,44 @@ async function openConnection(configId: string): Promise<string | null> {
   // Connections that do not save their password ask for it now (also when a session is restored).
   const secrets = await askSecrets(cfg)
   if (!secrets) return null
+  const attempt = startAttempt(configId, cfg.name, cfg.color)
+  // Cancel in the progress dialog ends the attempt at once; the main process closes what it opened so far.
+  let cancel!: () => void
+  const cancelled = new Promise<null>((resolve) => (cancel = () => resolve(null)))
+  cancels.set(attempt, cancel)
+  const opening = api.connect(configId, Object.keys(secrets).length ? secrets : undefined, attempt)
   try {
-    const r = await api.connect(configId, Object.keys(secrets).length ? secrets : undefined)
+    const r = await Promise.race([opening, cancelled])
+    if (!r) {
+      // Opened just as Cancel was pressed: close it again.
+      void opening.then((late) => api.disconnect(late.connId)).catch(() => {})
+      return null
+    }
     const live: LiveConn = { connId: r.connId, configId, name: cfg.name, color: cfg.color, serverVersion: r.serverVersion, topology: r.topology, readOnly: !!cfg.readOnly }
     set((s) => ({ live: { ...s.live, [r.connId]: live }, expanded: { ...s.expanded, [r.connId]: true }, treeSelection: r.connId }))
     noteConnectionUse(configId)
+    stepAttempt(attempt, { name: 'Databases', state: 'running' })
     await refreshDatabases(r.connId)
+    const l = get().live[r.connId]
+    stepAttempt(attempt, l?.error ? { name: 'Databases', state: 'failed', detail: l.error } : { name: 'Databases', state: 'ok', detail: `${l?.databases?.length ?? 0} database(s)` })
+    endAttempt(attempt)
     return r.connId
   } catch (e) {
-    toast(`Could not connect to ${cfg.name}: ${errorText(e)}`, 'error')
+    failAttempt(attempt, errorText(e))
     return null
+  } finally {
+    cancels.delete(attempt)
   }
+}
+
+/** Cancel callbacks of the connect attempts in progress. */
+const cancels = new Map<string, () => void>()
+
+/** Cancel in the connect progress dialog: stops the attempt and closes the dialog. */
+export function cancelConnect(attemptId: string): void {
+  cancels.get(attemptId)?.()
+  void api.cancelConnect(attemptId).catch(() => {})
+  endAttempt(attemptId)
 }
 
 /** Expands the tree down to the tab's collection (or database) and selects that row; returns its key. */

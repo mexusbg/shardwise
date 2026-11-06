@@ -42,6 +42,7 @@ export const PREF_ENTRIES: PrefEntry[] = [
   { id: 'rememberResultView', tab: 'data', label: 'Remember the view per collection', keywords: 'last used result table tree json' },
   { id: 'filterBuilderOnOpen', tab: 'data', label: 'Show the Filter Builder when a collection opens', keywords: 'visual query builder vqb panel open default' },
   { id: 'defaultCollation', tab: 'data', label: 'Default collation', hint: 'Language-aware sort and case-insensitive matching for new query tabs', keywords: 'collation locale language sort order alphabetical case insensitive strength cyrillic bulgarian russian icu' },
+  { id: 'jsonNumbers', tab: 'data', label: 'Numbers in JSON', hint: 'Plain 3 and 221.21, or NumberInt / Double with the type', keywords: 'numberint numberlong numberdecimal double int32 int64 plain typed wrappers json editor' },
   { id: 'jsonStyle', tab: 'data', label: 'JSON style', hint: 'JSON view and copied documents', keywords: 'ejson extended relaxed canonical shell mongosh copy document format' },
 
   { id: 'editorFontFamily', tab: 'editing', label: 'Font', keywords: 'family monospace typeface code' },

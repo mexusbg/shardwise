@@ -1,13 +1,14 @@
 import { EJSON } from 'bson'
 import type { JsonStyle } from './api'
 import { shellText } from './bsonValue'
+import { plainNumbers } from './plainNumbers'
 
 /**
  * Text of a document (or list of documents) in the chosen style: mongosh syntax such as
  * `ObjectId('…')`, or Extended JSON v2 in relaxed (`{"$oid": …}`, plain numbers) or canonical form.
  */
-export function docText(v: unknown, style: JsonStyle = 'shell', indent = 2): string {
-  if (style === 'shell' || v === undefined) return shellText(v, indent)
+export function docText(v: unknown, style: JsonStyle = 'shell', indent = 2, numbers: 'plain' | 'typed' = 'typed'): string {
+  if (style === 'shell' || v === undefined) return shellText(numbers === 'plain' ? plainNumbers(v) : v, indent)
   try {
     return EJSON.stringify(v as object, undefined, indent, { relaxed: style === 'relaxed' })
   } catch {

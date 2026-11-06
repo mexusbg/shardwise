@@ -2,7 +2,8 @@ import { app, BrowserWindow, clipboard, dialog, shell } from 'electron'
 import { join } from 'path'
 import type { OpenDialogOptions } from 'electron'
 import { buildUri, clearAskedSecrets, effectiveSetting, parseUri, withSecrets } from '@shared/connection'
-import type { Api } from '@shared/api'
+import type { Api, ConnectStep } from '@shared/api'
+import { encodeIpc } from '@shared/ipcCodec'
 import { analyzeSchema } from '@shared/schema'
 import { checkLatestRelease, repoFromPackage } from '@shared/updates'
 import { appFetch } from './net/fetch'
@@ -88,6 +89,8 @@ export function createApi(
   const files = gridFsHandlers(gridfs)
   const writable = (connId: string, action: string): void => mgr.assertWritable(connId, action)
   const mongosh = new MongoshLauncher(mgr, async () => (await store.getSettings()).mongoshPath)
+  /** Connect attempts still in progress, by the renderer's attempt id (Cancel in the progress dialog). */
+  const attempts = new Map<string, AbortController>()
 
   return {
     getSettings: () => store.getSettings(),
@@ -131,7 +134,18 @@ export function createApi(
     buildUri: (c, withPassword) => buildUri(c, withPassword),
     testConnection: (c) => mgr.test(c),
 
-    connect: async (id, secrets) => mgr.connect(withSecrets(await store.getConnection(id), secrets)),
+    connect: async (id, secrets, attemptId) => {
+      if (!attemptId) return mgr.connect(withSecrets(await store.getConnection(id), secrets))
+      const ctl = new AbortController()
+      attempts.set(attemptId, ctl)
+      try {
+        const progress = (p: ConnectStep): void => void win()?.webContents.send('event', 'connect:progress', encodeIpc({ attemptId, ...p }))
+        return await mgr.connect(withSecrets(await store.getConnection(id), secrets), { progress, signal: ctl.signal })
+      } finally {
+        attempts.delete(attemptId)
+      }
+    },
+    cancelConnect: (attemptId) => attempts.get(attemptId)?.abort(),
     disconnect: (connId) => mgr.disconnect(connId),
 
     listDatabases: (connId) => ops.listDatabases(mgr.get(connId), mgr.config(connId)),

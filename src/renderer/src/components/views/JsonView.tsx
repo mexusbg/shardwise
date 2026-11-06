@@ -14,6 +14,7 @@ const MAX_CHARS = 3 * 1024 * 1024
 export const JsonView = memo(function JsonView({ tab }: { tab: QueryTab }): ReactElement {
   const docs = tab.docs
   const style = useStore((s) => s.settings.jsonStyle)
+  const numbers = useStore((s) => s.settings.jsonNumbers)
   // Shell syntax writes dates in the zone of the date settings.
   const dates = useDateSettingsKey()
   const [collapsed, choose] = useNestedCollapsed('shardwise.jsonView.nested')
@@ -22,14 +23,14 @@ export const JsonView = memo(function JsonView({ tab }: { tab: QueryTab }): Reac
     const parts: string[] = []
     let size = 0
     for (let i = 0; i < docs.length; i++) {
-      const s = inlineSingleValueArrays(docText(docs[i], style, 2))
+      const s = inlineSingleValueArrays(docText(docs[i], style, 2, numbers))
       size += s.length + 2
       if (size > MAX_CHARS) return null
       parts.push(s)
     }
     return parts.join('\n\n')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [docs, tab.rev, style, dates])
+  }, [docs, tab.rev, style, numbers, dates])
 
   const folds = useMemo(() => (collapsed && text ? nestedFieldFolds(text) : []), [collapsed, text])
 

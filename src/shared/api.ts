@@ -56,6 +56,8 @@ export interface AppSettings {
   treeExpandFirst: boolean
   /** Text style of the JSON view and of copied documents. */
   jsonStyle: JsonStyle
+  /** Shell syntax: plain = `qty: 3, price: 221.21`; typed = `NumberInt('3')`, `Double('221.21')`. Saving keeps each field's type. */
+  jsonNumbers: 'plain' | 'typed'
   /** Ask before deleting a single document (multi-document deletes always ask). */
   confirmSingleDelete: boolean
   /** Look for a newer GitHub release when the app starts (Settings → About). */
@@ -215,6 +217,18 @@ export interface ConnectResult {
   connId: string
   serverVersion: string
   topology: string
+}
+
+/** One stage of opening a connection, as it starts (`running`) and as it ends (`ok` / `failed`). */
+export interface ConnectStep {
+  name: string
+  state: 'running' | 'ok' | 'failed'
+  detail?: string
+}
+
+/** A stage of the connect attempt `attemptId` (the id the renderer passed to `connect`). */
+export interface ConnectProgress extends ConnectStep {
+  attemptId: string
 }
 
 export interface DatabaseInfo {
@@ -592,8 +606,13 @@ export interface Api extends CompareApi, MigrationApi, MaskingApi, AiApi, TasksA
   testConnection(c: ConnectionConfig): TestResult
 
   // live connections
-  /** `secrets`: what the user typed for a connection that asks for its password on every connect. */
-  connect(id: string, secrets?: PromptedSecrets): ConnectResult
+  /**
+   * `secrets`: what the user typed for a connection that asks for its password on every connect.
+   * `attemptId`: reports each stage as a `connect:progress` event and lets `cancelConnect` stop the attempt.
+   */
+  connect(id: string, secrets?: PromptedSecrets, attemptId?: string): ConnectResult
+  /** Stops a connect attempt still in progress; its `connect` call fails with "Cancelled". */
+  cancelConnect(attemptId: string): void
   disconnect(connId: string): void
 
   // browsing
@@ -712,6 +731,7 @@ export type ApiResponse = { ok: true; value: string } | { ok: false; error: stri
 export interface ApiEvents extends AiEvents, TasksEvents, SearchEvents {
   'job:progress': JobProgress
   'connection:lost': { connId: string; error: string }
+  'connect:progress': ConnectProgress
   'playground:log': { runId: string; log: PlaygroundLog }
   'shell:log': { sessionId: string; log: PlaygroundLog }
   'shell:confirm': ShellConfirmRequest

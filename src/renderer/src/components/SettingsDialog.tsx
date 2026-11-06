@@ -152,10 +152,12 @@ const VIEWS: [ResultViewKind, string][] = [
   ['json', 'JSON']
 ]
 const JSON_SAMPLE: Record<JsonStyle, string> = {
-  shell: "{ _id: ObjectId('65a1…'), qty: 3, at: ISODate('2026-01-05T10:00:00Z') }",
+  shell: "{ _id: ObjectId('65a1…'), qty: 3, price: 221.21, at: ISODate('2026-01-05T10:00:00Z') }",
   relaxed: '{ "_id": { "$oid": "65a1…" }, "qty": 3, "at": { "$date": "2026-01-05T10:00:00Z" } }',
   canonical: '{ "_id": { "$oid": "65a1…" }, "qty": { "$numberInt": "3" }, "at": { "$date": { "$numberLong": "1767607200000" } } }'
 }
+
+const TYPED_SHELL_SAMPLE = "{ _id: ObjectId('65a1…'), qty: NumberInt('3'), price: Double('221.21'), at: ISODate('2026-01-05T10:00:00Z') }"
 
 function DataTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement {
   const [historyText, setHistoryText] = useState(String(s.historyLimit))
@@ -232,8 +234,13 @@ function DataTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement {
       <Group title="Showing documents">
         <Field id="jsonStyle" label="JSON format" top hint="JSON view, Copy Document and Copy results.">
           <Segmented value={s.jsonStyle} options={Object.entries(JSON_STYLE_LABELS) as [JsonStyle, string][]} onChange={(jsonStyle) => setS({ ...s, jsonStyle })} />
-          <div className="pref-sample mono">{JSON_SAMPLE[s.jsonStyle]}</div>
+          <div className="pref-sample mono">{s.jsonStyle === 'shell' && s.jsonNumbers === 'typed' ? TYPED_SHELL_SAMPLE : JSON_SAMPLE[s.jsonStyle]}</div>
         </Field>
+        {s.jsonStyle === 'shell' && (
+          <Field id="jsonNumbers" label="Numbers" hint={s.jsonNumbers === 'plain' ? "qty: 3, price: 221.21. Saving a document keeps each field's type (Int32, Long, Double, Decimal128)." : "qty: NumberInt('3'), price: Double('221.21')"}>
+            <Segmented value={s.jsonNumbers} options={[['plain', 'Plain'], ['typed', 'With type']] as const} onChange={(jsonNumbers) => setS({ ...s, jsonNumbers })} />
+          </Field>
+        )}
       </Group>
     </>
   )

@@ -1575,6 +1575,157 @@ textarea.text-value-edit {
   color: var(--danger);
 }
 
+/* ---------- Connect progress dialog ---------- */
+
+.cnp-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 16, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fade 0.12s ease-out;
+  padding: 16px;
+}
+.cnp-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 440px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+.cnp-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 16px 16px 12px;
+  min-width: 0;
+}
+.cnp-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.cnp-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--accent);
+}
+.cnp-heading {
+  min-width: 0;
+  flex: 1;
+}
+.cnp-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.cnp-sub {
+  margin-top: 2px;
+  font-size: 12px;
+}
+.cnp-bar {
+  margin: 14px 0 10px;
+  height: 4px;
+}
+.cnp-card.failed .cnp-bar > div {
+  background: var(--danger);
+}
+.cnp-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cnp-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 3px 0;
+  line-height: 18px;
+}
+.cnp-step > svg,
+.cnp-step > .cnp-spinner,
+.cnp-step > .cnp-pending {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.cnp-step.ok > svg {
+  color: var(--ok);
+}
+.cnp-step.failed > svg,
+.cnp-step.failed .cnp-label {
+  color: var(--danger);
+}
+.cnp-step.pending .cnp-label {
+  color: var(--text-2);
+}
+.cnp-step.running .cnp-label {
+  font-weight: 600;
+}
+.cnp-label {
+  flex: none;
+}
+.cnp-detail {
+  min-width: 0;
+  flex: 1;
+  text-align: right;
+  font-size: 12px;
+}
+.cnp-pending {
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  box-sizing: border-box;
+  transform: scale(0.75);
+}
+.cnp-spinner {
+  border: 2px solid var(--bg-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: cnp-spin 0.8s linear infinite;
+}
+@keyframes cnp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.cnp-hint {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.cnp-error {
+  margin-top: 10px;
+  max-height: 160px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.cnp-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.cnp-elapsed {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
 /* ---------- Context menu ---------- */
 
 .ctx {
