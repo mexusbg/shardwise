@@ -14,6 +14,7 @@ import { editorPrefs } from '../lib/editorPrefs'
 import { commandKeymap } from '../lib/commands'
 import type { CommandId } from '../lib/commands'
 import { editorSearch } from '../lib/editorSearch'
+import { bracketFolding } from '@shared/bracketFold'
 
 const highlight = HighlightStyle.define([
   { tag: [t.string, t.special(t.string)], color: 'var(--t-string)' },
@@ -135,7 +136,7 @@ export function CodeEditor(p: Props): ReactElement {
       readOnlyComp.current.of(EditorState.readOnly.of(!!p.readOnly))
     ]
     if (p.placeholder) exts.push(cmPlaceholder(p.placeholder))
-    if (p.full) exts.push(lineNumbers(), foldGutter(), highlightActiveLine(), editorSearch())
+    if (p.full) exts.push(lineNumbers(), foldGutter(), bracketFolding(), highlightActiveLine(), editorSearch())
     const style: Record<string, string> = {}
     if (p.minHeight) style.minHeight = `${p.minHeight}px`
     if (p.maxHeight) style.maxHeight = `${p.maxHeight}px`
