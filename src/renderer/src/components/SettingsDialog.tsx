@@ -137,6 +137,12 @@ function WorkspaceTab({ s, setS }: { s: AppSettings; setS: SetS }): ReactElement
           <Switch checked={s.connectionManagerOnStart} onChange={(v) => setS({ ...s, connectionManagerOnStart: v })} />
         </Field>
       </Group>
+
+      <Group title="Clipboard">
+        <Field id="clipboardConnections" label="Offer connection strings from the clipboard" hint="When Shardwise gets focus with a new mongodb:// or mongodb+srv:// string copied, it asks whether to add it. Strings you decline are not offered again until the next launch.">
+          <Switch checked={s.clipboardConnections} onChange={(v) => setS({ ...s, clipboardConnections: v })} />
+        </Field>
+      </Group>
     </>
   )
 }

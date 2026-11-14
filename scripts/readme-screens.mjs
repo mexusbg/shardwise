@@ -144,7 +144,7 @@ writeFileSync(
       },
       { ...conn('staging', 'Staging', '#bf8700', { folder: 'Cloud' }), ssh: { enabled: true, host: 'bastion.example.com', port: 22, username: 'deploy', method: 'key' } }
     ],
-    settings: { pageSize: 50, toolsPath: '', queryTimeoutMS: 0, theme: 'dark', checkUpdates: false }
+    settings: { pageSize: 50, toolsPath: '', queryTimeoutMS: 0, theme: 'dark', checkUpdates: false, clipboardConnections: false }
   })
 )
 writeFileSync(join(userData, 'window-state.json'), JSON.stringify({ bounds: { width: W, height: H }, maximized: false }))

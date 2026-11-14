@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { KeyboardEvent, ReactElement } from 'react'
+import type { KeyboardEvent, MouseEvent, ReactElement } from 'react'
 import type { CollectionInfo } from '@shared/api'
 import { connectionTooltip } from '@shared/connection'
 import type { ConnectionConfig } from '@shared/connection'
 import { TYPE_AHEAD_RESET_MS, typeAheadTarget } from '@shared/typeAhead'
+import { activeMulti, clickMulti } from '@shared/treeMulti'
 import { api } from '../lib/api'
 import { byName, byUsage, starredFirst } from '@shared/connectionUsage'
 import { connectionUsage } from '../lib/connectionUsage'
@@ -243,28 +244,90 @@ function collMenu(connId: string, db: string, c: CollectionInfo): MenuItem[] {
       icon: 'trash',
       danger: true,
       disabled: ro,
-      onClick: async () => {
-        const ok = await confirmDialog({
-          title: c.type === 'view' ? 'Drop view' : 'Drop collection',
-          message: (
-            <>
-              Permanently drop <b>{db}.{c.name}</b>
-              {c.type !== 'view' ? ' and all its documents and indexes' : ''}? This cannot be undone.
-            </>
-          ),
-          confirmLabel: 'Drop',
-          danger: true
-        })
-        if (!ok) return
-        try {
-          await api.dropCollection(connId, db, c.name)
-          await refreshCollections(connId, db)
-          toast(`Dropped ${db}.${c.name}`, 'success')
-        } catch (e) {
-          toast(errorText(e), 'error')
-        }
-      }
+      onClick: () => dropOne(connId, db, c)
     }
+  ]
+}
+
+async function dropOne(connId: string, db: string, c: CollectionInfo): Promise<void> {
+  const ok = await confirmDialog({
+    title: c.type === 'view' ? 'Drop view' : 'Drop collection',
+    message: (
+      <>
+        Permanently drop <b>{db}.{c.name}</b>
+        {c.type !== 'view' ? ' and all its documents and indexes' : ''}? This cannot be undone.
+      </>
+    ),
+    confirmLabel: 'Drop',
+    danger: true
+  })
+  if (!ok) return
+  try {
+    await api.dropCollection(connId, db, c.name)
+    await refreshCollections(connId, db)
+    toast(`Dropped ${db}.${c.name}`, 'success')
+  } catch (e) {
+    toast(errorText(e), 'error')
+  }
+}
+
+/** Drops collections and views of one database after one confirmation; reports the ones that failed. */
+async function dropCollections(connId: string, db: string, names: string[]): Promise<void> {
+  if (!names.length || isConnReadOnly(connId)) return
+  if (names.length === 1) {
+    const c = useStore.getState().collections[dbKey(connId, db)]?.find((x) => x.name === names[0])
+    return dropOne(connId, db, c ?? { name: names[0], type: 'collection' })
+  }
+  const shown = names.slice(0, 12)
+  const ok = await confirmDialog({
+    title: `Drop ${names.length} collections`,
+    message: (
+      <>
+        Permanently drop these {names.length} collections of <b>{db}</b> with all their documents and indexes? This cannot be undone.
+        <ul className="drop-list mono">
+          {shown.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+          {names.length > shown.length && <li className="faint">and {names.length - shown.length} more</li>}
+        </ul>
+      </>
+    ),
+    confirmLabel: `Drop ${names.length} collections`,
+    danger: true
+  })
+  if (!ok) return
+  const failed: string[] = []
+  for (const n of names) {
+    try {
+      await api.dropCollection(connId, db, n)
+    } catch (e) {
+      failed.push(`${n}: ${errorText(e)}`)
+    }
+  }
+  useStore.setState({ treeMulti: [] })
+  await refreshCollections(connId, db)
+  const dropped = names.length - failed.length
+  if (dropped) toast(`Dropped ${dropped} collection${dropped === 1 ? '' : 's'} from ${db}`, 'success')
+  if (failed.length) toast(`Could not drop ${failed.length}: ${failed.join('; ')}`, 'error')
+}
+
+/** Menu for several collections of one database selected together. */
+function multiMenu(connId: string, db: string, colls: CollectionInfo[]): MenuItem[] {
+  const ro = isConnReadOnly(connId)
+  const names = colls.map((c) => c.name)
+  const n = names.length
+  const tables = colls.filter((c) => c.type !== 'view').map((c) => c.name)
+  return [
+    { label: `Open ${n} Collections`, icon: 'table', onClick: () => colls.forEach((c) => openCollectionTab(connId, db, c.name, c.type === 'view')) },
+    { separator: true },
+    { label: `Copy ${n} Collections`, icon: 'copy', onClick: () => useTreeClipboard.setState({ item: { kind: 'collection', connId, db, colls: names } }) },
+    pasteItem(connId, db),
+    { separator: true },
+    { label: `Export ${n} collections…`, icon: 'export', onClick: () => openExportDialog({ connId, db, collections: names }) },
+    { label: 'Migrate to SQL…', icon: 'sql', disabled: !tables.length, onClick: () => openMigrationTab(connId, db, { direction: 'toSql', collections: tables }) },
+    { separator: true },
+    { label: 'Copy names', icon: 'copy', onClick: () => api.copyText(names.join('\n')) },
+    { label: `Drop ${n} collections…`, icon: 'trash', danger: true, disabled: ro, onClick: () => void dropCollections(connId, db, names) }
   ]
 }
 
@@ -274,7 +337,16 @@ function ConnectionNode({ l, filter }: { l: LiveConn; filter: string }): ReactEl
   const collections = useStore((s) => s.collections)
   const counts = useStore((s) => s.counts)
   const selection = useStore((s) => s.treeSelection)
-  const select = (k: string): void => useStore.setState({ treeSelection: k })
+  const treeMulti = useStore((s) => s.treeMulti)
+  const multi = activeMulti({ selection, multi: treeMulti })
+  const select = (k: string): void => useStore.setState({ treeSelection: k, treeMulti: [] })
+  // Ctrl/Cmd+click adds or removes a collection, Shift+click selects a run of them (within one database).
+  const clickColl = (e: MouseEvent, ck: string, siblings: string[]): void => {
+    if (!(e.ctrlKey || e.metaKey || e.shiftKey)) return select(ck)
+    const s = useStore.getState()
+    const next = clickMulti({ selection: s.treeSelection, multi: s.treeMulti }, ck, siblings, e.shiftKey ? 'range' : 'toggle')
+    useStore.setState({ treeSelection: next.selection, treeMulti: next.multi })
+  }
   const open = expanded[l.connId]
 
   const toggleDb = (db: string): void => {
@@ -352,19 +424,26 @@ function ConnectionNode({ l, filter }: { l: LiveConn; filter: string }): ReactEl
                 <span className="label">{d.name}</span>
               </div>
               {dbOpen &&
-                (visible ?? []).map((c) => {
+                (visible ?? []).map((c, _, shown) => {
                   const ck = collKey(l.connId, d.name, c.name)
                   return (
                     <div
                       key={c.name}
-                      className={`tree-row ${selection === ck ? 'selected' : ''}`}
+                      className={`tree-row ${selection === ck || multi.includes(ck) ? 'selected' : ''}`}
                       style={{ paddingLeft: 40 }}
                       data-tree-key={ck}
                       data-tree-parent={k}
                       data-tree-name={c.name}
-                      onClick={() => select(ck)}
-                      onDoubleClick={() => openCollectionTab(l.connId, d.name, c.name, c.type === 'view')}
+                      onMouseDown={(e) => {
+                        // Shift+click selects rows, not the text in them.
+                        if (e.shiftKey) e.preventDefault()
+                      }}
+                      onClick={(e) => clickColl(e, ck, shown.map((x) => collKey(l.connId, d.name, x.name)))}
+                      onDoubleClick={(e) => {
+                        if (!(e.ctrlKey || e.metaKey || e.shiftKey)) openCollectionTab(l.connId, d.name, c.name, c.type === 'view')
+                      }}
                       onContextMenu={(e) => {
+                        if (multi.includes(ck)) return showMenu(e, multiMenu(l.connId, d.name, shown.filter((x) => multi.includes(collKey(l.connId, d.name, x.name)))))
                         select(ck)
                         showMenu(e, collMenu(l.connId, d.name, c))
                       }}
@@ -480,6 +559,7 @@ export function Sidebar(): ReactElement {
 
   // Type-to-jump: letters select the next row at the same level whose name starts with them.
   const onTreeKey = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (e.key === 'Delete' && e.target === e.currentTarget && !e.ctrlKey && !e.metaKey && !e.altKey) return deleteSelected(e)
     if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || e.target !== e.currentTarget) return
     const now = Date.now()
     const fresh = now - typed.current.at > TYPE_AHEAD_RESET_MS
@@ -492,6 +572,19 @@ export function Sidebar(): ReactElement {
     if (!hit) return
     useStore.setState({ treeSelection: hit })
     rows.find((r) => r.dataset.treeKey === hit)?.scrollIntoView({ block: 'nearest' })
+  }
+
+  // Delete drops the selected collection(s), after the usual confirmation.
+  const deleteSelected = (e: KeyboardEvent<HTMLDivElement>): void => {
+    const s = useStore.getState()
+    const keys = activeMulti({ selection: s.treeSelection, multi: s.treeMulti })
+    const rows = (keys.length ? keys : [s.treeSelection ?? '']).map((k) => e.currentTarget.querySelector<HTMLElement>(`[data-tree-key="${CSS.escape(k)}"]`))
+    // Collection rows are the ones whose parent is a database row ("conn/db"); database rows have a connection as parent.
+    const parent = rows[0]?.dataset.treeParent ?? ''
+    const slash = parent.indexOf('/')
+    if (slash < 0 || rows.some((r) => !r || r.dataset.treeParent !== parent)) return
+    e.preventDefault()
+    void dropCollections(parent.slice(0, slash), parent.slice(slash + 1), rows.map((r) => r!.dataset.treeName ?? ''))
   }
 
   return (

@@ -476,3 +476,38 @@ export function connectionHostLabel(c: ConnectionConfig): string {
   }
   return hostList(c)
 }
+
+/** Clipboard text that is one MongoDB connection string (trimmed), or null for anything else. */
+export function connectionStringIn(text: string): string | null {
+  const t = text.trim()
+  if (t.length > 4096 || !/^mongodb(\+srv)?:\/\/\S+$/.test(t)) return null
+  try {
+    parseUri(t)
+    return t
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The server and user a connection reaches, for telling whether a connection string is already saved:
+ * hosts (in any order) or the SRV name, plus the user name. Other settings (databases shown, options) do not count.
+ */
+export function connectionTarget(c: ConnectionConfig): string | null {
+  let cfg = c
+  if (c.mode === 'uri') {
+    try {
+      cfg = parseUri(c.uri ?? '')
+    } catch {
+      return null
+    }
+  }
+  const where = cfg.mode === 'srv' ? `srv:${(cfg.srvHost ?? '').toLowerCase()}` : cfg.hosts.map((h) => `${h.host.toLowerCase()}:${h.port}`).sort().join(',')
+  return `${where}|${cfg.auth.username ?? ''}`
+}
+
+/** A saved connection that reaches the same server as the user of `c`, if there is one. */
+export const savedTwin = (c: ConnectionConfig, saved: ConnectionConfig[]): ConnectionConfig | undefined => {
+  const target = connectionTarget(c)
+  return target === null ? undefined : saved.find((s) => connectionTarget(s) === target)
+}

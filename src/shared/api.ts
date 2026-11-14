@@ -86,6 +86,8 @@ export interface AppSettings {
   historyLimit: number
   /** Show the Connection Manager at launch when no tabs are restored. */
   connectionManagerOnStart: boolean
+  /** Offer to add a MongoDB connection string found on the clipboard (when the window gets focus). */
+  clipboardConnections: boolean
 
   // --- Network (Settings → Network & tools) ---
   /** Outbound proxy for MongoDB, SSH, SQL and HTTPS traffic; a connection can override it. */
@@ -602,6 +604,11 @@ export interface Api extends CompareApi, MigrationApi, MaskingApi, AiApi, TasksA
   previewConnectionImportFromClipboard(passphrase?: string): ConnectionImportPreview
   importConnections(conns: ConnectionConfig[]): number
   parseUri(uri: string, base?: ConnectionConfig): ConnectionConfig
+  /**
+   * The connection string on the clipboard, parsed, when it is one and no saved connection reaches the same server
+   * with the same user; null otherwise (other clipboard text never leaves main).
+   */
+  clipboardConnection(): { uri: string; config: ConnectionConfig } | null
   buildUri(c: ConnectionConfig, withPassword: boolean): string
   testConnection(c: ConnectionConfig): TestResult
 

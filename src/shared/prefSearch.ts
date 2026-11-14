@@ -31,6 +31,7 @@ export const PREF_ENTRIES: PrefEntry[] = [
   { id: 'uiZoom', tab: 'workspace', label: 'Interface zoom', hint: 'Scale of the whole window', keywords: 'size scale bigger smaller font text ui' },
   { id: 'restoreSession', tab: 'workspace', label: 'Restore tabs on launch', keywords: 'session startup reopen previous' },
   { id: 'connectionManagerOnStart', tab: 'workspace', label: 'Connection Manager at launch', hint: 'Open the connection list when the app starts', keywords: 'startup connect dialog open' },
+  { id: 'clipboardConnections', tab: 'workspace', label: 'Offer connection strings from the clipboard', hint: 'Ask to add a copied mongodb:// or mongodb+srv:// string', keywords: 'clipboard paste copy uri connection string detect new add' },
   { id: 'valueColors', tab: 'workspace', label: 'Value colours', hint: 'Colour of strings, numbers, dates, ObjectIds… per theme', keywords: 'color colour type syntax highlight string number date objectid boolean null theme' },
 
   { id: 'queryTimeoutMS', tab: 'data', label: 'Query timeout', keywords: 'maxTimeMS slow limit milliseconds' },

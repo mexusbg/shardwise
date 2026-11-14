@@ -1,7 +1,7 @@
 import { app, BrowserWindow, clipboard, dialog, shell } from 'electron'
 import { join } from 'path'
 import type { OpenDialogOptions } from 'electron'
-import { buildUri, clearAskedSecrets, effectiveSetting, parseUri, withSecrets } from '@shared/connection'
+import { buildUri, clearAskedSecrets, connectionStringIn, effectiveSetting, newConnectionConfig, parseUri, savedTwin, withSecrets } from '@shared/connection'
 import type { Api, ConnectStep } from '@shared/api'
 import { encodeIpc } from '@shared/ipcCodec'
 import { analyzeSchema } from '@shared/schema'
@@ -124,6 +124,14 @@ export function createApi(
       return chosen.length
     },
     // Exports can be UTF-8, UTF-16 or the ANSI code page (Studio 3T writes its date comment that way).
+    clipboardConnection: async () => {
+      const uri = connectionStringIn(await clipboard.readText())
+      if (!uri) return null
+      const config = parseUri(uri)
+      if (savedTwin(config, await store.listConnections())) return null
+      if (config.name === newConnectionConfig().name) config.name = config.srvHost || config.hosts[0]?.host || config.name
+      return { uri, config }
+    },
     previewConnectionImportFromClipboard: async (passphrase) => parseConnectionImport(await clipboard.readText(), passphrase),
     previewConnectionImport: async (path, passphrase) => parseConnectionImport(decodeText(await fs.readFile(path)).text, passphrase),
     importConnections: async (conns) => {

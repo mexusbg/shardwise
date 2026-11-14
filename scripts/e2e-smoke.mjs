@@ -124,7 +124,8 @@ writeFileSync(
         overrides: { pageSize: 20, changeHistory: false }
       }
     ],
-    settings: { pageSize: 50, toolsPath: '', queryTimeoutMS: 0, theme: process.env.THEME ?? 'dark' }
+    // The clipboard offer starts off: whatever the person running this has copied must not interrupt the run.
+    settings: { pageSize: 50, toolsPath: '', queryTimeoutMS: 0, theme: process.env.THEME ?? 'dark', clipboardConnections: false }
   })
 )
 // E2E_WIDTH=1100 runs the whole tour in a narrower window (text that fits at 1500 px may not at 1100).
@@ -309,6 +310,83 @@ try {
   const jumpOO = await treeSelected()
   console.log('tree type-ahead:', jumpP === 'products' && jumpO === 'orders' && jumpOO === 'orders', `(${jumpP}, ${jumpO}, ${jumpOO})`)
   if (jumpP !== 'products' || jumpO !== 'orders' || jumpOO !== 'orders') throw new Error('Tree type-ahead did not select the expected collections')
+
+  // Several collections at once: Ctrl+click adds one, the menu acts on all of them, a plain click ends it.
+  {
+    const selectedCount = () => win.locator('.tree-row.selected').count()
+    await win.locator('.tree-row', { hasText: 'customers' }).first().click()
+    await win.locator('.tree-row', { hasText: 'products' }).first().click({ modifiers: ['Control'] })
+    const two = await selectedCount()
+    await win.locator('.tree-row', { hasText: 'products' }).first().click({ button: 'right' })
+    const copyItem = win.locator('.ctx-item', { hasText: 'Copy 2 Collections' })
+    const hasCopy = (await copyItem.count()) > 0
+    const hasDrop = (await win.locator('.ctx-item', { hasText: 'Drop 2 collections' }).count()) > 0
+    await shot('09b-tree-multi-select')
+    if (hasCopy) await copyItem.click()
+    else await win.keyboard.press('Escape')
+    await win.locator('.tree-row', { hasText: /^shop$/ }).first().click({ button: 'right' })
+    const paste = (await win.locator('.ctx-item', { hasText: 'Paste 2 Collections' }).count()) > 0
+    await win.keyboard.press('Escape')
+    await win.locator('.tree-row', { hasText: 'customers' }).first().click()
+    await win.locator('.tree-row', { hasText: 'products' }).first().click({ modifiers: ['Shift'] })
+    const run = await selectedCount()
+    await win.locator('.tree-row', { hasText: 'customers' }).first().click()
+    const one = await selectedCount()
+    const ok = two === 2 && hasCopy && hasDrop && paste && run >= 2 && one === 1
+    console.log('tree multi-select (ctrl, menu, copy/paste, shift, reset):', ok, `(${two}, ${hasCopy}, ${hasDrop}, ${paste}, ${run}, ${one})`)
+    if (!ok) throw new Error('Selecting several collections in the tree did not work')
+  }
+
+  // A new connection string on the clipboard is offered once per session; one already saved is never offered.
+  {
+    const before = await app.evaluate(({ clipboard }) => clipboard.readText())
+    try {
+      await win.locator('[title="Settings"]').click()
+      await win.locator('.modal .pref-nav button', { hasText: 'Workspace' }).click()
+      await win.locator('.modal [data-pref="clipboardConnections"] input[role=switch]').check()
+      await win.locator('.modal button', { hasText: 'Save changes' }).click()
+      await win.waitForSelector('.modal', { state: 'detached' })
+      const offered = async (text) => {
+        await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), text)
+        await win.evaluate(() => window.dispatchEvent(new Event('focus')))
+        return win
+          .waitForSelector('.modal-head:has-text("Add connection from the clipboard")', { timeout: 2500 })
+          .then(() => true)
+          .catch(() => false)
+      }
+      const uri = 'mongodb://clip-user:clip-secret@clip-host.example:27017/?appName=e2e'
+      const first = await offered(uri)
+      const shown = first ? ((await win.locator('.modal .clip-conn-uri').textContent()) ?? '') : ''
+      if (first) await shot('09c-clipboard-connection')
+      if (first) await win.locator('.modal button', { hasText: 'Cancel' }).click()
+      const again = await offered(uri)
+      if (again) await win.keyboard.press('Escape')
+      // A saved connection (the seeded "Local demo") is not offered.
+      const saved = await offered(`mongodb://127.0.0.1:${port}`)
+      if (saved) await win.keyboard.press('Escape')
+      // Yes opens the editor filled in from the string.
+      const other = await offered('mongodb://clip-user:pw@clip-other.example:27018')
+      let filled = false
+      if (other) {
+        await win.locator('.modal button', { hasText: 'Add connection' }).click()
+        filled = await win
+          .waitForSelector('.modal input[value="clip-other.example"]', { timeout: 3000 })
+          .then(() => true)
+          .catch(() => false)
+        await win.keyboard.press('Escape')
+      }
+      const ok = first && !shown.includes('clip-secret') && shown.includes('clip-host.example') && !again && !saved && other && filled
+      console.log('clipboard connection offer (once, password hidden, saved skipped, editor filled):', ok, `(${first}, ${!shown.includes('clip-secret')}, ${!again}, ${!saved}, ${other}, ${filled})`)
+      if (!ok) throw new Error('The clipboard connection offer did not behave as expected')
+      await win.locator('[title="Settings"]').click()
+      await win.locator('.modal .pref-nav button', { hasText: 'Workspace' }).click()
+      await win.locator('.modal [data-pref="clipboardConnections"] input[role=switch]').uncheck()
+      await win.locator('.modal button', { hasText: 'Save changes' }).click()
+      await win.waitForSelector('.modal', { state: 'detached' })
+    } finally {
+      await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), before)
+    }
+  }
 
   // Filter Builder: shown when a collection opens (Settings → Browsing data); add rules via context menus on cells.
   const builderOnOpen = (await win.locator('.qtab:visible .vqb').count()) > 0

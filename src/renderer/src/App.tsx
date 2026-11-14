@@ -26,6 +26,7 @@ import {
 import type { AnyTab } from './state/store'
 import { runQuery } from './state/queryActions'
 import { editConnection } from './components/connections/ConnectionEditor'
+import { useClipboardConnections } from './components/connections/clipboardConnection'
 import { ContextMenuHost, showMenu, showMenuAt } from './components/ContextMenu'
 import { Icon } from './components/Icon'
 import { ModalHost } from './components/Modal'
@@ -492,6 +493,7 @@ export function App(): ReactElement {
   const assistantOpen = useAssistant((s) => s.open)
   const sidebarFolded = useFolds((s) => s.sidebar)
   useAppCommands()
+  useClipboardConnections()
   useShortcut('app.connectionManager')
 
   useEffect(() => {

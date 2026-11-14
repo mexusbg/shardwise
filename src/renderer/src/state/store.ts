@@ -181,6 +181,8 @@ interface State {
   toasts: Toast[]
   jobs: Record<string, JobProgress>
   treeSelection: string | null
+  /** Collection rows selected together with treeSelection (Ctrl/Shift+click); counts only while it contains treeSelection. */
+  treeMulti: string[]
   /** Previous session waiting for the user's restore decision. */
   pendingSession: SavedSession | null
 }
@@ -197,6 +199,7 @@ export const useStore = create<State>(() => ({
   toasts: [],
   jobs: {},
   treeSelection: null,
+  treeMulti: [],
   pendingSession: null
 }))
 

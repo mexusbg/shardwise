@@ -45,9 +45,11 @@ interface ModalProps {
   icon?: string
   /** Close on Escape (default true). */
   escape?: boolean
+  /** Names the dialog in the page (data-modal), for code that checks which dialogs are open. */
+  kind?: string
 }
 
-export function Modal({ title, onClose, children, footer, width = 520, height, icon, escape = true }: ModalProps): ReactElement {
+export function Modal({ title, onClose, children, footer, width = 520, height, icon, escape = true, kind }: ModalProps): ReactElement {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -71,7 +73,7 @@ export function Modal({ title, onClose, children, footer, width = 520, height, i
   }, [])
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" ref={ref} style={{ width, height }} role="dialog" aria-modal>
+      <div className="modal" ref={ref} style={{ width, height }} role="dialog" aria-modal data-modal={kind}>
         <div className="modal-head">
           {icon && <Icon name={icon} />}
           <span className="grow ellipsis">{title}</span>
