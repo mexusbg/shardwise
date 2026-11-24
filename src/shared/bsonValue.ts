@@ -16,6 +16,7 @@ import {
   UUID
 } from 'bson'
 import { parseFilter, toJSString } from 'mongodb-query-parser'
+import { withNodeBuffer } from './parserBuffer'
 
 /** Value types the user can pick when entering or converting a value. */
 export const EDITABLE_TYPES = [
@@ -313,7 +314,7 @@ export function parseTyped(text: string, type: EditableType): unknown {
 
 /** Parse any shell-syntax expression (object, array or scalar). */
 export function parseShellValue(text: string): unknown {
-  const wrapped = parseFilter(`{"v": ${text}}`) as { v: unknown }
+  const wrapped = withNodeBuffer(() => parseFilter(`{"v": ${text}}`)) as { v: unknown }
   return wrapped.v
 }
 

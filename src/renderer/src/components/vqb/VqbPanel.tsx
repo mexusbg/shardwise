@@ -201,6 +201,7 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
             tab={tab}
             k="projection"
             mime={MIME_PROJECTION}
+            paths={paths}
             empty="Drag a column here to show or hide it"
             make={(f) => newProjectionItem(f)}
             render={(it, patch) => <ProjectionControls item={it as ProjectionItem} patch={patch} arrays={arrayFieldState(tab.docs ?? [], it.field)} />}
@@ -219,6 +220,7 @@ export function VqbPanel({ tab }: { tab: QueryTab }): ReactElement {
             tab={tab}
             k="sort"
             mime={MIME_SORT}
+            paths={paths}
             empty="Drag a column here to sort by it"
             make={(f) => newSortItem(f)}
             render={(it, patch) => <SortControls item={it as SortItem} patch={patch} />}
@@ -258,14 +260,21 @@ interface ListProps {
   tab: QueryTab
   k: ListKey
   mime: string
+  /** Field paths of the loaded documents, suggested in each row (less the fields other rows of the list use). */
+  paths: string[]
   empty: string
   make: (field: string) => Item
   render: (item: Item, patch: Patch) => ReactNode
 }
 
-function ItemList({ tab, k, mime, empty, make, render }: ListProps): ReactElement {
+function ItemList({ tab, k, mime, paths, empty, make, render }: ListProps): ReactElement {
   const items: Item[] = tab.vqb[k]
-  const listId = `vqb-fields-${tab.id}`
+  // A field is shown, hidden or sorted by once: each row suggests only the fields no other row of the list uses.
+  const listId = (it: Item): string => `vqb-${k}-${tab.id}-${it.id}`
+  const freePaths = (it: Item): string[] => {
+    const taken = new Set(items.filter((x) => x.id !== it.id && x.field).map((x) => x.field))
+    return paths.filter((p) => !taken.has(p))
+  }
   const edit = (fn: (l: Item[]) => Item[]): void => editVqb(tab.id, (v: VqbState) => ({ [k]: fn(v[k]) }))
   const dropAt = (index?: number): Parameters<typeof useDrop>[0] => ({
     mime,
@@ -280,7 +289,12 @@ function ItemList({ tab, k, mime, empty, make, render }: ListProps): ReactElemen
         const patch: Patch = (p) => edit((l) => l.map((x) => (x.id === it.id ? ({ ...x, ...p } as Item) : x)))
         return (
           <ItemRow key={it.id} item={it} mime={mime} drop={dropAt(i)} edit={edit} rank={k === 'sort' ? i + 1 : undefined} controls={render(it, patch)}>
-            <FieldChip value={it.field} listId={listId} onChange={(field) => patch({ field })} />
+            <FieldChip value={it.field} listId={listId(it)} onChange={(field) => patch({ field })} />
+            <datalist id={listId(it)}>
+              {freePaths(it).map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
           </ItemRow>
         )
       })}

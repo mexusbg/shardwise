@@ -1,4 +1,5 @@
 import { parseFilter, parseProject, parseSort, toJSString } from 'mongodb-query-parser'
+import { withNodeBuffer } from '@shared/parserBuffer'
 import type { Doc } from '@shared/api'
 import { CollationError, parseCollationText } from '@shared/collation'
 
@@ -54,20 +55,20 @@ const clean = (m: string): string => m.replace(/\s+in\s*\([\s\S]*\)\s*$/, '').tr
 export function parseQueryParts(query: string, projection: string, sort: string): ParsedQuery {
   let filter: Doc
   try {
-    filter = query.trim() ? (parseFilter(query) as Doc) : {}
+    filter = query.trim() ? (withNodeBuffer(() => parseFilter(query)) as Doc) : {}
   } catch (e) {
     throw new QueryTextError('query', clean((e as Error).message))
   }
   if (filter === null || typeof filter !== 'object' || Array.isArray(filter)) throw new QueryTextError('query', 'Query must be an object')
   let proj: Doc | null = null
   try {
-    proj = projection.trim() ? (parseProject(projection) as Doc) : null
+    proj = projection.trim() ? (withNodeBuffer(() => parseProject(projection)) as Doc) : null
   } catch (e) {
     throw new QueryTextError('projection', clean((e as Error).message))
   }
   let srt: Doc | null = null
   try {
-    srt = sort.trim() ? (parseSort(sort) as Doc) : null
+    srt = sort.trim() ? (withNodeBuffer(() => parseSort(sort)) as Doc) : null
   } catch (e) {
     throw new QueryTextError('sort', clean((e as Error).message))
   }
@@ -87,7 +88,7 @@ export function parseCollationPart(text: string): Doc | null {
 export function tryParse(kind: 'query' | 'projection' | 'sort', text: string): Doc | null | undefined {
   try {
     if (!text.trim()) return kind === 'query' ? {} : null
-    const v = kind === 'query' ? parseFilter(text) : kind === 'projection' ? parseProject(text) : parseSort(text)
+    const v = withNodeBuffer(() => (kind === 'query' ? parseFilter(text) : kind === 'projection' ? parseProject(text) : parseSort(text)))
     return v as Doc | null
   } catch {
     return undefined

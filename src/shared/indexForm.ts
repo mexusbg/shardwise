@@ -1,4 +1,5 @@
 import { parseFilter, toJSString } from 'mongodb-query-parser'
+import { withNodeBuffer } from './parserBuffer'
 
 type Doc = Record<string, unknown>
 
@@ -168,7 +169,7 @@ interface ParsedText {
 function parseDocText(text: string, what: string): ParsedText {
   if (!text.trim()) return {}
   try {
-    const v = parseFilter(text) as unknown
+    const v = withNodeBuffer(() => parseFilter(text)) as unknown
     if (v === null || typeof v !== 'object' || Array.isArray(v)) return { error: `${what} must be a document` }
     return { value: v as Doc }
   } catch (e) {

@@ -432,6 +432,20 @@ try {
   const projectionDrop = (await barText(0)).includes('email')
   console.log('drag header → fields:', projectionDrop, await barText(0))
   if (!projectionDrop) throw new Error('Dragging the email header onto Fields did not update the projection')
+  // A second Fields row does not suggest email again (the first row still does).
+  {
+    await vqbSection('fields').locator('.vqb-drop').last().locator('button', { hasText: 'Field' }).click()
+    const suggestions = (i) =>
+      vqbSection('fields')
+        .locator('.vqb-field-input')
+        .nth(i)
+        .evaluate((input) => [...(input.list?.options ?? [])].map((o) => o.value))
+    const second = await suggestions(1)
+    const first = await suggestions(0)
+    const ok = !second.includes('email') && second.includes('name') && first.includes('email')
+    console.log('fields: added field not suggested again:', ok)
+    if (!ok) throw new Error(`The second Fields row still suggests email (${second.slice(0, 8).join(', ')})`)
+  }
   await header('age').dragTo(vqbSection('order').locator('.vqb-drop').last())
   await win.waitForTimeout(200)
   const sortDrop = (await barText(1)).includes('age')
@@ -503,15 +517,21 @@ try {
   await win.keyboard.press('Control+Home')
   await win.keyboard.press('End')
   await win.keyboard.press('Enter')
-  await win.keyboard.insertText('vip: true,')
+  // UUID() and BinData() are built with Node's Buffer by the shell parser, which the window lacks.
+  await win.keyboard.insertText("vip: true, uid: UUID('0e0c6a4e-5b8f-4c1a-9a3e-2f6d7b8c9d01'), avatar: BinData(0, 'SGVsbG8='),")
   // Numbers are plain in the editor (age: 18, score: 0) and keep their BSON types when saved.
   const editorText = await win.locator('.modal .cm-content').innerText()
   const plainInEditor = !/NumberInt|NumberLong\('\d{1,15}'\)|Double\(/.test(editorText) && /age: \d+/.test(editorText)
   await win.locator('.modal .btn.primary', { hasText: 'Update' }).click()
   await win.waitForTimeout(800)
+  const editorError = (await win.locator('.modal').count()) ? ((await win.locator('.modal').innerText()).match(/[^\n]*(Buffer|Error|error)[^\n]*/)?.[0] ?? 'dialog still open') : ''
   if (await win.locator('.modal').count()) await win.keyboard.press('Escape')
   {
     const c = await MongoClient.connect(uri)
+    const first = await c.db('shop').collection('customers').findOne({ uid: { $exists: true } })
+    const binaryKept = !editorError && first?.uid?.sub_type === 4 && first.uid.toString('hex') === '0e0c6a4e5b8f4c1a9a3e2f6d7b8c9d01' && Buffer.from(first.avatar.buffer).toString() === 'Hello'
+    console.log('UUID / BinData saved from the document editor:', binaryKept, editorError ? `(${editorError})` : '')
+    if (!binaryKept) throw new Error(`Saving a document with UUID / BinData failed: ${editorError || 'values changed'}`)
     const wrong = await c
       .db('shop')
       .collection('customers')
